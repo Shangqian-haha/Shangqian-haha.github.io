@@ -42,8 +42,7 @@ menu:
     文章通览: /posts/ || fas fa-book-open
   友人||fas fa-user-group:
     友链展示: /link/ || fas fa-link
-    # TODO: 朋友动态需要自行部署 Friend-Circle-Lite 到 Vercel，暂时禁用
-    # 朋友动态: /fcircle/ || fas fa-rss
+    朋友动态: /fcircle/ || fas fa-rss
   # TODO: 留言功能需要 Twikoo 评论系统支持，暂时禁用
   # 留言||fas fa-comments:
   #   留言白板: /comment/ || fas fa-comment-dots
@@ -144,7 +143,7 @@ category_per_img:
 footer_img: false
 
 # 网站固定背景图。只在需要全站背景图时填写图片 URL。
-background: /img/homepage-bg.jpg
+background: https://bee-reg-ab.imagency.cn/p/50801b4e58356be79509d439ca2e0530.jpg
 # 深色模式网站固定背景图。留空时沿用 background 或主题默认背景。
 background_dark:
 
@@ -583,9 +582,6 @@ footer_better:
       #   link: https://beian.mps.gov.cn/#/query/webSearch
     # 页脚底部右侧链接，例如框架、主题或 CDN 说明。
     right:
-      - text: 主题名称
-        desrc: 本站基于 Butterfly 主题魔改而成
-        link:
     # 站点运行时间配置。
     runtime:
       # 是否显示站点运行时间。
@@ -641,7 +637,7 @@ aside:
   # 欢迎卡片，可显示自定义欢迎语和访客位置信息。
   card_welcome:
     # 是否显示欢迎卡片。
-    enable: true
+    enable: false
     # 欢迎卡片标题。
     title: Welcome
     # 欢迎卡片标题图标 class，通常使用 Font Awesome。
@@ -664,7 +660,7 @@ aside:
   # 公告卡片。
   card_announcement:
     # 是否显示公告卡片。
-    enable: true
+    enable: false
     # 公告内容，支持 HTML；留空时卡片仍按模板显示空内容，建议不用时关闭。
     content: 
   # 最近文章卡片。
