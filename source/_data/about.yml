@@ -33,7 +33,9 @@ description_and_social_links:
 personality:
   type: INFJ
   type_name: 提倡者
+  summary: 既理想主义，又坚守原则，不甘随波逐流、虚度此生，而是一心渴望挺身而出，有所作为。
   url: https://www.16personalities.com/ch/infj-人格
+  svg: /img/personality.svg
 
 skills:
   learning: 正在持续学习中
@@ -44,12 +46,16 @@ projects:
   - name: 个人博客
     url: https://github.com/Shangqian-haha/Shangqian-haha.github.io
     description: 基于 Hexo + liushen 主题的个人博客
+  - name: Trying to do better
+    description: 在沉默中积蓄力量，不急于证明，只专注于成为更好的自己
 
 hobbies:
-  - 编程
   - 阅读
+  - 随笔
+  - 编程
+  - 摄影
 
 self_evaluation:
-  thoughts: 乐观开朗，乐于助人
-  work: 认真负责，有较强的学习能力
-  summary: 持续进步中！
+  thoughts: 内敛而深邃，习惯独立思考，对事物的本质有敏锐的洞察力
+  work: 沉稳专注，注重细节与深度，追求有温度的技术实现
+  summary: 在代码与文字间寻找意义，用沉默的热情守护内心的信念

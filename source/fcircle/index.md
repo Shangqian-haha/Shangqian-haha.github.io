@@ -10,7 +10,7 @@ aside: false
     if (typeof UserConfig === 'undefined') {
         var UserConfig = {
             // 填写你的 Friend-Circle-Lite 静态地址（尾部带/）
-            private_api_url: 'https://fc.liushen.fun/',
+            private_api_url: 'https://fc.hzy.cool/',
             // 点击加载更多时，一次最多加载几篇文章，默认20
             page_turning_number: 20,
             // 头像加载失败时，默认头像地址

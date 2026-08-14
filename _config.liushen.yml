@@ -42,7 +42,7 @@ menu:
     文章通览: /posts/ || fas fa-book-open
   友人||fas fa-user-group:
     友链展示: /link/ || fas fa-link
-    朋友动态: /fcircle/ || fas fa-rss
+    # 朋友动态: /fcircle/ || fas fa-rss
   # TODO: 留言功能需要 Twikoo 评论系统支持，暂时禁用
   # 留言||fas fa-comments:
   #   留言白板: /comment/ || fas fa-comment-dots
@@ -1301,7 +1301,7 @@ text_align_justify: false
 # 为页眉和页脚添加半透明遮罩，提升背景图上的文字可读性。
 mask:
   # 是否为顶部横幅区域添加遮罩。
-  header: true
+  header: false
   # 是否为页脚区域添加遮罩。
   footer: false
 
