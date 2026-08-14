@@ -1,0 +1,55 @@
+/* 所有页面全屏背景图模糊 */
+#web_bg {
+  filter: blur(4px) brightness(0.9) !important;
+  -webkit-filter: blur(4px) brightness(0.9) !important;
+}
+
+/* 首页 header 透明，显示全页背景 */
+#page-header.full_page {
+  background-color: transparent !important;
+}
+
+/* 非首页 header 也透明 */
+#page-header.not-home-page,
+#page-header.post-bg {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* 内容区毛玻璃效果 */
+.layout > div:first-child:not(.nc) {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(12px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(1.2) !important;
+}
+
+/* 侧栏毛玻璃 */
+#aside-content .card-widget {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(12px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(1.2) !important;
+}
+
+/* 暗色模式 */
+[data-theme="dark"] .layout > div:first-child:not(.nc) {
+  background: rgba(18, 18, 18, 0.65) !important;
+}
+[data-theme="dark"] #aside-content .card-widget {
+  background: rgba(18, 18, 18, 0.65) !important;
+}
+
+/* 导航栏滚动后毛玻璃 */
+#page-header.nav-fixed #nav {
+  background: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(16px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.5) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+[data-theme="dark"] #page-header.nav-fixed #nav {
+  background: rgba(18, 18, 18, 0.5) !important;
+}
+
+/* 首页遮罩层去除，让背景图完全显示 */
+#page-header.full_page::before {
+  background-color: transparent !important;
+}

@@ -908,6 +908,26 @@ body {
     transform: translateY(0);
   }
 }
+.layout > div:first-child:not(.nc) {
+  background: rgba(255,255,255,0.75) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+#aside-content .card-widget {
+  background: rgba(255,255,255,0.75) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+[data-theme="dark"] .layout > div:first-child:not(.nc) {
+  background: rgba(18,18,18,0.75) !important;
+}
+[data-theme="dark"] #aside-content .card-widget {
+  background: rgba(18,18,18,0.75) !important;
+}
+#page-header.nav-fixed #nav {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
 #card-poem {
   display: flex;
   flex-direction: column;
