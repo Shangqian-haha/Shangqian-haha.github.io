@@ -1,0 +1,55 @@
+top_info:
+  float_text:
+    - 🌙 内敛而深邃
+    - 💭 独立思考者
+    - 🌿 理想主义守护者
+    - 🔮 洞察本质
+    - 📝 沉默的热情
+    - 🎨 创造力与想象力
+    - 🕊️ 追求意义与联结
+    - ✨ 坚守内心的信念
+  avatar: /img/avatar.jpg
+  site_name: Shangqian
+  motto: 记录生活与技术的点滴
+
+personal_info:
+  name: Shangqian
+  gender: 男
+  school: 桂林电子科技大学
+  major: 大数据
+  grade: 待填写
+  birthday: 待填写
+  address: 待填写
+  email: 357425252@qq.com
+  QQ: 357425252
+
+description_and_social_links:
+  description: 热爱编程与技术，喜欢记录折腾过程中踩过的坑。
+  social_links:
+    - platform: GitHub
+      url: https://github.com/Shangqian-haha
+      icon: /img/link/github.webp
+
+personality:
+  type: INFJ
+  type_name: 提倡者
+  url: https://www.16personalities.com/ch/infj-人格
+
+skills:
+  learning: 正在持续学习中
+  technical: []
+  general: []
+
+projects:
+  - name: 个人博客
+    url: https://github.com/Shangqian-haha/Shangqian-haha.github.io
+    description: 基于 Hexo + liushen 主题的个人博客
+
+hobbies:
+  - 编程
+  - 阅读
+
+self_evaluation:
+  thoughts: 乐观开朗，乐于助人
+  work: 认真负责，有较强的学习能力
+  summary: 持续进步中！
