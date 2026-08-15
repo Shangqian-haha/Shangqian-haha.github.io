@@ -2717,6 +2717,12 @@ maxWidth500()
   font-weight: 800;
   color: var(--liushen-text);
 }
+#about-container .personality-summary {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--liushen-description);
+}
 #about-container .personality-link {
   width: fit-content;
   padding: 9px 14px;
