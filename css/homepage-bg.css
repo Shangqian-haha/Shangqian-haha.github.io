@@ -53,3 +53,9 @@
 #page-header.full_page::before {
   background-color: transparent !important;
 }
+
+/* 非首页遮罩层也去除 */
+#page-header.not-home-page::before,
+#page-header.post-bg::before {
+  background-color: transparent !important;
+}
