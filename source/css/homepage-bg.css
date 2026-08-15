@@ -60,13 +60,13 @@
   background-color: transparent !important;
 }
 
-/* 页脚颜色调整 - 与蓝色主题搭配 */
+/* 页脚颜色调整 - 黄昏色调 */
 :root {
-  --better-footer-icons-bg: linear-gradient(0deg, rgba(38, 121, 204, 0.15), rgba(38, 121, 204, 0.0));
-  --better-footer-content-bg: linear-gradient(0deg, rgba(38, 121, 204, 0.12), rgba(38, 121, 204, 0.05));
-  --better-footer-bottom-bg: rgba(38, 121, 204, 0.08);
-  --better-footer-icon-bg: #2679cc;
-  --better-footer-hover: #1a5fa0;
+  --better-footer-icons-bg: transparent;
+  --better-footer-content-bg: transparent;
+  --better-footer-bottom-bg: transparent;
+  --better-footer-icon-bg: #ff8c32;
+  --better-footer-hover: #e67300;
 }
 
 /* 页面副标题样式 */
@@ -123,4 +123,12 @@
 
 .flink-list-item .flink-item-desc {
   text-align: center !important;
+}
+
+/* 页脚版权信息字体白色 */
+#footer-bottom .copyright,
+#footer-bottom .copyright i,
+#footer-bottom .copyright span,
+#footer-bottom #runtime {
+  color: #fff !important;
 }

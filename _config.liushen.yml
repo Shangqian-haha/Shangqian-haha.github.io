@@ -566,7 +566,7 @@ footer_better:
       # 是否显示页脚版权行。
       enable: true
       # 版权作者名。建议填写站点名或作者名。
-      author: SiteOwner
+      author: Shangqian
       # 作者链接。留空时只显示文字，不输出空链接。
       link:
       # 起始年份。主题会显示 since 到当前年份的版权时间。
