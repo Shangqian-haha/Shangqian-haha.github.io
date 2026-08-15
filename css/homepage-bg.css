@@ -62,9 +62,9 @@
 
 /* 页脚颜色调整 - 黄昏色调 */
 :root {
-  --better-footer-icons-bg: linear-gradient(0deg, rgba(255, 140, 50, 0.15), rgba(255, 100, 50, 0.0));
-  --better-footer-content-bg: linear-gradient(0deg, rgba(255, 140, 50, 0.12), rgba(255, 100, 50, 0.05));
-  --better-footer-bottom-bg: rgba(255, 120, 50, 0.08);
+  --better-footer-icons-bg: transparent;
+  --better-footer-content-bg: transparent;
+  --better-footer-bottom-bg: transparent;
   --better-footer-icon-bg: #ff8c32;
   --better-footer-hover: #e67300;
 }
