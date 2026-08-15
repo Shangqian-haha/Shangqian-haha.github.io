@@ -53,3 +53,74 @@
 #page-header.full_page::before {
   background-color: transparent !important;
 }
+
+/* 非首页遮罩层也去除 */
+#page-header.not-home-page::before,
+#page-header.post-bg::before {
+  background-color: transparent !important;
+}
+
+/* 页脚颜色调整 - 与蓝色主题搭配 */
+:root {
+  --better-footer-icons-bg: linear-gradient(0deg, rgba(38, 121, 204, 0.15), rgba(38, 121, 204, 0.0));
+  --better-footer-content-bg: linear-gradient(0deg, rgba(38, 121, 204, 0.12), rgba(38, 121, 204, 0.05));
+  --better-footer-bottom-bg: rgba(38, 121, 204, 0.08);
+  --better-footer-icon-bg: #2679cc;
+  --better-footer-hover: #1a5fa0;
+}
+
+/* 页面副标题样式 */
+#page-description {
+  margin-top: 0.75rem;
+  max-width: 42rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+[data-theme="dark"] #page-description {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* 友链列表项宽度调整 */
+.butterfly-flink-list > .flink-list-item {
+  width: calc(100% / 3 - 1rem) !important;
+  max-width: 350px;
+}
+
+@media screen and (min-width: 2048px) {
+  .butterfly-flink-list > .flink-list-item {
+    width: calc(100% / 4 - 1rem) !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .butterfly-flink-list > .flink-list-item {
+    width: calc(100% / 2 - 1rem) !important;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .butterfly-flink-list > .flink-list-item {
+    width: calc(100% - 1rem) !important;
+  }
+}
+
+/* 友链列表项文字居中 */
+.flink-list-item .flink-item-info {
+  justify-content: center !important;
+  text-align: center !important;
+  padding-left: 0 !important;
+}
+
+.flink-list-item .flink-item-name {
+  text-align: center !important;
+}
+
+.flink-list-item .flink-item-desc {
+  text-align: center !important;
+}

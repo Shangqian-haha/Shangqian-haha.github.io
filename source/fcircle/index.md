@@ -1,8 +1,9 @@
 ---
-title: 朋友动态
+title: Read Later
 date: 2026-08-14 12:00:00
 type: fcircle
 aside: false
+description: 好文章，在我抵达不了的知识盲区，总有人替我走在前头。无关社交，只论文章。
 ---
 
 <div id="friend-circle-lite-root"></div>
@@ -10,7 +11,7 @@ aside: false
     if (typeof UserConfig === 'undefined') {
         var UserConfig = {
             // 填写你的 Friend-Circle-Lite 静态地址（尾部带/）
-            private_api_url: 'https://fc.hzy.cool/',
+            private_api_url: 'https://fc.liushen.fun/',
             // 点击加载更多时，一次最多加载几篇文章，默认20
             page_turning_number: 20,
             // 头像加载失败时，默认头像地址
