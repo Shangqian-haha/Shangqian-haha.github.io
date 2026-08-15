@@ -23,37 +23,46 @@ description: 好文章，在我抵达不了的知识盲区，总有人替我走�
 <script src="https://fastly.jsdelivr.net/gh/willow-god/Friend-Circle-Lite/main/fclite.min.js"></script>
 <script>
 (function() {
-    // 图片代理：绕过 p.liiiu.cn 等图床的防盗链
-    function proxyUrl(src) {
-        if (!src || src.startsWith('data:') || src.startsWith('/')) return src;
-        return 'https://wsrv.nl/?url=' + encodeURIComponent(src);
+    var avatarMap = null;
+
+    function loadMapping() {
+        return fetch('/data/avatar-mapping.json')
+            .then(function(r) { return r.json(); })
+            .then(function(map) { avatarMap = map; })
+            .catch(function() { avatarMap = {}; });
     }
 
-    function proxyImage(img) {
+    var PLACEHOLDER = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><rect width="100%" height="100%" fill="%23e0e0e0"/><text x="50%" y="54%" text-anchor="middle" font-size="28" font-weight="bold" fill="%23999">404</text></svg>');
+
+    function replaceAvatar(img) {
         var src = img.getAttribute('src');
-        if (src && src.indexOf('wsrv.nl') === -1 && src.indexOf('liiiu.cn') !== -1) {
-            img.setAttribute('src', proxyUrl(src));
+        if (!src || !avatarMap || src.indexOf('/img/avatars/') !== -1) return;
+        if (src.indexOf('liiiu.cn') !== -1) {
+            img.setAttribute('src', avatarMap[src] || PLACEHOLDER);
+            img.onerror = null;
         }
-        // 同时处理 onerror，避免代理失败后再次触发原始域名请求
-        img.onerror = function() {
-            this.onerror = null;
-            this.src = '/img/avatar.jpg';
-        };
     }
 
-    var observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(m) {
-            m.addedNodes.forEach(function(node) {
-                if (node.nodeType !== 1) return;
-                if (node.classList && node.classList.contains('card-bg')) proxyImage(node);
-                if (node.querySelectorAll) {
-                    node.querySelectorAll('img').forEach(proxyImage);
-                }
+    function processNode(node) {
+        if (node.nodeType !== 1) return;
+        if (node.tagName === 'IMG') replaceAvatar(node);
+        if (node.querySelectorAll) {
+            node.querySelectorAll('img').forEach(replaceAvatar);
+        }
+    }
+
+    loadMapping().then(function() {
+        var root = document.getElementById('friend-circle-lite-root');
+        if (!root) return;
+        // 处理已有的图片
+        root.querySelectorAll('img').forEach(replaceAvatar);
+        // 监听后续渲染的图片
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(m) {
+                m.addedNodes.forEach(processNode);
             });
         });
+        observer.observe(root, { childList: true, subtree: true });
     });
-
-    var root = document.getElementById('friend-circle-lite-root');
-    if (root) observer.observe(root, { childList: true, subtree: true });
 })();
 </script>
