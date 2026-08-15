@@ -21,3 +21,39 @@ description: 好文章，在我抵达不了的知识盲区，总有人替我走�
 </script>
 <link rel="stylesheet" href="https://fastly.jsdelivr.net/gh/willow-god/Friend-Circle-Lite/main/fclite.min.css">
 <script src="https://fastly.jsdelivr.net/gh/willow-god/Friend-Circle-Lite/main/fclite.min.js"></script>
+<script>
+(function() {
+    // 图片代理：绕过 p.liiiu.cn 等图床的防盗链
+    function proxyUrl(src) {
+        if (!src || src.startsWith('data:') || src.startsWith('/')) return src;
+        return 'https://wsrv.nl/?url=' + encodeURIComponent(src);
+    }
+
+    function proxyImage(img) {
+        var src = img.getAttribute('src');
+        if (src && src.indexOf('wsrv.nl') === -1 && src.indexOf('liiiu.cn') !== -1) {
+            img.setAttribute('src', proxyUrl(src));
+        }
+        // 同时处理 onerror，避免代理失败后再次触发原始域名请求
+        img.onerror = function() {
+            this.onerror = null;
+            this.src = '/img/avatar.jpg';
+        };
+    }
+
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(m) {
+            m.addedNodes.forEach(function(node) {
+                if (node.nodeType !== 1) return;
+                if (node.classList && node.classList.contains('card-bg')) proxyImage(node);
+                if (node.querySelectorAll) {
+                    node.querySelectorAll('img').forEach(proxyImage);
+                }
+            });
+        });
+    });
+
+    var root = document.getElementById('friend-circle-lite-root');
+    if (root) observer.observe(root, { childList: true, subtree: true });
+})();
+</script>
