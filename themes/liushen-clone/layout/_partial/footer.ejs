@@ -1,0 +1,17 @@
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; <%= theme.footer && theme.footer.since ? theme.footer.since + ' - ' : '' %><%= new Date().getFullYear() %> <%= config.author %></span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      <% if (theme.social && theme.social.github) { %>
+        <a href="<%= theme.social.github %>" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      <% } %>
+      <% if (theme.social && theme.social.email) { %>
+        <a href="<%= theme.social.email %>" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      <% } %>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,40 @@
+<%
+  var post = article;
+  var cover = post.cover || null;
+  var showCover = theme.index_cover !== false && cover;
+%>
+<article class="post-card card">
+  <% if (showCover) { %>
+    <a class="post-card-cover" href="<%= url_for(post.path) %>" aria-hidden="true">
+      <img src="<%= url_for(cover) %>" alt="<%= post.title %>" loading="lazy" onerror="this.parentElement.style.display='none'">
+    </a>
+  <% } %>
+  <div class="post-card-body">
+    <h2 class="post-card-title">
+      <a href="<%= url_for(post.path) %>"><%= post.title %></a>
+    </h2>
+    <div class="post-card-meta">
+      <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="<%= date_xml(post.date) %>"><%= date(post.date, 'YYYY-MM-DD') %></time></span>
+      <% if (post.categories && post.categories.length) { %>
+        <span class="meta-item"><i class="fa-regular fa-folder"></i>
+          <% post.categories.each(function (c) { %>
+            <a href="<%= url_for(c.path) %>"><%= c.name %></a>
+          <% }); %>
+        </span>
+      <% } %>
+      <% if (post.tags && post.tags.length) { %>
+        <span class="meta-item"><i class="fa-solid fa-tag"></i>
+          <% post.tags.each(function (t) { %>
+            <a href="<%= url_for(t.path) %>">#<%= t.name %></a>
+          <% }); %>
+        </span>
+      <% } %>
+    </div>
+    <% if (post.description) { %>
+      <p class="post-card-desc"><%= post.description %></p>
+    <% } else { %>
+      <p class="post-card-desc"><%= strip_html(truncate(post.content, { length: 120, omission: '…' })) %></p>
+    <% } %>
+    <a class="post-card-more" href="<%= url_for(post.path) %>">阅读全文 <i class="fa-solid fa-arrow-right"></i></a>
+  </div>
+</article>

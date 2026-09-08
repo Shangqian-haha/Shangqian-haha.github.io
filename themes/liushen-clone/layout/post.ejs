@@ -1,0 +1,71 @@
+<%- partial('_partial/head', { page, config, theme }) %>
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <%- partial('_partial/header', { page, config, theme }) %>
+  <%- partial('_partial/search-dialog') %>
+
+  <main class="site-body container post-body">
+    <%- partial('_partial/hero-badge', { theme }) %>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title"><%= page.title %></h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="<%= date_xml(page.date) %>"><%= date(page.date, 'YYYY-MM-DD') %></time></span>
+          <% if (page.categories && page.categories.length) { %>
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <% page.categories.each(function (c) { %><a href="<%= url_for(c.path) %>"><%= c.name %></a><% }); %>
+            </span>
+          <% } %>
+          <% if (page.tags && page.tags.length) { %>
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <% page.tags.each(function (t) { %><a href="<%= url_for(t.path) %>">#<%= t.name %></a><% }); %>
+            </span>
+          <% } %>
+        </div>
+        <% if (page.cover) { %>
+          <div class="post-cover"><img src="<%= url_for(page.cover) %>" alt="<%= page.title %>"></div>
+        <% } %>
+      </header>
+
+      <div class="post-content-wrap">
+        <% if (theme.post_toc !== false) { %>
+          <% var tocHtml = toc(page.content, { list_number: false }); %>
+          <% if (tocHtml && tocHtml.trim().length > 0 && tocHtml.indexOf('</a>') !== -1) { %>
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <%- tocHtml %>
+            </aside>
+          <% } %>
+        <% } %>
+        <div class="post-content">
+          <%- page.content %>
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          <% if (page.prev) { %>
+            <a class="post-nav-item prev" href="<%= url_for(page.prev.path) %>">
+              <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
+              <span class="nav-title"><%= page.prev.title %></span>
+            </a>
+          <% } %>
+          <% if (page.next) { %>
+            <a class="post-nav-item next" href="<%= url_for(page.next.path) %>">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title"><%= page.next.title %></span>
+            </a>
+          <% } %>
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <%- partial('_partial/footer', { config, theme }) %>
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  <%- partial('_partial/body-end') %>
+  <script src="<%= url_for('/js/main.js') %>"></script>
+</body>
+</html>

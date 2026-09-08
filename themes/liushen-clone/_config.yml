@@ -1,0 +1,46 @@
+# ==============================================
+# hexo-theme-liushen-clone
+# 参考 blog.liushen.fun 风格复刻的简洁卡片式主题
+# ==============================================
+
+# 头像（相对站点根，位于 source/img 下）
+avatar: /img/avatar.jpg
+
+# 副标题 / 个性签名
+subtitle: 记录生活与技术的点滴
+description: 一个简洁、优雅的个人技术博客，记录编程、学习与生活点滴。
+
+# 强调色：淡蓝 -> 橙（参考站品牌渐变）
+accent: "#76CBEC"
+accent2: "#F7A137"
+
+# 顶部导航菜单（文字: 链接）
+menu:
+  首页: /
+  归档: /archives/
+  分类: /categories/
+  标签: /tags/
+  说说: /shuoshuo/
+  友链: /link/
+  关于: /about/
+
+# 社交链接（Hero 区与侧栏使用）
+social:
+  github: https://github.com/Shangqian-haha
+  email: mailto:357425252@qq.com
+  qq: ""
+
+# Hero 区终端徽章文字
+hero_badge: "~/hello-world$"
+
+# 首页文章卡片是否展示封面
+index_cover: true
+
+# 文章详情是否展示目录（TOC）
+post_toc: true
+
+# 页脚
+footer:
+  since: 2026
+  icp: ""
+  beian: ""

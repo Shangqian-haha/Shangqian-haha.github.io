@@ -1,0 +1,45 @@
+<%- partial('_partial/head', { page, config, theme }) %>
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <%- partial('_partial/header', { page, config, theme }) %>
+  <%- partial('_partial/search-dialog') %>
+
+  <main class="site-body container archive-body">
+    <%- partial('_partial/hero-badge', { theme }) %>
+    <header class="list-header card">
+      <h1 class="list-title"><i class="fa-solid fa-box-archive"></i> 归档</h1>
+      <p class="list-sub">共 <%= site.posts.length %> 篇文章</p>
+    </header>
+
+    <div class="archive-list">
+      <%
+        var curYear = null;
+        site.posts.each(function (p) {
+          var y = date(p.date, 'YYYY');
+          if (y !== curYear) {
+            curYear = y;
+            if (curYear !== null) { %>
+              </div>
+            <% } %>
+            <h2 class="archive-year"><%= curYear %></h2>
+            <div class="archive-group">
+          <% } %>
+          <a class="archive-item card" href="<%= url_for(p.path) %>">
+            <time class="archive-date"><%= date(p.date, 'MM-DD') %></time>
+            <span class="archive-title"><%= p.title %></span>
+          </a>
+        <% }); %>
+        <% if (curYear !== null) { %>
+          </div>
+        <% } %>
+    </div>
+  </main>
+
+  <%- partial('_partial/footer', { config, theme }) %>
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  <%- partial('_partial/body-end') %>
+  <script src="<%= url_for('/js/main.js') %>"></script>
+</body>
+</html>

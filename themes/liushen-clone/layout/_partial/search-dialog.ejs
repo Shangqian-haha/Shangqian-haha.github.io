@@ -1,0 +1,29 @@
+<% /* 站内搜索弹窗 - 头部按钮触发打开 */ %>
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="<%= theme.search_placeholder || '搜索全站文章…' %>" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>

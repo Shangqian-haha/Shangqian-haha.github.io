@@ -1,0 +1,29 @@
+<header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="<%= url_for('/') %>">
+        <img class="brand-avatar" src="<%= url_for(theme.avatar || '/img/avatar.jpg') %>" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name"><%= config.title %></span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      <% if (theme.menu) { %>
+        <% Object.keys(theme.menu).forEach(function (name) { %>
+          <a class="nav-link" href="<%= url_for(theme.menu[name]) %>"><%= name %></a>
+        <% }); %>
+      <% } %>
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>

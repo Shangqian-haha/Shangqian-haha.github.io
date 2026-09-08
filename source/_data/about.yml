@@ -1,4 +1,15 @@
-top_info:
+# ==============================================
+# 关于页数据（对应 themes/liushen-clone/layout/_partial/about.ejs）
+# 参考 blog.liushen.fun/about/ 结构复刻
+# ==============================================
+
+# 顶部极光 Hero
+hero:
+  avatar: /img/avatar.jpg
+  name: 尚谦
+  greeting: "Hi! I'm"
+  motto: 记录生活与技术的点滴
+  # 头像两侧漂浮文字（前 4 条在左，后 4 条在右）
   float_text:
     - 🌙 内敛而深邃
     - 💭 独立思考者
@@ -8,46 +19,85 @@ top_info:
     - 🎨 创造力与想象力
     - 🕊️ 追求意义与联结
     - ✨ 坚守内心的信念
-  avatar: /img/avatar.jpg
-  site_name: 尚谦
-  motto: 记录生活与技术的点滴
 
+# 基础信息（Identity）
 personal_info:
-  name: 尚谦
-  gender: 男
-  school: 桂林电子科技大学
-  major: 大数据
-  grade: 待填写
-  birthday: 待填写
-  address: 待填写
-  email: 357425252@qq.com
-  QQ: 357425252
+  - label: 昵称
+    value: 尚谦
+  - label: 标签
+    value: 00后
+  - label: 性别
+    value: 男
+  - label: 毕业院校
+    value: 桂林电子科技大学
+  - label: 专业
+    value: 大数据
+  - label: 当前工作
+    value: 数据分析师
+  - label: 地址
+    value: 苏州
+  - label: 邮箱
+    value: 357425252@qq.com
+    link: mailto:357425252@qq.com
+  - label: QQ
+    value: 357425252
 
-description_and_social_links:
-  description: 热爱编程与技术，喜欢记录折腾过程中踩过的坑。
-  social_links:
-    - platform: GitHub
-      url: https://github.com/Shangqian-haha
-      icon: /img/link/github.webp
-
+# 性格侧写（Personality / MBTI）
 personality:
   type: INFJ-A
-  type_name: 提倡者
+  name: 提倡者
   summary: 既理想主义，又坚守原则，不甘随波逐流、虚度此生，而是一心渴望挺身而出，有所作为。
+  traits:
+    - 洞察力
+    - 共情
+    - 理想主义
   url: https://www.16personalities.com/ch/infj-人格
   svg: /img/personality.svg
 
+# 技能与工具（Capabilities）
+# icons 按 10 个一行自动分 3 行；icon 为 Font Awesome 品牌图标类名
 skills:
-  learning: 正在持续学习中
-  technical: []
-  general: []
+  note: 正在持续学习中
+  icons:
+    - { icon: python, name: Python }
+    - { icon: java, name: Java }
+    - { icon: js, name: JavaScript }
+    - { icon: node-js, name: Node.js }
+    - { icon: html5, name: HTML5 }
+    - { icon: css3-alt, name: CSS3 }
+    - { icon: php, name: PHP }
+    - { icon: rust, name: Rust }
+    - { icon: golang, name: Go }
+    - { icon: swift, name: Swift }
+    - { icon: react, name: React }
+    - { icon: vuejs, name: Vue.js }
+    - { icon: angular, name: Angular }
+    - { icon: bootstrap, name: Bootstrap }
+    - { icon: sass, name: Sass }
+    - { icon: less, name: Less }
+    - { icon: npm, name: npm }
+    - { icon: yarn, name: Yarn }
+    - { icon: laravel, name: Laravel }
+    - { icon: wordpress, name: WordPress }
+    - { icon: git-alt, name: Git }
+    - { icon: github, name: GitHub }
+    - { icon: gitlab, name: GitLab }
+    - { icon: docker, name: Docker }
+    - { icon: linux, name: Linux }
+    - { icon: windows, name: Windows }
+    - { icon: apple, name: Apple }
+    - { icon: figma, name: Figma }
+    - { icon: cloudflare, name: Cloudflare }
+    - { icon: aws, name: AWS }
 
-projects:
-  - name: 个人博客
-    url: https://github.com/Shangqian-haha/Shangqian-haha.github.io
-    description: 基于 Hexo + liushen 主题的个人博客
-  - name: Trying to do better
-    description: 在沉默中积蓄力量，不急于证明，只专注于成为更好的自己
+# 联系与兴趣（Connect）
+social:
+  - name: GitHub
+    url: https://github.com/Shangqian-haha
+    icon: github
+  - name: QQ
+    url: https://qm.qq.com/cgi-bin/qm_share/open_source_page?uin=357425252
+    icon: qq
 
 hobbies:
   - 阅读
@@ -55,7 +105,27 @@ hobbies:
   - 编程
   - 摄影
 
-self_evaluation:
-  thoughts: 内敛而深邃，习惯独立思考，对事物的本质有敏锐的洞察力
-  work: 沉稳专注，注重细节与深度，追求有温度的技术实现
-  summary: 在代码与文字间寻找意义，用沉默的热情守护内心的信念
+# 在做的事（Projects）
+projects:
+  - name: Trying to do better
+    description: 在沉默中积蓄力量，不急于证明，只专注于成为更好的自己
+
+# 近期节奏（project-focus）
+focus:
+  title: 近期节奏
+  items:
+    - title: 博客打磨
+      desc: 持续完善 Hexo 博客的主题、页面与交互细节。
+    - title: 学习积累
+      desc: 深耕大数据与编程，记录学习心得。
+    - title: 写作输出
+      desc: 用文字沉淀思考，保持记录的习惯。
+
+# 自我评价（Snapshot）
+evaluation:
+  - label: 思想
+    text: 内敛而深邃，习惯独立思考，对事物的本质有敏锐的洞察力
+  - label: 工作
+    text: 沉稳专注，注重细节与深度，追求有温度的技术实现
+  - label: 总结
+    text: 在代码与文字间寻找意义，用沉默的热情守护内心的信念

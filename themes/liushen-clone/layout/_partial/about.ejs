@@ -1,0 +1,181 @@
+<%
+  var a = site.data.about || {};
+  var hero = a.hero || {};
+  var personal = a.personal_info || [];
+  var personality = a.personality || {};
+  var skills = a.skills || {};
+  var icons = skills.icons || [];
+  var social = a.social || [];
+  var hobbies = a.hobbies || [];
+  var projects = a.projects || [];
+  var focus = a.focus || {};
+  var evaluation = a.evaluation || [];
+  var floatTexts = hero.float_text || [];
+  var avatar = hero.avatar || theme.avatar || '/img/avatar.jpg';
+  var perRow = 10;
+%>
+
+<section class="about-page">
+  <!-- 极光 Hero -->
+  <section class="about-hero" data-aurora-hero aria-labelledby="about-title">
+    <div class="aurora-orb aurora-orb-1"></div>
+    <div class="aurora-orb aurora-orb-2"></div>
+    <div class="aurora-orb aurora-orb-3"></div>
+    <div class="aurora-mouse" data-aurora-mouse></div>
+
+    <div class="hero-content">
+      <div class="hero-avatar-row">
+        <% if (floatTexts.length) { %>
+          <div class="float-cloud float-cloud-left" aria-hidden="true">
+            <% floatTexts.slice(0, 4).forEach(function (t, i) { %>
+              <span class="float-text float-text-<%= i + 1 %>"><%= t %></span>
+            <% }); %>
+          </div>
+        <% } %>
+        <div class="avatar-ring">
+          <div class="avatar-inner">
+            <img src="<%= url_for(avatar) %>" alt="<%= hero.name %> 的头像" class="about-avatar" loading="eager" decoding="async">
+          </div>
+        </div>
+        <% if (floatTexts.length > 4) { %>
+          <div class="float-cloud float-cloud-right" aria-hidden="true">
+            <% floatTexts.slice(4, 8).forEach(function (t, i) { %>
+              <span class="float-text float-text-<%= i + 5 %>"><%= t %></span>
+            <% }); %>
+          </div>
+        <% } %>
+      </div>
+
+      <h1 id="about-title" class="about-title">
+        <span class="greeting"><%= hero.greeting || "Hi! I'm" %></span>
+        <span class="name-glow"><%= hero.name || config.author %></span>
+      </h1>
+      <% if (hero.motto) { %><p class="hero-motto"><%= hero.motto %></p><% } %>
+    </div>
+  </section>
+
+  <!-- 卡片网格 -->
+  <div class="about-card-grid">
+    <!-- 基础信息 -->
+    <section class="about-card about-card-profile">
+      <div class="panel-head"><span>Identity</span><h2>基础信息</h2></div>
+      <div class="info-list">
+        <% personal.forEach(function (it) { %>
+          <div class="info-item">
+            <span class="info-label"><%= it.label %></span>
+            <% if (it.link) { %>
+              <a href="<%= it.link %>" class="info-value"><%= it.value %></a>
+            <% } else { %>
+              <span class="info-value"><%= it.value %></span>
+            <% } %>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+
+    <!-- 性格侧写 -->
+    <section class="about-card about-card-personality">
+      <div class="panel-head"><span>Personality</span><h2>性格侧写</h2></div>
+      <div class="personality-body">
+        <div>
+          <% if (personality.type) { %><p class="personality-type"><%= personality.type %></p><% } %>
+          <% if (personality.name) { %><p class="personality-name"><%= personality.name %></p><% } %>
+          <% if (personality.summary) { %><p class="personality-summary"><%= personality.summary %></p><% } %>
+          <% if (personality.traits && personality.traits.length) { %>
+            <div class="personality-traits">
+              <% personality.traits.forEach(function (t) { %><span><%= t %></span><% }); %>
+            </div>
+          <% } %>
+          <% if (personality.url) { %>
+            <a href="<%= personality.url %>" target="_blank" rel="noopener noreferrer">查看详情</a>
+          <% } %>
+        </div>
+        <% if (personality.svg) { %>
+          <img src="<%= url_for(personality.svg) %>" alt="<%= personality.name %> 性格插图" loading="lazy" decoding="async">
+        <% } %>
+      </div>
+    </section>
+
+    <!-- 技能与工具 -->
+    <section class="about-card about-card-skills">
+      <div class="panel-head"><span>Capabilities</span><h2>技能与工具</h2></div>
+      <div class="skills-viewport">
+        <div class="skills-lanes">
+          <% for (var r = 0; r * perRow < icons.length; r++) { %>
+            <div class="skills-row skills-row-<%= r + 1 %>">
+              <% for (var c = r * perRow; c < Math.min((r + 1) * perRow, icons.length); c++) { %>
+                <% var sk = icons[c]; %>
+                <div class="skill-chip" style="--delay: <%= (c * 0.025).toFixed(3) %>s" role="img" aria-label="<%= sk.name || sk.icon %>" title="<%= sk.name || sk.icon %>">
+                  <i class="fa-brands fa-<%= sk.icon %>" aria-hidden="true"></i>
+                </div>
+              <% } %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      <% if (skills.note) { %><p class="skills-note"><%= skills.note %></p><% } %>
+    </section>
+
+    <!-- 联系与兴趣 -->
+    <section class="about-card about-card-contact">
+      <div class="panel-head"><span>Connect</span><h2>联系与兴趣</h2></div>
+      <div class="social-grid">
+        <% social.forEach(function (s) { %>
+          <a class="social-card" href="<%= s.url %>" target="_blank" rel="noopener noreferrer">
+            <i class="fa-brands fa-<%= s.icon %>" aria-hidden="true"></i>
+            <span><%= s.name %></span>
+          </a>
+        <% }); %>
+      </div>
+      <% if (hobbies.length) { %>
+        <div class="hobby-list">
+          <% hobbies.forEach(function (h) { %><span><%= h %></span><% }); %>
+        </div>
+      <% } %>
+    </section>
+
+    <!-- 在做的事 -->
+    <section class="about-card about-card-projects">
+      <div class="panel-head"><span>Projects</span><h2>在做的事</h2></div>
+      <div class="project-list">
+        <% projects.forEach(function (p) { %>
+          <% if (p.url) { %>
+            <a class="project-item" href="<%= p.url %>" target="_blank" rel="noopener noreferrer">
+          <% } else { %>
+            <div class="project-item">
+          <% } %>
+              <span class="project-kicker">Project</span>
+              <strong><%= p.name %></strong>
+              <% if (p.description) { %><p><%= p.description %></p><% } %>
+          <% if (p.url) { %></a><% } else { %></div><% } %>
+        <% }); %>
+      </div>
+      <% if (focus.title && focus.items && focus.items.length) { %>
+        <div class="project-focus">
+          <span><%= focus.title %></span>
+          <div class="project-focus-grid">
+            <% focus.items.forEach(function (f) { %>
+              <div class="project-focus-item">
+                <strong><%= f.title %></strong>
+                <p><%= f.desc %></p>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      <% } %>
+    </section>
+
+    <!-- 自我评价 -->
+    <section class="about-card about-card-evaluation">
+      <div class="panel-head"><span>Snapshot</span><h2>自我评价</h2></div>
+      <div class="evaluation-list">
+        <% evaluation.forEach(function (e) { %>
+          <div>
+            <span><%= e.label %></span>
+            <p><%= e.text %></p>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+  </div>
+</section>

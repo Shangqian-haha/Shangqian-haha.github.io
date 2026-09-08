@@ -1,0 +1,40 @@
+<%- partial('_partial/head', { page, config, theme }) %>
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <%- partial('_partial/header', { page, config, theme }) %>
+  <%- partial('_partial/search-dialog') %>
+
+  <main class="site-body container">
+    <%- partial('_partial/hero-badge', { theme }) %>
+    <header class="list-header card">
+      <h1 class="list-title"><i class="fa-solid fa-tags"></i> 标签</h1>
+      <% if (page.tag) { %>
+        <p class="list-sub">标签「<%= page.tag %>」共 <%= page.posts.length %> 篇文章</p>
+      <% } else { %>
+        <p class="list-sub">共 <%= site.tags.length %> 个标签</p>
+      <% } %>
+    </header>
+
+    <% if (!page.tag) { %>
+      <div class="tag-cloud card">
+        <% site.tags.each(function (t) { %>
+          <a href="<%= url_for(t.path) %>">#<%= t.name %></a>
+        <% }); %>
+      </div>
+    <% } %>
+
+    <div class="post-list">
+      <% page.posts.each(function (article) { %>
+        <%- partial('_partial/post-card', { article: article }) %>
+      <% }); %>
+    </div>
+  </main>
+
+  <%- partial('_partial/footer', { config, theme }) %>
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  <%- partial('_partial/body-end') %>
+  <script src="<%= url_for('/js/main.js') %>"></script>
+</body>
+</html>

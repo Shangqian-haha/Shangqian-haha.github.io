@@ -1,0 +1,67 @@
+<aside class="site-aside">
+  <%
+    // 构建期计算：文章数 / 总字数 / 最后更新时间
+    var totalWords = 0;
+    site.posts.forEach(function (p) {
+      if (!p.content) return;
+      var text = String(p.content)
+        .replace(/<[^>]*>/g, ' ')          // 去 HTML 标签
+        .replace(/```[\s\S]*?```/g, ' ')   // 去代码块
+        .replace(/`[^`]*`/g, ' ')          // 去行内代码
+        .replace(/[#>*_!\[\](){}|\-]/g, ' '); // 去常见 Markdown 符号
+      var cjk = (text.match(/[\u3400-\u9fff]/g) || []).length;       // CJK 字符
+      var ascii = (text.match(/[A-Za-z0-9]+/g) || []).length;       // 英文 / 数字 词
+      totalWords += cjk + ascii;
+    });
+    var lastUpdatedRaw = site.updated || (site.posts.first && site.posts.first.updated) || Date.now();
+    var lastUpdated = new Date(lastUpdatedRaw);
+    var now = new Date();
+    var diffMs = now - lastUpdated;
+    var diffDays = Math.floor(diffMs / 86400000);
+    var updatedText;
+    if (diffDays <= 0) updatedText = '今天';
+    else if (diffDays === 1) updatedText = '1天前';
+    else updatedText = diffDays + '天前';
+  %>
+
+  <!-- 网站信息卡片 -->
+  <section class="aside-card card webinfo-card">
+    <h3 class="webinfo-card-title">
+      <i class="fa-solid fa-chart-line"></i> 网站信息
+    </h3>
+    <dl class="webinfo-list">
+      <div><dt>文章数目</dt><dd><%= site.posts.length %></dd></div>
+      <div><dt>本站总字数</dt><dd><%= totalWords.toLocaleString('zh-CN') %></dd></div>
+      <div><dt>本站访客数</dt><dd id="busuanzi_site_uv"><%= site.posts.length > 0 ? '—' : '' %></dd></div>
+      <div><dt>本站访问量</dt><dd id="busuanzi_site_pv"><%= site.posts.length > 0 ? '—' : '' %></dd></div>
+      <div>
+        <dt>最后更新时间</dt>
+        <dd id="webinfo-last-build" data-build-timestamp="<%= lastUpdatedRaw %>"><%= updatedText %></dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- 分类卡片 -->
+  <% if (site.categories.length) { %>
+  <section class="aside-card card">
+    <h3 class="aside-card-title"><i class="fa-regular fa-folder-open"></i> 分类</h3>
+    <ul class="aside-list">
+      <% site.categories.each(function (c) { %>
+        <li><a href="<%= url_for(c.path) %>"><%= c.name %><span class="count"><%= c.posts.length %></span></a></li>
+      <% }); %>
+    </ul>
+  </section>
+  <% } %>
+
+  <!-- 标签卡片 -->
+  <% if (site.tags.length) { %>
+  <section class="aside-card card">
+    <h3 class="aside-card-title"><i class="fa-solid fa-tags"></i> 标签</h3>
+    <div class="aside-tags">
+      <% site.tags.each(function (t) { %>
+        <a href="<%= url_for(t.path) %>">#<%= t.name %></a>
+      <% }); %>
+    </div>
+  </section>
+  <% } %>
+</aside>

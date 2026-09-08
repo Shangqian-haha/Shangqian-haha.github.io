@@ -3,10 +3,6 @@
   flink_style: butterfly
   random: false
   link_list:
-    - name: LiuShen's Blog
-      link: https://blog.liushen.fun/
-      avatar: https://blog.liushen.fun/favicon.ico
-      descr: 清羽飞扬的技术博客，提供各类技术教程与生活分享
     - name: 菱风叙_CloudOps
       link: https://huangjingblog.cn/
       avatar: /img/694560da2ce92a4f9312aec7.jpg

@@ -3,11 +3,11 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Shangqian
-subtitle: ''
-description: ''
-keywords:
-author: Shangqian
+title: Shang Qian
+subtitle: 记录生活与技术的点滴
+description: 一个简洁、优雅的个人技术博客，记录编程、学习与生活点滴。
+keywords: 博客, Hexo, 技术, 编程
+author: 尚谦
 language: zh-CN
 timezone: ''
 
@@ -96,7 +96,14 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: liushen
+theme: liushen-clone
+
+# 本地搜索（hexo-generator-searchdb 输出 search.json）
+search:
+  path: search.json
+  field: post
+  content: true
+  format: striptags
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment

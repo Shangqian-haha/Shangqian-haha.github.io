@@ -1,0 +1,26 @@
+<%
+  var badgeText = '~/hello-world$';
+  if (page) {
+    if (page.__index === true) {
+      // 首页：保持默认
+      badgeText = theme.hero_badge || '~/hello-world$';
+    } else if (page.__post === true) {
+      // 文章详情：用文章 slug（英文文件名）
+      var slug = page.slug;
+      if (!slug && page.source) {
+        slug = page.source.split('/').pop().replace(/\.(md|markdown)$/i, '');
+      }
+      badgeText = '~/' + (slug || 'post');
+    } else if (page.path) {
+      // 其他页面：取 URL 第一段作为页面名称
+      var seg = page.path.replace(/^\//, '').split('/')[0];
+      if (seg && seg !== 'index.html') {
+        badgeText = '~/' + seg;
+      }
+    }
+  }
+%>
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text"><%= badgeText %></span>
+</div>

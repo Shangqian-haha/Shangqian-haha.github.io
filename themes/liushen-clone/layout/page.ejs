@@ -1,0 +1,124 @@
+<%- partial('_partial/head', { page, config, theme }) %>
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <%- partial('_partial/header', { page, config, theme }) %>
+  <%- partial('_partial/search-dialog') %>
+
+  <main class="site-body container">
+    <%- partial('_partial/hero-badge', { theme }) %>
+
+    <% if (page.type === 'categories') { %>
+      <header class="list-header card">
+        <h1 class="list-title"><i class="fa-regular fa-folder-open"></i> 分类</h1>
+        <p class="list-sub">共 <%= site.categories.length %> 个分类</p>
+      </header>
+      <div class="taxonomy-list">
+        <% site.categories.each(function (c) { %>
+          <a class="taxonomy-item card" href="<%= url_for(c.path) %>">
+            <span class="taxonomy-name"><%= c.name %></span>
+            <span class="taxonomy-count"><%= c.posts.length %> 篇</span>
+          </a>
+        <% }); %>
+      </div>
+
+    <% } else if (page.type === 'tags') { %>
+      <header class="list-header card">
+        <h1 class="list-title"><i class="fa-solid fa-tags"></i> 标签</h1>
+        <p class="list-sub">共 <%= site.tags.length %> 个标签</p>
+      </header>
+      <div class="tag-cloud card">
+        <% site.tags.each(function (t) { %>
+          <a href="<%= url_for(t.path) %>">#<%= t.name %></a>
+        <% }); %>
+      </div>
+
+    <% } else if (page.type === 'posts') { %>
+      <header class="list-header card">
+        <h1 class="list-title"><i class="fa-solid fa-file-lines"></i> 文章</h1>
+        <p class="list-sub">共 <%= site.posts.length %> 篇文章</p>
+      </header>
+      <div class="post-list">
+        <% site.posts.each(function (article) { %>
+          <%- partial('_partial/post-card', { article: article }) %>
+        <% }); %>
+      </div>
+
+    <% } else if (page.type === 'link') { %>
+      <header class="list-header card">
+        <h1 class="list-title"><i class="fa-solid fa-link"></i> <%= page.title || '友链' %></h1>
+        <p class="list-sub">在互联网的星河里，记录那些常来常往、彼此照亮的朋友们。</p>
+      </header>
+      <div class="flink-groups">
+        <% if (site.data.link && site.data.link.length) { %>
+          <% site.data.link.forEach(function (group) { %>
+            <section class="flink-group">
+              <h2 class="flink-group-title"><i class="fa-solid fa-hashtag"></i><%= group.class_name %></h2>
+              <% if (group.class_desc) { %><p class="flink-group-desc"><%= group.class_desc %></p><% } %>
+              <div class="flink-grid">
+                <% group.link_list.forEach(function (f) { %>
+                  <a class="flink-card card" href="<%= f.link %>" target="_blank" rel="noopener">
+                    <img class="flink-avatar" src="<%= f.avatar %>" alt="<%= f.name %>" onerror="this.onerror=null;this.src='<%= url_for(theme.avatar) %>'">
+                    <div class="flink-info">
+                      <div class="flink-name"><%= f.name %></div>
+                      <% if (f.descr) { %><div class="flink-desc"><%= f.descr %></div><% } %>
+                    </div>
+                  </a>
+                <% }); %>
+              </div>
+            </section>
+          <% }); %>
+        <% } else { %>
+          <div class="list-empty card">暂无友链，去 <code>source/_data/link.yml</code> 添加吧～</div>
+        <% } %>
+      </div>
+
+    <% } else if (page.type === 'shuoshuo') { %>
+      <header class="list-header card">
+        <h1 class="list-title"><i class="fa-solid fa-comment-dots"></i> <%= page.title || '说说' %></h1>
+        <p class="list-sub"><%= page.description || '记录一些零碎的想法与近况。' %></p>
+      </header>
+      <div class="shuoshuo-list">
+        <% if (site.data.shuoshuo && site.data.shuoshuo.length) { %>
+          <% site.data.shuoshuo.forEach(function (item) { %>
+            <article class="shuoshuo-item card">
+              <div class="shuoshuo-head">
+                <img class="shuoshuo-avatar" src="<%= item.avatar || theme.avatar %>" alt="avatar" onerror="this.onerror=null;this.src='<%= url_for(theme.avatar) %>'">
+                <div>
+                  <div class="shuoshuo-author"><%= item.author || config.author %></div>
+                  <div class="shuoshuo-date"><%= date(item.date, 'YYYY-MM-DD') %></div>
+                </div>
+              </div>
+              <div class="shuoshuo-content"><%- item.content %></div>
+              <% if (item.tags && item.tags.length) { %>
+                <div class="shuoshuo-tags">
+                  <% item.tags.forEach(function (tag) { %><span class="shuoshuo-tag">#<%= tag %></span><% }); %>
+                </div>
+              <% } %>
+            </article>
+          <% }); %>
+        <% } else { %>
+          <div class="list-empty card">暂无说说，去 <code>source/_data/shuoshuo.yml</code> 添加吧～</div>
+        <% } %>
+      </div>
+
+    <% } else if (page.type === 'about') { %>
+      <%- partial('_partial/about', { page, config, theme, site }) %>
+
+    <% } else { %>
+      <article class="page-card card">
+        <h1 class="page-title"><%= page.title %></h1>
+        <div class="post-content">
+          <%- page.content %>
+        </div>
+      </article>
+    <% } %>
+  </main>
+
+  <%- partial('_partial/footer', { config, theme }) %>
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  <%- partial('_partial/body-end') %>
+  <script src="<%= url_for('/js/main.js') %>"></script>
+</body>
+</html>
