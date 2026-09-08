@@ -1,286 +1,547 @@
-<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>关于 | Shangqian</title><meta name="author" content="Shangqian"><meta name="copyright" content="Shangqian"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="robots" content="index, follow"><meta property="og:type" content="website">
-<meta property="og:title" content="关于">
-<meta property="og:url" content="http://example.com/about/index.html">
-<meta property="og:site_name" content="Shangqian">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/avatar.jpg">
-<meta property="article:published_time" content="2026-08-14T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-08-14T03:13:26.947Z">
-<meta property="article:author" content="Shangqian">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/img/avatar.jpg"><link rel="shortcut icon" href="/img/favicon.ico"><link rel="canonical" href="http://example.com/about/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.0.0"><link rel="stylesheet" href="/css/custom.css?v=5.0.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11.1.14/swiper-bundle.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>
-    (() => {
-      
-    const saveToLocal = {
-      set: (key, value, ttl) => {
-        if (!ttl) return
-        const expiry = Date.now() + ttl * 86400000
-        localStorage.setItem(key, JSON.stringify({ value, expiry }))
-      },
-      get: key => {
-        const itemStr = localStorage.getItem(key)
-        if (!itemStr) return undefined
-        const { value, expiry } = JSON.parse(itemStr)
-        if (Date.now() > expiry) {
-          localStorage.removeItem(key)
-          return undefined
-        }
-        return value
-      }
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
 
-    window.btf = {
-      saveToLocal,
-      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
-        const script = document.createElement('script')
-        script.src = url
-        script.async = true
-        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
-        script.onload = script.onreadystatechange = () => {
-          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
-        }
-        script.onerror = reject
-        document.head.appendChild(script)
-      }),
-      getCSS: (url, id) => new Promise((resolve, reject) => {
-        const link = document.createElement('link')
-        link.rel = 'stylesheet'
-        link.href = url
-        if (id) link.id = id
-        link.onload = link.onreadystatechange = () => {
-          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
-        }
-        link.onerror = reject
-        document.head.appendChild(link)
-      }),
-      addGlobalFn: (key, fn, name = false, parent = window) => {
-        if (!true && key.startsWith('pjax')) return
-        const globalFn = parent.globalFn || {}
-        globalFn[key] = globalFn[key] || {}
-        if (name && globalFn[key][name]) return
-        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
-        parent.globalFn = globalFn
-      }
-    }
-  
-      
-      const activateDarkMode = () => {
-        document.documentElement.setAttribute('data-theme', 'dark')
-        if (document.querySelector('meta[name="theme-color"]') !== null) {
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
-        }
-      }
-      const activateLightMode = () => {
-        document.documentElement.setAttribute('data-theme', 'light')
-        if (document.querySelector('meta[name="theme-color"]') !== null) {
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
-        }
-      }
+<title>关于 · Shang Qian</title>
+<meta name="description" content="一个简洁、优雅的个人技术博客，记录编程、学习与生活点滴。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
 
-      btf.activateDarkMode = activateDarkMode
-      btf.activateLightMode = activateLightMode
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
 
-      const theme = saveToLocal.get('theme')
+    <nav class="header-nav" id="header-nav">
       
-      const applyAutoTheme = () => {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        prefersDark ? activateDarkMode() : activateLightMode()
-      }
-    
-          const hour = new Date().getHours()
-          const isNight = hour <= 6 || hour >= 18
-          if (theme === undefined || theme === 'auto') isNight ? activateDarkMode() : activateLightMode()
-          else theme === 'light' ? activateLightMode() : activateDarkMode()
+        
+          <a class="nav-link" href="/">首页</a>
+        
+          <a class="nav-link" href="/archives/">归档</a>
+        
+          <a class="nav-link" href="/categories/">分类</a>
+        
+          <a class="nav-link" href="/tags/">标签</a>
+        
+          <a class="nav-link" href="/shuoshuo/">说说</a>
+        
+          <a class="nav-link" href="/link/">友链</a>
+        
+          <a class="nav-link" href="/about/">关于</a>
         
       
-      const asideStatus = saveToLocal.get('aside-status')
-      if (asideStatus !== undefined) {
-        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
-      }
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container">
+    
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/about</span>
+</div>
+
+
     
       
-    const detectApple = () => {
-      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
-        document.documentElement.classList.add('apple')
-      }
-    }
-    detectApple()
+
+<section class="about-page">
+  <!-- 极光 Hero -->
+  <section class="about-hero" data-aurora-hero aria-labelledby="about-title">
+    <div class="aurora-orb aurora-orb-1"></div>
+    <div class="aurora-orb aurora-orb-2"></div>
+    <div class="aurora-orb aurora-orb-3"></div>
+    <div class="aurora-mouse" data-aurora-mouse></div>
+
+    <div class="hero-content">
+      <div class="hero-avatar-row">
+        
+          <div class="float-cloud float-cloud-left" aria-hidden="true">
+            
+              <span class="float-text float-text-1">🌙 内敛而深邃</span>
+            
+              <span class="float-text float-text-2">💭 独立思考者</span>
+            
+              <span class="float-text float-text-3">🌿 理想主义守护者</span>
+            
+              <span class="float-text float-text-4">🔮 洞察本质</span>
+            
+          </div>
+        
+        <div class="avatar-ring">
+          <div class="avatar-inner">
+            <img src="/img/avatar.jpg" alt="尚谦 的头像" class="about-avatar" loading="eager" decoding="async">
+          </div>
+        </div>
+        
+          <div class="float-cloud float-cloud-right" aria-hidden="true">
+            
+              <span class="float-text float-text-5">📝 沉默的热情</span>
+            
+              <span class="float-text float-text-6">🎨 创造力与想象力</span>
+            
+              <span class="float-text float-text-7">🕊️ 追求意义与联结</span>
+            
+              <span class="float-text float-text-8">✨ 坚守内心的信念</span>
+            
+          </div>
+        
+      </div>
+
+      <h1 id="about-title" class="about-title">
+        <span class="greeting">Hi! I&#39;m</span>
+        <span class="name-glow">尚谦</span>
+      </h1>
+      <p class="hero-motto">记录生活与技术的点滴</p>
+    </div>
+  </section>
+
+  <!-- 卡片网格 -->
+  <div class="about-card-grid">
+    <!-- 基础信息 -->
+    <section class="about-card about-card-profile">
+      <div class="panel-head"><span>Identity</span><h2>基础信息</h2></div>
+      <div class="info-list">
+        
+          <div class="info-item">
+            <span class="info-label">昵称</span>
+            
+              <span class="info-value">尚谦</span>
+            
+          </div>
+        
+          <div class="info-item">
+            <span class="info-label">标签</span>
+            
+              <span class="info-value">00后</span>
+            
+          </div>
+        
+          <div class="info-item">
+            <span class="info-label">性别</span>
+            
+              <span class="info-value">男</span>
+            
+          </div>
+        
+          <div class="info-item">
+            <span class="info-label">毕业院校</span>
+            
+              <span class="info-value">桂林电子科技大学</span>
+            
+          </div>
+        
+          <div class="info-item">
+            <span class="info-label">专业</span>
+            
+              <span class="info-value">大数据</span>
+            
+          </div>
+        
+          <div class="info-item">
+            <span class="info-label">当前工作</span>
+            
+              <span class="info-value">数据分析师</span>
+            
+          </div>
+        
+          <div class="info-item">
+            <span class="info-label">地址</span>
+            
+              <span class="info-value">苏州</span>
+            
+          </div>
+        
+          <div class="info-item">
+            <span class="info-label">邮箱</span>
+            
+              <a href="mailto:357425252@qq.com" class="info-value">357425252@qq.com</a>
+            
+          </div>
+        
+          <div class="info-item">
+            <span class="info-label">QQ</span>
+            
+              <span class="info-value">357425252</span>
+            
+          </div>
+        
+      </div>
+    </section>
+
+    <!-- 性格侧写 -->
+    <section class="about-card about-card-personality">
+      <div class="panel-head"><span>Personality</span><h2>性格侧写</h2></div>
+      <div class="personality-body">
+        <div>
+          <p class="personality-type">INFJ-A</p>
+          <p class="personality-name">提倡者</p>
+          <p class="personality-summary">既理想主义，又坚守原则，不甘随波逐流、虚度此生，而是一心渴望挺身而出，有所作为。</p>
+          
+            <div class="personality-traits">
+              <span>洞察力</span><span>共情</span><span>理想主义</span>
+            </div>
+          
+          
+            <a href="https://www.16personalities.com/ch/infj-人格" target="_blank" rel="noopener noreferrer">查看详情</a>
+          
+        </div>
+        
+          <img src="/img/personality.svg" alt="提倡者 性格插图" loading="lazy" decoding="async">
+        
+      </div>
+    </section>
+
+    <!-- 技能与工具 -->
+    <section class="about-card about-card-skills">
+      <div class="panel-head"><span>Capabilities</span><h2>技能与工具</h2></div>
+      <div class="skills-viewport">
+        <div class="skills-lanes">
+          
+            <div class="skills-row skills-row-1">
+              
+                
+                <div class="skill-chip" style="--delay: 0.000s" role="img" aria-label="Python" title="Python">
+                  <i class="fa-brands fa-python" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.025s" role="img" aria-label="Java" title="Java">
+                  <i class="fa-brands fa-java" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.050s" role="img" aria-label="JavaScript" title="JavaScript">
+                  <i class="fa-brands fa-js" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.075s" role="img" aria-label="Node.js" title="Node.js">
+                  <i class="fa-brands fa-node-js" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.100s" role="img" aria-label="HTML5" title="HTML5">
+                  <i class="fa-brands fa-html5" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.125s" role="img" aria-label="CSS3" title="CSS3">
+                  <i class="fa-brands fa-css3-alt" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.150s" role="img" aria-label="PHP" title="PHP">
+                  <i class="fa-brands fa-php" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.175s" role="img" aria-label="Rust" title="Rust">
+                  <i class="fa-brands fa-rust" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.200s" role="img" aria-label="Go" title="Go">
+                  <i class="fa-brands fa-golang" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.225s" role="img" aria-label="Swift" title="Swift">
+                  <i class="fa-brands fa-swift" aria-hidden="true"></i>
+                </div>
+              
+            </div>
+          
+            <div class="skills-row skills-row-2">
+              
+                
+                <div class="skill-chip" style="--delay: 0.250s" role="img" aria-label="React" title="React">
+                  <i class="fa-brands fa-react" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.275s" role="img" aria-label="Vue.js" title="Vue.js">
+                  <i class="fa-brands fa-vuejs" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.300s" role="img" aria-label="Angular" title="Angular">
+                  <i class="fa-brands fa-angular" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.325s" role="img" aria-label="Bootstrap" title="Bootstrap">
+                  <i class="fa-brands fa-bootstrap" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.350s" role="img" aria-label="Sass" title="Sass">
+                  <i class="fa-brands fa-sass" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.375s" role="img" aria-label="Less" title="Less">
+                  <i class="fa-brands fa-less" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.400s" role="img" aria-label="npm" title="npm">
+                  <i class="fa-brands fa-npm" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.425s" role="img" aria-label="Yarn" title="Yarn">
+                  <i class="fa-brands fa-yarn" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.450s" role="img" aria-label="Laravel" title="Laravel">
+                  <i class="fa-brands fa-laravel" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.475s" role="img" aria-label="WordPress" title="WordPress">
+                  <i class="fa-brands fa-wordpress" aria-hidden="true"></i>
+                </div>
+              
+            </div>
+          
+            <div class="skills-row skills-row-3">
+              
+                
+                <div class="skill-chip" style="--delay: 0.500s" role="img" aria-label="Git" title="Git">
+                  <i class="fa-brands fa-git-alt" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.525s" role="img" aria-label="GitHub" title="GitHub">
+                  <i class="fa-brands fa-github" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.550s" role="img" aria-label="GitLab" title="GitLab">
+                  <i class="fa-brands fa-gitlab" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.575s" role="img" aria-label="Docker" title="Docker">
+                  <i class="fa-brands fa-docker" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.600s" role="img" aria-label="Linux" title="Linux">
+                  <i class="fa-brands fa-linux" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.625s" role="img" aria-label="Windows" title="Windows">
+                  <i class="fa-brands fa-windows" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.650s" role="img" aria-label="Apple" title="Apple">
+                  <i class="fa-brands fa-apple" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.675s" role="img" aria-label="Figma" title="Figma">
+                  <i class="fa-brands fa-figma" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.700s" role="img" aria-label="Cloudflare" title="Cloudflare">
+                  <i class="fa-brands fa-cloudflare" aria-hidden="true"></i>
+                </div>
+              
+                
+                <div class="skill-chip" style="--delay: 0.725s" role="img" aria-label="AWS" title="AWS">
+                  <i class="fa-brands fa-aws" aria-hidden="true"></i>
+                </div>
+              
+            </div>
+          
+        </div>
+      </div>
+      <p class="skills-note">正在持续学习中</p>
+    </section>
+
+    <!-- 联系与兴趣 -->
+    <section class="about-card about-card-contact">
+      <div class="panel-head"><span>Connect</span><h2>联系与兴趣</h2></div>
+      <div class="social-grid">
+        
+          <a class="social-card" href="https://github.com/Shangqian-haha" target="_blank" rel="noopener noreferrer">
+            <i class="fa-brands fa-github" aria-hidden="true"></i>
+            <span>GitHub</span>
+          </a>
+        
+          <a class="social-card" href="https://qm.qq.com/cgi-bin/qm_share/open_source_page?uin=357425252" target="_blank" rel="noopener noreferrer">
+            <i class="fa-brands fa-qq" aria-hidden="true"></i>
+            <span>QQ</span>
+          </a>
+        
+      </div>
+      
+        <div class="hobby-list">
+          <span>阅读</span><span>随笔</span><span>编程</span><span>摄影</span>
+        </div>
+      
+    </section>
+
+    <!-- 在做的事 -->
+    <section class="about-card about-card-projects">
+      <div class="panel-head"><span>Projects</span><h2>在做的事</h2></div>
+      <div class="project-list">
+        
+          
+            <div class="project-item">
+          
+              <span class="project-kicker">Project</span>
+              <strong>Trying to do better</strong>
+              <p>在沉默中积蓄力量，不急于证明，只专注于成为更好的自己</p>
+          </div>
+        
+      </div>
+      
+        <div class="project-focus">
+          <span>近期节奏</span>
+          <div class="project-focus-grid">
+            
+              <div class="project-focus-item">
+                <strong>博客打磨</strong>
+                <p>持续完善 Hexo 博客的主题、页面与交互细节。</p>
+              </div>
+            
+              <div class="project-focus-item">
+                <strong>学习积累</strong>
+                <p>深耕大数据与编程，记录学习心得。</p>
+              </div>
+            
+              <div class="project-focus-item">
+                <strong>写作输出</strong>
+                <p>用文字沉淀思考，保持记录的习惯。</p>
+              </div>
+            
+          </div>
+        </div>
+      
+    </section>
+
+    <!-- 自我评价 -->
+    <section class="about-card about-card-evaluation">
+      <div class="panel-head"><span>Snapshot</span><h2>自我评价</h2></div>
+      <div class="evaluation-list">
+        
+          <div>
+            <span>思想</span>
+            <p>内敛而深邃，习惯独立思考，对事物的本质有敏锐的洞察力</p>
+          </div>
+        
+          <div>
+            <span>工作</span>
+            <p>沉稳专注，注重细节与深度，追求有温度的技术实现</p>
+          </div>
+        
+          <div>
+            <span>总结</span>
+            <p>在代码与文字间寻找意义，用沉默的热情守护内心的信念</p>
+          </div>
+        
+      </div>
+    </section>
+  </div>
+</section>
+
+
+    
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
   
-    })()
-  </script><script>const GLOBAL_CONFIG = {
-  root: '/',
-  algolia: undefined,
-  localSearch: {"path":"/search.json","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
-  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
-  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"本篇文章从发布到现在已经隔了","messageNext":"天了，里面的内容可能过期了，你要自己甄别一下哟👉👈"},
-  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
-  copy: {
-    success: '😋复制啦！请注意版权信息呀！',
-    error: '😪呜呜，复制失败了！',
-    noSupport: '🤐浏览器不支持呢，你用的啥玩意？'
-  },
-  relativeDate: {
-    homepage: false,
-    post: false
-  },
-  runtime: '天',
-  dateSuffix: {
-    just: '刚刚',
-    min: '分钟前',
-    hour: '小时前',
-    day: '天前',
-    month: '个月前'
-  },
-  copyright: {"limitCount":1000,"languages":{"author":"作者: Shangqian","link":"链接: ","source":"来源: Shangqian","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
-  lightbox: 'fancybox',
-  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","theme_to_auto":"已切换为自动模式","bgLight":"rgba(255, 255, 255, 0.509)","bgDark":"rgba(48, 48, 48, 0.509)","position":"top-right"},
-  shuoshuo: {"enable":false,"api":null,"base_url":null,"avatar":null,"cache_minutes":30,"page_size":30,"default_external_cover":null,"github_external_cover":null,"meting_api":null},
-  welcome: {"enable":false,"title":"Welcome","icon":"fa fa-user","content":null,"error_text":"Location service unavailable","location":{"enable":false,"base_lng":null,"base_lat":null,"distance_label":"site owner"}},
-  locationApi: {"api":"https://v1.nsuuu.com/api/ipip","api_key":null,"cache_hours":24},
-  commentPopup: {"artalk":{"server":null,"site":null,"visitor":null,"option":null},"enabled":false},
-  infinitegrid: {
-    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.12.0/dist/infinitegrid.min.js',
-    buttonText: '加载更多'
-  },
-  isPhotoFigcaption: true,
-  islazyload: true,
-  isAnchor: false,
-  percent: {
-    toc: true,
-    rightside: false,
-  },
-  autoDarkmode: false,
-  autoChangeMode: 2
-}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
-  title: '关于',
-  isPost: false,
-  isHome: false,
-  isHighlightShrink: undefined,
-  isToc: false,
-  postUpdate: '2026-08-14 11:13:26'
-}</script><link rel="stylesheet" href="/css/homepage-bg.css"><meta name="generator" content="Hexo 7.3.0"></head><body><div class="float-box right top"></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="add-menu-container"> </div><div class="is-center" id="sidebar-avatar"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/loading.gif'" alt="avatar"/></div><div class="author-info__name">Shangqian</div></div><div class="site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">2</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">1</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><div class="menus_items visible"><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 整理</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-box-archive"></i><span> 时光卷轴</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 文章分类</span></a></li><li><a class="site-page child" href="/posts/"><i class="fa-fw fas fa-book-open"></i><span> 文章通览</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-user-group"></i><span> 友人</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链展示</span></a></li><li><a class="site-page child" href="/fcircle/"><i class="fa-fw fas fa-rss"></i><span> Read Later</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-circle-info"></i><span> 关于</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-user"></i><span> 站长资料</span></a></li></ul></div></div></div></div><div class="page type-about" id="body-wrap"><header class="not-home-page fixed" id="page-header" style="background-image: url(/img/homepage-bg.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/" title="Shangqian"><span class="site-name">Shangqian</span></a></span><div id="menus"></div><div class="menus_items visible"><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 整理</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/archives/"><i class="fa-fw fas fa-box-archive"></i><span> 时光卷轴</span></a></li><li><a class="site-page child" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 文章分类</span></a></li><li><a class="site-page child" href="/posts/"><i class="fa-fw fas fa-book-open"></i><span> 文章通览</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-user-group"></i><span> 友人</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链展示</span></a></li><li><a class="site-page child" href="/fcircle/"><i class="fa-fw fas fa-rss"></i><span> Read Later</span></a></li></ul></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-circle-info"></i><span> 关于</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-user"></i><span> 站长资料</span></a></li></ul></div></div><center id="name-container"><a id="page-name" href="javascript:btf.scrollToDest(0, 500)">点击回归页面顶部</a></center><div id="nav-right"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i></span></div><div id="toggle-menu"><span class="site-page" href="javascript:void(0);" title="展开菜单"><i class="fas fa-indent fa-fw"></i></span></div></div></nav><div id="page-site-info"><h1 id="site-title">关于</h1></div></header><main class="layout hide-aside" id="content-inner"><div id="page"><div id="about-container"><section class="about-shell"><div class="about-shell__grid"><div class="about-shell__main"><div class="about-panel about-panel--profile card"><div class="panel-head"><span class="panel-kicker">Identity</span><h3 class="panel-title">基础信息</h3></div><div class="info-list"><div class="info-item"><span class="label">昵称</span><span class="value">尚谦</span></div><div class="info-item"><span class="label">性别</span><span class="value">男</span></div><div class="info-item"><span class="label">毕业院校</span><span class="value">桂林电子科技大学</span></div><div class="info-item"><span class="label">专业</span><span class="value">大数据</span></div><div class="info-item"><span class="label">邮箱</span><a class="value" href="mailto:357425252@qq.com">357425252@qq.com</a></div><div class="info-item"><span class="label">QQ</span><span class="value">357425252</span></div></div></div><div class="about-panel about-panel--skills card"><div class="panel-head"><span class="panel-kicker">Capabilities</span><h3 class="panel-title">技能与工具</h3></div><div class="skills-stack"><div class="skills-row"></div></div><p class="skills-note">正在持续学习中</p></div><div class="about-panel about-panel--projects card"><div class="panel-head"><span class="panel-kicker">Projects</span><h3 class="panel-title">在做的事</h3></div><div class="project-list"><a class="project-item" href="https://github.com/Shangqian-haha/Shangqian-haha.github.io" target="_blank" rel="noopener nofollow"><h4>个人博客</h4><p>基于 Hexo + liushen 主题的个人博客</p></a><a class="project-item" target="_blank" rel="noopener nofollow"><h4>Trying to do better</h4><p>在沉默中积蓄力量，不急于证明，只专注于成为更好的自己</p></a></div></div></div><div class="about-shell__side"><div class="about-panel about-panel--personality card"><div class="panel-head"><span class="panel-kicker">Personality</span><h3 class="panel-title">性格侧写</h3></div><div class="personality-card"><div class="personality-copy"><p class="personality-type">INFJ-A</p><p class="personality-name">提倡者</p><p class="personality-summary">既理想主义，又坚守原则，不甘随波逐流、虚度此生，而是一心渴望挺身而出，有所作为。</p><a class="personality-link" href="https://www.16personalities.com/ch/infj-人格" target="_blank" rel="noopener nofollow">查看详情</a></div><div class="personality-illustration"><img class="no-lightbox" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/personality.svg" onerror="this.onerror=null;this.src='/img/loading.gif'" alt="Personality SVG"></div></div></div><div class="about-panel about-panel--hobbies card"><div class="panel-head"><span class="panel-kicker">Lifestyle</span><h3 class="panel-title">兴趣偏好</h3></div><div class="hobby-list"><span class="hobby-pill">阅读</span><span class="hobby-pill">随笔</span><span class="hobby-pill">编程</span><span class="hobby-pill">摄影</span></div></div><div class="about-panel about-panel--evaluation card"><div class="panel-head"><span class="panel-kicker">Snapshot</span><h3 class="panel-title">自我评价</h3></div><div class="evaluation-list"><div class="evaluation-item"><span class="label">思想</span><p>内敛而深邃，习惯独立思考，对事物的本质有敏锐的洞察力</p></div><div class="evaluation-item"><span class="label">工作</span><p>沉稳专注，注重细节与深度，追求有温度的技术实现</p></div><div class="evaluation-item"><span class="label">总结</span><p>在代码与文字间寻找意义，用沉默的热情守护内心的信念</p></div></div></div></div></div></section></div></div></main><footer id="footer"><div id="footer-wrap" style="background: transparent"><div id="footer_icons"></div><div id="footer_content"></div><div id="footer-bottom"><div class="footer-bottom-content"><div class="footer-bottom-left"><span class="copyright"><i class="fa-regular fa-copyright" style="margin-right:5px"></i>2021 - 2026 <span style="margin-left:5px">Shangqian</span></span><div></div></div><div class="footer-bottom-right"> <div id="runtime" title="本站运行时间">本站已苟活：0 天 0 时 0 分 0 秒</div><div> </div></div></div></div></div><script>if (!window.liushen) {
-  window.liushen = {
-    saveData: (key, data) => {
-      localStorage.setItem(key, JSON.stringify({
-        time: Date.now(),
-        data: data
-      }));
-    },
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
-    loadData: (key, validTimeInMinutes) => {
-      let storedData = JSON.parse(localStorage.getItem(key));
-      if (storedData) {
-        let elapsedTime = Date.now() - storedData.time;
-        if (elapsedTime >= 0 && elapsedTime < validTimeInMinutes * 60000) {
-          return storedData.data;
-        }
-      }
-      return null;
-    },
-
-    runtime: () => {
-      const formatTime = (unit) => unit > 9 ? unit : "0" + unit;
-      const startTime = new Date('2026/08/13 19:00:00').getTime();
-      const currentTime = Date.now();
-      let elapsedTimeInSeconds = Math.round((currentTime - startTime) / 1000);
-
-      let runtimeText = "本站已苟活：";
-      if (elapsedTimeInSeconds >= 86400) {
-        runtimeText += `${formatTime(Math.floor(elapsedTimeInSeconds / 86400))} 天 `;
-        elapsedTimeInSeconds %= 86400;
-      }
-      if (elapsedTimeInSeconds >= 3600) {
-        runtimeText += `${formatTime(Math.floor(elapsedTimeInSeconds / 3600))} 时 `;
-        elapsedTimeInSeconds %= 3600;
-      }
-      if (elapsedTimeInSeconds >= 60) {
-        runtimeText += `${formatTime(Math.floor(elapsedTimeInSeconds / 60))} 分 `;
-        elapsedTimeInSeconds %= 60;
-      }
-      runtimeText += `${formatTime(elapsedTimeInSeconds)} 秒`;
-
-      const runtimeElement = document.getElementById("runtime");
-      if (runtimeElement) {
-        runtimeElement.innerHTML = runtimeText;
-      }
-      setTimeout(window.liushen.runtime, 1000);
-    },
-
-    randomLink: () => {
-      let linksData = window.liushen.loadData("links", 30);
-      if (linksData) {
-        let linkElements = document.querySelectorAll("#friend-links-in-footer .footer-item");
-        if (!linkElements.length) return;
-
-        for (let i = 0; i < linkElements.length; i++) {
-          let randomIndex = Math.floor(Math.random() * linksData.length);
-          linkElements[i].innerText = linksData[randomIndex].name;
-          linkElements[i].href = linksData[randomIndex].link;
-          linksData.splice(randomIndex, 1);
-        }
-      } else {
-        fetch("/flink_count.json")
-          .then(response => response.json())
-          .then(data => {
-            window.liushen.saveData("links", data.link_list);
-            window.liushen.randomLink();
-          });
-      }
-    }
-  };
-}
-
-if (true) {
-  window.liushen.randomLink();
-  document.addEventListener("DOMContentLoaded", window.liushen.randomLink);
-  window.liushen.runtime();
-} else {
-  window.liushen.randomLink();
-  window.liushen.runtime();
-}</script></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="translateLink" type="button" title="简繁转换" style="width: 35px;">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fa-regular fa-star-half-stroke"></i><span class="rightside-text">亮暗切换</span></button><button id="cat" onclick="toggleLive2dVisibility()" title="小猫显隐"><i class="fa-solid fa-cat"></i><span class="rightside-text">小猫显隐</span></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i><span class="rightside-text">更多设置</span></button><button id="fullscreen" onclick="toggleFullScreen()" title="全屏切换"><i class="fa-solid fa-expand"></i><span class="rightside-text">全屏切换</span></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i><span class="rightside-text">回到顶部</span></button></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="fa-solid fa-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="fa-solid fa-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="fa-solid fa-arrow-rotate-right"></i></div><div class="rightMenu-item" id="menu-home"><i class="fa-solid fa-house"></i></div></div><div class="rightMenu-group rightMenu-line hide" id="menu-text"><a class="rightMenu-item" id="copy" href="javascript:rm.copySelect();"><i class="fa-solid fa-copy"></i><span>复制选中文字</span></a><a class="rightMenu-item" id="reply" href="javascript:rm.replySelect();"><i class="fa-regular fa-comment"></i><span>评论选中段落</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" href="/archives/"><i class="fa-solid fa-archive"></i><span>文章时间线</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="fa-solid fa-folder-open"></i><span>文章分大类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="fa-solid fa-tags"></i><span>文章小标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuNormal"><div class="rightMenu-item" id="menu-translate"><i class="fa-solid fa-earth-asia"></i><span>繁简模式切换</span></div><div class="rightMenu-item" id="menu-live2dvisibility"><i class="fa-solid fa-cat"></i><span>小猫显示隐藏</span></div><div class="rightMenu-item" id="menu-print"><i class="fa-solid fa-print fa-fw"></i><span>打印整个页面</span></div></div></div><div id="rightmenu-mask"></div><div><script src="/js/others.js?v=5.0.0"></script><script src="/js/utils.js?v=5.0.0"></script><script src="/js/main.js?v=5.0.0"></script><script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.simple.min.js"></script><script src="/js/rightmenu.js?v=5.0.0"></script><script src="https://cdn.jsdelivr.net/npm/swiper@11.1.14/swiper-bundle.min.js"></script><script src="/js/homepage-swiper.js?v=5.0.0"></script><script src="/js/tw_cn.js?v=5.0.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.36/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@5.2.0/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@19.1.3/dist/lazyload.iife.min.js"></script><div class="js-pjax"></div><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js"></script><script>(() => {
-  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
-
-  window.pjax = new Pjax({
-    elements: 'a:not([target="_blank"])',
-    selectors: pjaxSelectors,
-    cacheBust: false,
-    analytics: false,
-    scrollRestoration: false
-  })
-
-  const triggerPjaxFn = (val) => {
-    if (!val) return
-    Object.values(val).forEach(fn => fn())
-  }
-
-  document.addEventListener('pjax:send', () => {
-    // removeEventListener
-    btf.removeGlobalFnEvent('pjaxSendOnce')
-    btf.removeGlobalFnEvent('themeChange')
-
-    // reset readmode
-    const $bodyClassList = document.body.classList
-    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
-
-    triggerPjaxFn(window.globalFn.pjaxSend)
-  })
-
-  document.addEventListener('pjax:complete', () => {
-    btf.removeGlobalFnEvent('pjaxCompleteOnce')
-    document.querySelectorAll('script[data-pjax]').forEach(item => {
-      const newScript = document.createElement('script')
-      const content = item.text || item.textContent || item.innerHTML || ""
-      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
-      newScript.appendChild(document.createTextNode(content))
-      item.parentNode.replaceChild(newScript, item)
-    })
-
-    triggerPjaxFn(window.globalFn.pjaxComplete)
-  })
-
-  document.addEventListener('pjax:error', e => {
-    if (e.request.status === 404) {
-      pjax.loadUrl('/404.html')
-    }
-  })
-})()</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索全站文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.0.0"></script></div></div></body></html>
+  <script src="/js/main.js"></script>
+</body>
+</html>
