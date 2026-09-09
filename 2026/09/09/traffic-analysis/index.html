@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>流量分析入门：你的用户都是从哪条路找上门的？ · Shang Qian</title>
+<meta name="description" content="流量到底是什么、为什么同一个 UV 价值能差几十倍、以及广告费到底该算在哪个渠道头上——这篇把流量分析的核心概念一次讲清。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          
+          
+            <a class="nav-link" href="/">首页</a>
+          
+        
+          
+          
+            <div class="nav-item has-dropdown">
+              <button class="nav-link nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                <span>文章汇总</span>
+                <i class="fa-solid fa-chevron-down nav-chevron" aria-hidden="true"></i>
+              </button>
+              <ul class="nav-dropdown">
+                
+                  <li><a class="nav-dropdown-link" href="/archives/">归档</a></li>
+                
+                  <li><a class="nav-dropdown-link" href="/categories/">分类</a></li>
+                
+                  <li><a class="nav-dropdown-link" href="/tags/">标签</a></li>
+                
+              </ul>
+            </div>
+          
+        
+          
+          
+            <a class="nav-link" href="/shuoshuo/">说说</a>
+          
+        
+          
+          
+            <a class="nav-link" href="/link/">友链</a>
+          
+        
+          
+          
+            <a class="nav-link" href="/about/">关于</a>
+          
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+      <button class="header-scroll-top-btn" id="header-scroll-top-btn" type="button" title="返回顶部" aria-label="返回顶部" aria-hidden="true">
+        <span class="header-scroll-top-progress" aria-hidden="true"></span>
+        <span class="header-scroll-top-percent" aria-hidden="true">0</span>
+        <i class="fa-solid fa-arrow-up header-scroll-top-icon" aria-hidden="true"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>cd ..</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/traffic-analysis</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">流量分析入门：你的用户都是从哪条路找上门的？</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-09-09T06:00:00.000Z">2026-09-09</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">#数据分析</a><a href="/tags/%E6%B5%81%E9%87%8F/">#流量</a><a href="/tags/%E6%B8%A0%E9%81%93%E5%BD%92%E5%9B%A0/">#渠道归因</a><a href="/tags/%E6%8E%A8%E5%B9%BF/">#推广</a>
+            </span>
+          
+        </div>
+        
+          <div class="post-cover"><img src="/img/cover-1.svg" alt="流量分析入门：你的用户都是从哪条路找上门的？"></div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9A%E7%94%A8%E6%88%B7%E7%9A%84%E2%80%9D%E5%8A%A8%E6%80%81%E8%B6%B3%E8%BF%B9%E2%80%9D"><span class="toc-text">流量是什么：用户的”动态足迹”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E4%B9%9F%E5%88%86%E4%B8%89%E5%85%AD%E4%B9%9D%E7%AD%89"><span class="toc-text">流量也分三六九等</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E4%BB%8E%E5%93%AA%E6%9D%A5%EF%BC%9A%E6%8E%A8%E5%B9%BF%E6%B8%A0%E9%81%93%E5%9B%9B%E5%A4%A7%E7%B1%BB"><span class="toc-text">流量从哪来：推广渠道四大类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%9F%E5%8A%B3%E7%AE%97%E8%B0%81%E7%9A%84%EF%BC%9A%E6%B8%A0%E9%81%93%E5%BD%92%E5%9B%A0"><span class="toc-text">功劳算谁的：渠道归因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A8%E5%B9%BF%E8%A6%81%E8%B7%9F%E7%9D%80%E2%80%9D%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E2%80%9D%E8%B5%B0"><span class="toc-text">推广要跟着”生命周期”走</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B7%98%E5%AE%9D%E4%B8%89%E5%85%84%E5%BC%9F%EF%BC%9A%E7%9B%B4%E9%80%9A%E8%BD%A6%E3%80%81%E5%BC%95%E5%8A%9B%E9%AD%94%E6%96%B9%E3%80%81%E4%B8%87%E8%B1%A1%E5%8F%B0"><span class="toc-text">淘宝三兄弟：直通车、引力魔方、万象台</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-text">小结</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>做运营的人嘴边天天挂着一个词：流量。但真问一句”流量到底是啥”，很多人只会说”就是访问量嘛”。其实往深了想，流量这玩意儿比想象中有意思得多——它背后藏着的，是每一个活生生的用户，以及他们从”第一次点进来”到”变成忠实老客”的完整轨迹。</p>
+<h2 id="流量是什么：用户的”动态足迹”"><a href="#流量是什么：用户的”动态足迹”" class="headerlink" title="流量是什么：用户的”动态足迹”"></a>流量是什么：用户的”动态足迹”</h2><p>一句话概括：<strong>流量是用户在互联网世界留下的动态足迹，而用户是流量的唯一载体</strong>。没有用户，就没有流量；脱离了人去看那些 UV、PV 数字，等于只看到了一串没感情的计数器。</p>
+<p>用户从认识你到离不开你，流量轨迹大致会走三个阶段：</p>
+<ul>
+<li><strong>新用户</strong>：通过搜索、广告这些渠道第一次摸上门（这时候贡献的是”新增 UV”），顺带留下最初的 PV；</li>
+<li><strong>活跃用户</strong>：来得越来越勤（PV 蹭蹭涨），开始在你站里到处逛，从首页跳到商品页再跳到文章页——访问路径越来越复杂；</li>
+<li><strong>核心用户</strong>：已经形成了固定习惯，PV 集中砸在几个关键页面上，比如支付页、个人中心，说明他认准你了。</li>
+</ul>
+<p>看流量，本质就是在看这条轨迹上，人走到哪一步了。</p>
+<h2 id="流量也分三六九等"><a href="#流量也分三六九等" class="headerlink" title="流量也分三六九等"></a>流量也分三六九等</h2><p>同一个 UV，价值可能差几十倍。别被”流量大”三个字骗了，要会<strong>给流量分层</strong>——而流量的分层，说到底就是”用户价值的分层”：</p>
+<table>
+<thead>
+<tr>
+<th>分层</th>
+<th>是谁</th>
+<th>特征</th>
+<th>价值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>基础流量</strong></td>
+<td>偶然点进来的 UV（比如误点了个广告）</td>
+<td>PV 全堆在首页，进来就跑了，跳出率高</td>
+<td>低</td>
+</tr>
+<tr>
+<td><strong>有效流量</strong></td>
+<td>主动搜关键词找来的 UV</td>
+<td>路径是”商品页→咨询页”，虽然还没下单，但明显有想法</td>
+<td>中</td>
+</tr>
+<tr>
+<td><strong>核心流量</strong></td>
+<td>复购的老客 UV</td>
+<td>PV 集中在”个人中心→历史订单”，单次访问贡献的成交额远高于平均</td>
+<td>高</td>
+</tr>
+</tbody></table>
+<p>举个例子：同样来了 100 个人，A 渠道 100 个全是误点广告就走的，B 渠道 100 个全是搜”XX 好用吗”点进来还翻了你三篇评测的——这俩的含金量能一样吗？所以做流量分析，第一件事永远是<strong>先分清你手上的是哪种流量</strong>。</p>
+<h2 id="流量从哪来：推广渠道四大类"><a href="#流量从哪来：推广渠道四大类" class="headerlink" title="流量从哪来：推广渠道四大类"></a>流量从哪来：推广渠道四大类</h2><p>流量不会凭空出现，总得有个入口。常见的推广渠道大概分四类：</p>
+<ul>
+<li><strong>媒体类</strong>：电视、报纸、杂志、电台这些传统媒体；</li>
+<li><strong>社会化广告</strong>：微信、微博、社群、短视频；</li>
+<li><strong>App 类广告</strong>：应用市场、预装机、超级 App 内部的广告位；</li>
+<li><strong>线上广告</strong>：搜索广告、导航、联盟、超级平台广告。</li>
+</ul>
+<p>搞清楚渠道，是为了下一步——算清楚”这单生意到底该记在哪个渠道头上”。</p>
+<h2 id="功劳算谁的：渠道归因"><a href="#功劳算谁的：渠道归因" class="headerlink" title="功劳算谁的：渠道归因"></a>功劳算谁的：渠道归因</h2><p>这是流量分析里最有意思、也最容易打架的部分。你花了钱投了 N 个渠道，最后用户下单了，这笔功劳算给谁？</p>
+<p><strong>单点归因</strong>：把所有功劳塞给一个触点，简单粗暴。</p>
+<ul>
+<li><strong>首次归因（first click）</strong>：功劳全给用户第一次接触你的那个渠道。适合”品牌破冰”场景——比如新品发布会靠抖音先曝光，用户后来才去电商平台下单，那这单就算抖音的。也适合房产、课程这种决策周期超长的低频产品。</li>
+<li><strong>末次归因（last click）</strong>：功劳全给转化前最后一个触点。适合双 11 这种大促、外卖生鲜这种短决策周期的高频消费——用户就是点完最后一个优惠券链接下的单，谁也别争。</li>
+</ul>
+<p><strong>多点归因</strong>：承认”转化是多个触点一起努力的结果”，把功劳按规则分给路径上的多个触点。</p>
+<ul>
+<li><strong>线性归因</strong>：平均分，每个触点功劳一样，谁也别觉得自己更重要；</li>
+<li><strong>时间衰减归因</strong>：离转化越近功劳越大。比如最后一个触点占 50%，前一天那个占 30%，更早的占 20%；</li>
+<li><strong>位置归因</strong>：首末两头各占 40%（首次激发兴趣 + 末次促成转化），剩下的 20% 平均分给中间那些触点。</li>
+</ul>
+<p>选哪种归因，取决于你的用户路径长短和决策周期。路径短（广告→搜索→下单）就用多点归因快速看全局，决策长就老老实实盯首次。</p>
+<h2 id="推广要跟着”生命周期”走"><a href="#推广要跟着”生命周期”走" class="headerlink" title="推广要跟着”生命周期”走"></a>推广要跟着”生命周期”走</h2><p>一个产品从出生到成熟，推广目的根本不是一回事。核心逻辑是三个词的递进：<strong>扩大认知 → 转化变现 → 用户留存</strong>。</p>
+<ul>
+<li><strong>萌芽期（冷启动）</strong>：目标是”曝光 + 引流”，让目标用户知道”有这么个东西存在”，先把人圈进流量池（公众号、社群）；</li>
+<li><strong>成长期（扩张）</strong>：目标是”下载 + 新客消费”，推动用户真正用起来、完成首次付费，验证这生意能不能跑通；</li>
+<li><strong>成熟期（稳定运营）</strong>：目标是”用户 + 销售额”，提升粘性和单用户价值，把利润榨出来。</li>
+</ul>
+<p>拿不准自己该投啥的时候，先问问自己产品现在在哪个阶段，答案基本就出来了。</p>
+<h2 id="淘宝三兄弟：直通车、引力魔方、万象台"><a href="#淘宝三兄弟：直通车、引力魔方、万象台" class="headerlink" title="淘宝三兄弟：直通车、引力魔方、万象台"></a>淘宝三兄弟：直通车、引力魔方、万象台</h2><p>最后举个最接地气的例子——淘宝的三大推广工具，正好对应”全域、多模态、多元化、确定性”这四个词：</p>
+<ul>
+<li><strong>直通车</strong>：主打<strong>搜索</strong>渠道。用户搜”运动鞋”，你投了”运动鞋”关键词的直通车广告，就会出现在搜索结果页里。本质是”等用户来搜”。</li>
+<li><strong>引力魔方</strong>：主打<strong>推荐</strong>渠道，铺在”猜你喜欢”那些位置。用户刚看完一件上衣，它就把能搭配的裤子推到他面前。本质是”主动凑上去”。</li>
+<li><strong>万象台</strong>：覆盖<strong>全渠道</strong>，搜索页、猜你喜欢都管，把消费者行为路径整个追踪起来。本质是”全都要”。</li>
+</ul>
+<p>这仨对应到前面讲的归因和渠道，你就能理解它们各自的定位：直通车吃”搜索意图”，引力魔方吃”兴趣推荐”，万象台吃”全域覆盖”。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>流量分析说到底就四件事：<strong>先认清流量是人的足迹，再给流量按价值分层，然后追着渠道算清楚功劳，最后让推广策略跟着产品生命周期走</strong>。把这四件事串起来，你就不会只是盯着那个冷冰冰的 UV 数字发呆，而是真正看懂了数字背后的人。</p>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+            <a class="post-nav-item prev" href="/2026/09/09/user-analysis/">
+              <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
+              <span class="nav-title">用户分析入门：给每个用户画一张&#34;画像&#34;</span>
+            </a>
+          
+          
+            <a class="post-nav-item next" href="/2026/09/07/metrics-system-intro/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">指标体系入门：电商人必须会看的那堆数字</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

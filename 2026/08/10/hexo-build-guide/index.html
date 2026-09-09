@@ -1,3 +1,6 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#17191f">
@@ -20,6 +23,7 @@
     document.documentElement.setAttribute('data-theme', theme);
   })();
 </script>
+</head>
 
 <body>
   <div class="scroll-progress" id="scroll-progress"></div>
@@ -35,19 +39,44 @@
     <nav class="header-nav" id="header-nav">
       
         
-          <a class="nav-link" href="/">首页</a>
+          
+          
+            <a class="nav-link" href="/">首页</a>
+          
         
-          <a class="nav-link" href="/archives/">归档</a>
+          
+          
+            <div class="nav-item has-dropdown">
+              <button class="nav-link nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                <span>文章汇总</span>
+                <i class="fa-solid fa-chevron-down nav-chevron" aria-hidden="true"></i>
+              </button>
+              <ul class="nav-dropdown">
+                
+                  <li><a class="nav-dropdown-link" href="/archives/">归档</a></li>
+                
+                  <li><a class="nav-dropdown-link" href="/categories/">分类</a></li>
+                
+                  <li><a class="nav-dropdown-link" href="/tags/">标签</a></li>
+                
+              </ul>
+            </div>
+          
         
-          <a class="nav-link" href="/categories/">分类</a>
+          
+          
+            <a class="nav-link" href="/shuoshuo/">说说</a>
+          
         
-          <a class="nav-link" href="/tags/">标签</a>
+          
+          
+            <a class="nav-link" href="/link/">友链</a>
+          
         
-          <a class="nav-link" href="/shuoshuo/">说说</a>
-        
-          <a class="nav-link" href="/link/">友链</a>
-        
-          <a class="nav-link" href="/about/">关于</a>
+          
+          
+            <a class="nav-link" href="/about/">关于</a>
+          
         
       
       <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
@@ -56,6 +85,11 @@
       <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
         <i class="fa-solid fa-moon"></i>
         <i class="fa-solid fa-sun"></i>
+      </button>
+      <button class="header-scroll-top-btn" id="header-scroll-top-btn" type="button" title="返回顶部" aria-label="返回顶部" aria-hidden="true">
+        <span class="header-scroll-top-progress" aria-hidden="true"></span>
+        <span class="header-scroll-top-percent" aria-hidden="true">0</span>
+        <i class="fa-solid fa-arrow-up header-scroll-top-icon" aria-hidden="true"></i>
       </button>
     </nav>
 
@@ -100,7 +134,7 @@
     <div class="post-topbar">
       <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
         <i class="fa-solid fa-arrow-left"></i>
-        <span>返回</span>
+        <span>cd ..</span>
       </a>
       
 <div class="hero-badge">
@@ -141,20 +175,23 @@
           
         
         <div class="post-content">
-          <p>折腾博客这件事，其实是个无底洞。但正是这种「折腾」，让我在一次次推倒重来里，把前端、部署、域名、SEO 这些原本陌生的东西摸了个遍。</p>
-<h2 id="为什么选择-Hexo"><a href="#为什么选择-Hexo" class="headerlink" title="为什么选择 Hexo"></a>为什么选择 Hexo</h2><p>选型时在 Hugo、Hexo、VitePress 之间纠结了很久，最终选择 Hexo 的原因很简单：</p>
+          <p>折腾博客这件事，其实是个无底洞。但正是这种「折腾」，让我在一次次推倒重来里，把前端、部署、域名、SEO 这些原本陌生的东西摸了个遍。这篇文章把我从零搭起这个博客的完整过程记录下来，顺便把踩过的坑也一起摊开，省得你再趟一遍。</p>
+<h2 id="为什么选择-Hexo"><a href="#为什么选择-Hexo" class="headerlink" title="为什么选择 Hexo"></a>为什么选择 Hexo</h2><p>选型的时候我在 Hugo、Hexo、VitePress 之间纠结了很久。先说结论：我最后选了 <strong>Hexo</strong>，理由挺实在的——</p>
 <ul>
-<li><strong>生态成熟</strong>，主题丰富，中文资料多</li>
-<li><strong>纯静态生成</strong>，可以直接丢到 GitHub Pages 上，零服务器成本</li>
-<li><strong>写作体验好</strong>，Markdown 直接渲染</li>
+<li><strong>生态成熟</strong>：主题多、插件多，中文资料一搜一大把，卡住了几乎都能找到现成答案；</li>
+<li><strong>纯静态生成</strong>：<code>hexo generate</code> 一把梭，产出就是一个纯静态的 <code>public/</code> 文件夹，可以直接丢到 GitHub Pages 上，<strong>零服务器成本、不用备案</strong>；</li>
+<li><strong>写作体验好</strong>：文章就是普通的 Markdown，改完跑一次构建就生效，不用管数据库、不用管后端。</li>
 </ul>
-<h2 id="安装与初始化"><a href="#安装与初始化" class="headerlink" title="安装与初始化"></a>安装与初始化</h2><p>先装好 Node.js 环境，然后全局安装 Hexo 命令行工具：</p>
+<p>说白了，Hugo 更快但 Go 模板那套写起来别扭，VitePress 更适合做文档站。想安安静静写博客、又想要「折腾空间」，Hexo 的平衡点最舒服。我现在这套是 <strong>Hexo 7.3.0 + 自研主题 <code>liushen-clone</code></strong>，源码托管在 GitHub 上，<code>master</code> 分支放源码、<code>main</code> 分支放构建好的网页（GitHub Pages 读的是 main）。</p>
+<h2 id="安装与初始化"><a href="#安装与初始化" class="headerlink" title="安装与初始化"></a>安装与初始化</h2><p>第一步，装 Node.js 环境（Hexo 是跑在 Node 上的），然后全局装命令行工具：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br><span class="line">hexo init my-blog</span><br><span class="line"><span class="built_in">cd</span> my-blog</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
 
-<p>初始化完成后，目录结构大致如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">my-blog/</span><br><span class="line">├── _config.yml     # 站点配置</span><br><span class="line">├── source/         # 文章与静态资源</span><br><span class="line">│   └── _posts/     # 博客文章</span><br><span class="line">├── themes/         # 主题目录</span><br><span class="line">└── package.json</span><br></pre></td></tr></table></figure>
+<p>初始化完成后，目录结构大致长这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">my-blog/</span><br><span class="line">├── _config.yml     # 站点配置（根目录这份管「站点」，不是主题）</span><br><span class="line">├── source/         # 文章与静态资源</span><br><span class="line">│   ├── _posts/     # 博客文章，都放这里</span><br><span class="line">│   └── _data/      # 数据文件（说说、友链、关于页都靠它驱动）</span><br><span class="line">├── themes/         # 主题目录</span><br><span class="line">│   └── liushen-clone/  # 我正在用的自研主题</span><br><span class="line">└── package.json</span><br></pre></td></tr></table></figure>
 
-<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><table>
+<p>这里想先划个重点：<strong>根目录的 <code>_config.yml</code> 管站点，主题目录里的 <code>_config.yml</code> 才管外观</strong>。这两份长得像、名字一样，刚上手特别容易改错地方——这其实就是我后面要讲的第一批坑之一。</p>
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><p>日常就这几条，背下来够用了：</p>
+<table>
 <thead>
 <tr>
 <th>命令</th>
@@ -163,26 +200,66 @@
 </thead>
 <tbody><tr>
 <td><code>hexo new &quot;标题&quot;</code></td>
-<td>新建一篇文章</td>
+<td>在 <code>source/_posts/</code> 下新建一篇文章（用 <code>scaffolds/post.md</code> 模板）</td>
 </tr>
 <tr>
-<td><code>hexo server</code></td>
-<td>本地预览</td>
+<td><code>hexo new page &quot;页面名&quot;</code></td>
+<td>在 <code>source/页面名/index.md</code> 新建一个普通页（比如「关于」「友链」）</td>
+</tr>
+<tr>
+<td><code>hexo clean</code></td>
+<td>删掉 <code>db.json</code> 和 <code>public/</code> —— <strong>任何报错先 clean 再 generate</strong></td>
 </tr>
 <tr>
 <td><code>hexo generate</code></td>
-<td>生成静态文件</td>
+<td>构建静态站点到 <code>public/</code></td>
+</tr>
+<tr>
+<td><code>hexo server</code></td>
+<td>起本地预览，默认 4000 端口</td>
 </tr>
 <tr>
 <td><code>hexo deploy</code></td>
-<td>一键部署</td>
+<td>把 <code>public/</code> 推到 GitHub Pages（main 分支）</td>
 </tr>
 </tbody></table>
-<h2 id="踩过的坑"><a href="#踩过的坑" class="headerlink" title="踩过的坑"></a>踩过的坑</h2><blockquote>
-<p>刚上手时最容易犯的错，就是把站点配置和主题配置搞混。记住：根目录的 <code>_config.yml</code> 管站点，主题目录里的才是管外观。</p>
+<p>写文章的完整节奏是这样的：<code>hexo new</code> 起稿 → 写 Markdown → <code>hexo server</code> 边看边改 → <code>hexo clean &amp;&amp; hexo generate</code> 出最终产物 → 上线。归档、分类、标签这三样<strong>都不用手动维护</strong>，它们分别从文章的 <code>date</code>、<code>categories</code>、<code>tags</code> 字段自动生成，跑一次 <code>hexo generate</code> 就全刷出来了。</p>
+<p>上线这步展开讲一下，因为「为什么是两次推送」这件事我当时懵了很久：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">hexo clean &amp;&amp; hexo generate &amp;&amp; hexo deploy   <span class="comment"># 推的是「网页」，到 main 分支</span></span><br><span class="line">git add .</span><br><span class="line">git commit -m <span class="string">&quot;更新说明：xxx&quot;</span></span><br><span class="line">git push origin master                        <span class="comment"># 推的是「源码」，到 master 分支</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>hexo deploy</code> 推的是构建产物 <code>public/</code> 到 <strong>main</strong> 分支，决定「网站长什么样」；</li>
+<li><code>git push origin master</code> 推的是源码到 <strong>master</strong> 分支，备份「文章和配置」。</li>
+</ul>
+<p>两个都得做：漏了 deploy，网站不更新；漏了 push，源码没备份，哪天电脑崩了就真的一夜回到解放前。</p>
+<h2 id="踩过的坑"><a href="#踩过的坑" class="headerlink" title="踩过的坑"></a>踩过的坑</h2><p>下面这几个，每一个都是我实打实撞过、又费半天劲才爬出来的，按「最想骂人」的程度排序：</p>
+<p><strong>1. 改了 <code>_config.yml</code> 刷新没反应</strong></p>
+<p>这是最隐蔽的一个。hexo server 启动时会<strong>一次性缓存根配置</strong>，你之后改了 <code>_config.yml</code> 里的东西（比如换主题、改站名），本地刷新页面根本没变化——不是没保存，是 server 压根没重读。</p>
+<blockquote>
+<p>解法：<strong>杀掉旧的 server 进程，重新 <code>hexo server</code> 起来</strong>。改配置类的东西，别指望热重载。</p>
 </blockquote>
-<p>另外一个坑是时区问题，如果文章日期显示不对，检查一下 <code>_config.yml</code> 里的 <code>timezone</code> 配置即可。</p>
-<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>博客的价值不在工具本身，而在「持续记录」这个动作。希望这份记录能帮到同样在折腾的你。</p>
+<p><strong>2. 文章正文窄得像一条缝</strong></p>
+<p>有一阵子文章页的正文挤在左边一条窄窄的列里，右边空一大块，怎么调都不对。排查半天才发现是 CSS Grid 的坑：它按 DOM 顺序分配列，目录（TOC）在正文前面，就被塞进了那个宽列。最后用 <code>grid-template-areas</code> 把「正文」和「目录」显式钉死在各自区域才解决。</p>
+<p><strong>3. 说说的日期显示成一串 GMT</strong></p>
+<p>在 <code>shuoshuo.yml</code> 里日期只写了 <code>2026-09-08</code>，结果前端显示成 <code>Mon Sep 08 2026 08:00:00 GMT+0800</code> 这种鬼东西。原因是 Hexo 的 yaml 解析会把 <code>YYYY-MM-DD</code> 自动转成 Date 对象。模板里要用 <code>date(item.date, &#39;YYYY-MM-DD&#39;)</code> 显式格式化才能还原。</p>
+<p><strong>4. 友链头像动不动裂图</strong></p>
+<p>别人的站点头像地址失效是常有的事，一失效就一张破图挂在那。现在模板里加了 <code>onerror</code> 兜底，裂了自动换成默认头像。想彻底解决，就得自己去换一个稳定的图片源。</p>
+<p><strong>5. <code>fatal: remote origin already exists</code></strong></p>
+<p>仓库已经配好远程了，手滑又跑了一次 <code>git remote add origin ...</code>。记住：<strong>配过一次就别再 add</strong>，要看远程用 <code>git remote -v</code> 就行。</p>
+<p><strong>6. deploy 报 <code>Permission denied (publickey)</code></strong></p>
+<p>这是部署环节最大的拦路虎。报这个错，说明本机 SSH 公钥没配到 GitHub 账号（或仓库的 Deploy keys）里。解法是生成一对 key，把 <code>.pub</code> 内容贴到 GitHub → Settings → SSH and GPG keys，之后 push 就不用再管了。</p>
+<p><strong>7. 阅读进度按钮怎么滚都不显示</strong></p>
+<p>这个坑是最让我崩溃的，因为它「看着哪都对、就是不工作」。事情是这样的：我给导航栏加了个阅读进度按钮，逻辑很简单——往下滚超过 15 像素，右上角就滑出一个显示百分比的圆环。代码写完、<code>hexo generate</code> 也过了，结果刷新页面啥都没有，把页面滚到底也还是没影。</p>
+<p>一开始我以为是缓存，让你按 <code>Ctrl+Shift+R</code> 强刷，没用；又怀疑是按钮的显示条件写错了，逐行检查 JS，也没问题。最后我干脆用无头浏览器（headless Chrome）去实测，把页面滚到底后打印滚动状态，才发现蹊跷：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">window.innerHeight  = 800     ← 视口高度正常</span><br><span class="line">documentElement.clientHeight = 2797  ← 居然等于「内容高度」，而不是视口高度！</span><br><span class="line">滚动发生在 document.body 上，而不是 documentElement 上</span><br></pre></td></tr></table></figure>
+
+<p>这下真相大白了：<strong>这个自研主题手写的 HTML 骨架，缺了 <code>&lt;!DOCTYPE html&gt;</code> 和 <code>&lt;html&gt;</code>、<code>&lt;head&gt;</code> 这几个标签</strong>。没有 DOCTYPE，浏览器就进入「怪异模式（quirks mode）」，滚动容器会落在 <code>&lt;body&gt;</code> 上、<code>clientHeight</code> 被内容撑开。于是 JS 里算进度用的 <code>max = scrollHeight - clientHeight</code> 恒等于 0，显示条件 <code>scrolled &gt; 15 &amp;&amp; max &gt; 0</code> 永远不成立——按钮自然怎么滚都不出来。</p>
+<p>解法就一行事：在主题的 <code>head.ejs</code> 里补上 <code>&lt;!DOCTYPE html&gt;</code>、<code>&lt;html lang=&quot;zh-CN&quot;&gt;</code> 和 <code>&lt;head&gt;</code> 三个包裹。因为所有页面模板都共用这一个文件，<strong>改一处、全部页面一起好</strong>。</p>
+<blockquote>
+<p>这个坑还藏了个「买一送一」：博客顶部那根 2px 的细进度条，其实从上线起就一直没动过（同样因为 max&#x3D;0），修 DOCTYPE 的时候一起被治好了。</p>
+</blockquote>
+<p><strong>教训</strong>：写主题的时候，HTML 骨架的 <code>&lt;!DOCTYPE html&gt;</code> 千万别省，省了不会立刻报错，但会在某个你根本想不到的地方（滚动、布局、百分比高度）悄悄坑你一把。</p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>博客的价值不在工具本身，而在「持续记录」这个动作。Hexo 也好、主题也罢，都是帮你把想法落成文字的手段。希望这份记录能帮到同样在折腾的你，少踩几个我踩过的坑。</p>
 
         </div>
       </div>
@@ -190,9 +267,9 @@
       <footer class="post-footer">
         <div class="post-nav">
           
-            <a class="post-nav-item prev" href="/2026/08/18/deploy-github-pages/">
+            <a class="post-nav-item prev" href="/2026/08/23/python-pandas-intro/">
               <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
-              <span class="nav-title">把博客免费部署到 GitHub Pages</span>
+              <span class="nav-title">Python 数据分析入门：从 Pandas 开始</span>
             </a>
           
           

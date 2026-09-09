@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>用户分析入门：给每个用户画一张&#34;画像&#34; · Shang Qian</title>
+<meta name="description" content="用户分析到底在干嘛？用户画像和一堆标签是什么关系？RFM 模型又是怎么算的？这篇用&#34;给用户贴标签&#34;的思路把它讲明白。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          
+          
+            <a class="nav-link" href="/">首页</a>
+          
+        
+          
+          
+            <div class="nav-item has-dropdown">
+              <button class="nav-link nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                <span>文章汇总</span>
+                <i class="fa-solid fa-chevron-down nav-chevron" aria-hidden="true"></i>
+              </button>
+              <ul class="nav-dropdown">
+                
+                  <li><a class="nav-dropdown-link" href="/archives/">归档</a></li>
+                
+                  <li><a class="nav-dropdown-link" href="/categories/">分类</a></li>
+                
+                  <li><a class="nav-dropdown-link" href="/tags/">标签</a></li>
+                
+              </ul>
+            </div>
+          
+        
+          
+          
+            <a class="nav-link" href="/shuoshuo/">说说</a>
+          
+        
+          
+          
+            <a class="nav-link" href="/link/">友链</a>
+          
+        
+          
+          
+            <a class="nav-link" href="/about/">关于</a>
+          
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+      <button class="header-scroll-top-btn" id="header-scroll-top-btn" type="button" title="返回顶部" aria-label="返回顶部" aria-hidden="true">
+        <span class="header-scroll-top-progress" aria-hidden="true"></span>
+        <span class="header-scroll-top-percent" aria-hidden="true">0</span>
+        <i class="fa-solid fa-arrow-up header-scroll-top-icon" aria-hidden="true"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>cd ..</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/user-analysis</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">用户分析入门：给每个用户画一张&#34;画像&#34;</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-09-09T06:30:00.000Z">2026-09-09</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">#数据分析</a><a href="/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">#用户画像</a><a href="/tags/%E6%A0%87%E7%AD%BE%E4%BD%93%E7%B3%BB/">#标签体系</a><a href="/tags/RFM/">#RFM</a>
+            </span>
+          
+        </div>
+        
+          <div class="post-cover"><img src="/img/cover-2.svg" alt="用户分析入门：给每个用户画一张&#34;画像&#34;"></div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E5%88%86%E6%9E%90%E6%98%AF%E5%95%A5"><span class="toc-text">用户分析是啥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E5%88%86%E6%9E%90%E8%83%BD%E5%B9%B2%E5%95%A5"><span class="toc-text">用户分析能干啥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F-%E7%BB%99%E7%94%A8%E6%88%B7%E8%B4%B4%E6%A0%87%E7%AD%BE"><span class="toc-text">用户画像 &#x3D; 给用户贴标签</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E7%A7%8D%E6%A0%87%E7%AD%BE"><span class="toc-text">四种标签</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E5%BC%A0%E7%94%BB%E5%83%8F%E6%80%8E%E4%B9%88%E6%8B%BC%E5%87%BA%E6%9D%A5"><span class="toc-text">一张画像怎么拼出来</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%BB%E5%83%8F%E7%9A%84%E5%9B%9B%E4%B8%AA%E7%BB%B4%E5%BA%A6"><span class="toc-text">画像的四个维度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%90%AD%E7%94%BB%E5%83%8F%EF%BC%8C%E4%B8%83%E6%AD%A5%E8%B5%B0"><span class="toc-text">搭画像，七步走</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%BB%E5%83%8F%E5%81%9A%E5%A5%BD%E4%BA%86%EF%BC%8C%E5%BE%80%E5%93%AA%E7%94%A8"><span class="toc-text">画像做好了，往哪用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-text">小结</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>前面聊流量，那是站在”路”的角度看人来了多少。今天换个角度，站在”人”本身的角度，看看这些用户到底都是谁、喜欢啥、值多少钱。这就是<strong>用户分析</strong>——数据分析里最”有温度”的一块。</p>
+<h2 id="用户分析是啥"><a href="#用户分析是啥" class="headerlink" title="用户分析是啥"></a>用户分析是啥</h2><p>一句话：<strong>用户分析是通过收集、整理、分析用户数据，搞清楚用户的行为、需求、偏好和特征，从而给产品设计、运营策略、营销活动提供决策依据的过程</strong>。</p>
+<p>说白了，就是别再拍脑袋猜”用户想要啥”，而是让数据告诉你。它是数据驱动型业务的核心环节，目标就一个：看懂用户，然后更好地服务他、也更好地从他身上赚到钱。</p>
+<h2 id="用户分析能干啥"><a href="#用户分析能干啥" class="headerlink" title="用户分析能干啥"></a>用户分析能干啥</h2><p>它的用途主要四个：</p>
+<ul>
+<li><strong>构建用户画像</strong>：给用户群体画像，看清”我的用户长啥样”；</li>
+<li><strong>精准营销与触达</strong>：对不同的人说不同的话，不群发垃圾短信；</li>
+<li><strong>用户忠诚度培养</strong>：找出哪些人快流失了，提前挽留；</li>
+<li><strong>用户增长</strong>：搞清楚增长从哪来，把力气花在刀刃上。</li>
+</ul>
+<h2 id="用户画像-给用户贴标签"><a href="#用户画像-给用户贴标签" class="headerlink" title="用户画像 &#x3D; 给用户贴标签"></a>用户画像 &#x3D; 给用户贴标签</h2><p>用户分析的看家本领，就是做<strong>用户画像</strong>。而画像的核心，其实是<strong>标签体系</strong>。</p>
+<p>所谓画像，用大白话说就是”和用户慢慢相知”的过程。在数据层面，就是通过搭一套<strong>用户标签体系</strong>，生成一堆底层标签——有属性标签、行为标签、统计类标签，还有靠模型算出来的标签。</p>
+<h3 id="四种标签"><a href="#四种标签" class="headerlink" title="四种标签"></a>四种标签</h3><ul>
+<li><strong>属性标签</strong>：用户的基本盘，年龄、性别、地域、职业、学历。认识一个人，先看这些。</li>
+<li><strong>行为标签</strong>：用户在产品里的动作，使用频率、时长、访问路径、点击偏好、买没买过。靠这些看他的习惯和需求。</li>
+<li><strong>统计类标签</strong>：对行为或属性做统计得出的结果，比如”近 30 天消费 1000 元”。</li>
+<li><strong>模型构建标签</strong>：上算法（聚类、分类、预测）挖出来的潜在特征，比如”高价值用户””可能流失用户”。</li>
+</ul>
+<h3 id="一张画像怎么拼出来"><a href="#一张画像怎么拼出来" class="headerlink" title="一张画像怎么拼出来"></a>一张画像怎么拼出来</h3><p>标签是”原材料”，画像就是把这些原材料筛选、组合、关联之后，拼出来的立体形象。看一个例子：</p>
+<blockquote>
+<p>把”28 岁、男性、程序员、月收入 2 万+”（<strong>属性标签</strong>）、”每周用编程学习平台 4 次、每次 1 小时、常下载进阶课程”（<strong>行为标签</strong>）、”近 3 个月消费课程 5000 元”（<strong>统计标签</strong>）、”高价值长期学习用户”（<strong>模型标签</strong>）拼到一起，就得出一个”注重自我提升、消费能力强的程序员”画像。</p>
+</blockquote>
+<p>有了这张画像，企业就知道这类人需要什么，产品怎么优化、运营怎么搞、广告怎么投，全都有的放矢了。</p>
+<h2 id="画像的四个维度"><a href="#画像的四个维度" class="headerlink" title="画像的四个维度"></a>画像的四个维度</h2><p>搭画像不是随便贴标签，要分层。常见是四层框架：</p>
+<p><strong>1. 基础属性层——用户静态的”基本面”</strong></p>
+<ul>
+<li>人口统计标签：年龄、性别、地域、职业、收入（例：25-30 岁，上海，互联网运营，月薪 15k+）；</li>
+<li>社会属性标签：婚姻状况、家庭角色（”新手妈妈”）、消费层级（”中高端消费者”）；</li>
+<li>设备与渠道标签：iOS&#x2F;Android、APP&#x2F;PC&#x2F;小程序、来源渠道。</li>
+</ul>
+<p><strong>2. 行为特征层——用户动态的”轨迹图”</strong></p>
+<ul>
+<li>产品使用行为：频次（”周打开 5 次”）、时长（”单次 30 分钟”）、路径（”首页→商品详情→购物车→结算”）；</li>
+<li>偏好行为：”常浏览美妆””优先选折扣商品”；</li>
+<li>消费行为：客单价、消费周期、支付方式（信用卡 &#x2F; 花呗）；</li>
+<li>交互行为：跟客服聊得多不多、爱不爱点广告。</li>
+</ul>
+<p><strong>3. 价值预测层——数据建模的”潜在洞察”</strong></p>
+<ul>
+<li>统计类标签：近 30 天消费总额、历史退货率；</li>
+<li>模型类标签：<strong>RFM 模型</strong>（最近消费时间 + 消费频率 + 消费金额 → 圈出”高价值用户”）、预测模型（流失概率、付费意愿）、聚类标签（”性价比敏感型””品质追求型”）。</li>
+</ul>
+<p><strong>4. 场景关联层——用户需求的”上下文”</strong></p>
+<ul>
+<li>场景化标签：结合时间地点行为目的，如”工作日早 7 点通勤用地铁扫码 App””周末下午逛亲子商品”；</li>
+<li>心理与态度标签：”价格敏感型””品牌忠诚型””社交分享爱好者”。</li>
+</ul>
+<h2 id="搭画像，七步走"><a href="#搭画像，七步走" class="headerlink" title="搭画像，七步走"></a>搭画像，七步走</h2><p>有了框架，落地流程一般是这七步：</p>
+<ol>
+<li><strong>明确业务目标</strong>：画像要用来干嘛？</li>
+<li><strong>确定目标用户群体</strong>：缩小范围，别想一口吃成胖子；</li>
+<li><strong>数据收集与清洗</strong>：地基要打牢；</li>
+<li><strong>标签体系设计</strong>：搭多层级的标签网络；</li>
+<li><strong>标签权重计算与验证</strong>：量化每个标签到底多重要；</li>
+<li><strong>画像构建与可视化</strong>：生成具象化的用户模型；</li>
+<li><strong>画像应用与迭代</strong>：动态优化，画像不是做一次就完事的。</li>
+</ol>
+<h2 id="画像做好了，往哪用"><a href="#画像做好了，往哪用" class="headerlink" title="画像做好了，往哪用"></a>画像做好了，往哪用</h2><p>画像的价值最终要落地，四个方向：</p>
+<ul>
+<li><strong>产品设计</strong>：以用户为中心做功能迭代；</li>
+<li><strong>精准营销</strong>：标签组合实现”千人千面”；</li>
+<li><strong>运营策略</strong>：分群运营，不同的人给不同的玩法；</li>
+<li><strong>场景化服务</strong>：构建用户旅程映射，在合适的时机给合适的服务。</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>用户分析的核心就一句话：<strong>给用户贴标签，再把标签拼成画像，最后用画像驱动决策</strong>。属性、行为、统计、模型四种标签是砖，四个维度是楼层，七步是施工流程，四个落地场景是房子盖好后怎么住。把这套记下来，你就算真正摸到”用户分析”的门了。</p>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+          
+            <a class="post-nav-item next" href="/2026/09/09/traffic-analysis/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">流量分析入门：你的用户都是从哪条路找上门的？</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>
