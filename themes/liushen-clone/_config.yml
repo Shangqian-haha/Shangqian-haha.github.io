@@ -14,12 +14,15 @@ description: 一个简洁、优雅的个人技术博客，记录编程、学习�
 accent: "#76CBEC"
 accent2: "#F7A137"
 
-# 顶部导航菜单（文字: 链接）
+# 顶部导航菜单
+# 普通项：名称: 链接
+# 下拉项：名称: 下面再缩进写子项（名称: 链接），悬停显示下拉框
 menu:
   首页: /
-  归档: /archives/
-  分类: /categories/
-  标签: /tags/
+  文章汇总:
+    归档: /archives/
+    分类: /categories/
+    标签: /tags/
   说说: /shuoshuo/
   友链: /link/
   关于: /about/
@@ -33,8 +36,9 @@ social:
 # Hero 区终端徽章文字
 hero_badge: "~/hello-world$"
 
-# 首页文章卡片是否展示封面
-index_cover: true
+# 列表页（首页/分类/标签）文章卡片是否展示封面
+# false = 卡片纯文字，点进文章详情页顶部才显示封面图
+index_cover: false
 
 # 文章详情是否展示目录（TOC）
 post_toc: true

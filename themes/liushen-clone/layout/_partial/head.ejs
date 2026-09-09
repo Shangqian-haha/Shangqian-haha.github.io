@@ -1,3 +1,6 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#17191f">
@@ -5,7 +8,6 @@
 <%
   var _title = config.title;
   if (is_post()) _title = page.title + ' · ' + config.title;
-  else if (is_home() && theme.subtitle) _title = config.title + ' · ' + theme.subtitle;
   else if (!is_home() && page.title) _title = page.title + ' · ' + config.title;
 %>
 <title><%= _title %></title>
@@ -25,3 +27,4 @@
     document.documentElement.setAttribute('data-theme', theme);
   })();
 </script>
+</head>

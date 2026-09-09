@@ -10,7 +10,22 @@
     <nav class="header-nav" id="header-nav">
       <% if (theme.menu) { %>
         <% Object.keys(theme.menu).forEach(function (name) { %>
-          <a class="nav-link" href="<%= url_for(theme.menu[name]) %>"><%= name %></a>
+          <% var item = theme.menu[name]; %>
+          <% if (item && typeof item === 'object') { %>
+            <div class="nav-item has-dropdown">
+              <button class="nav-link nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                <span><%= name %></span>
+                <i class="fa-solid fa-chevron-down nav-chevron" aria-hidden="true"></i>
+              </button>
+              <ul class="nav-dropdown">
+                <% Object.keys(item).forEach(function (sub) { %>
+                  <li><a class="nav-dropdown-link" href="<%= url_for(item[sub]) %>"><%= sub %></a></li>
+                <% }); %>
+              </ul>
+            </div>
+          <% } else { %>
+            <a class="nav-link" href="<%= url_for(item) %>"><%= name %></a>
+          <% } %>
         <% }); %>
       <% } %>
       <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
@@ -19,6 +34,11 @@
       <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
         <i class="fa-solid fa-moon"></i>
         <i class="fa-solid fa-sun"></i>
+      </button>
+      <button class="header-scroll-top-btn" id="header-scroll-top-btn" type="button" title="返回顶部" aria-label="返回顶部" aria-hidden="true">
+        <span class="header-scroll-top-progress" aria-hidden="true"></span>
+        <span class="header-scroll-top-percent" aria-hidden="true">0</span>
+        <i class="fa-solid fa-arrow-up header-scroll-top-icon" aria-hidden="true"></i>
       </button>
     </nav>
 

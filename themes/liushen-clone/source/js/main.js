@@ -73,6 +73,38 @@
     });
   }
 
+  /* ---------- 导航栏阅读进度按钮 ---------- */
+  var headerScrollTop = document.getElementById('header-scroll-top-btn');
+  if (headerScrollTop) {
+    var scrollPercentEl = headerScrollTop.querySelector('.header-scroll-top-percent');
+    var scrollProgressEl = headerScrollTop.querySelector('.header-scroll-top-progress');
+    var scrollRaf = null;
+    function updateHeaderScroll() {
+      var h = document.documentElement;
+      var scrolled = h.scrollTop || document.body.scrollTop || 0;
+      var max = h.scrollHeight - h.clientHeight;
+      var pct = max > 0 ? Math.round((Math.min(scrolled / max, 1) || 0) * 100) : 0;
+      var visible = scrolled > 15 && max > 0;
+      headerScrollTop.classList.toggle('is-visible', visible);
+      headerScrollTop.setAttribute('aria-hidden', String(!visible));
+      if (scrollPercentEl) scrollPercentEl.textContent = String(pct);
+      if (scrollProgressEl) scrollProgressEl.style.backgroundImage = 'conic-gradient(var(--accent) ' + pct + '%, transparent ' + pct + '%)';
+    }
+    function scheduleHeaderScroll() {
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(function () {
+        scrollRaf = null;
+        updateHeaderScroll();
+      });
+    }
+    headerScrollTop.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    window.addEventListener('scroll', scheduleHeaderScroll, { passive: true });
+    window.addEventListener('resize', scheduleHeaderScroll, { passive: true });
+    updateHeaderScroll();
+  }
+
   window.addEventListener('scroll', function () {
     updateProgress();
     updateBackTop();
