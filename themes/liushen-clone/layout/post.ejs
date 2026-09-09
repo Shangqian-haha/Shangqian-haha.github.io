@@ -5,7 +5,13 @@
   <%- partial('_partial/search-dialog') %>
 
   <main class="site-body container post-body">
-    <%- partial('_partial/hero-badge', { theme }) %>
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="<%= url_for('/archives/') %>" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>返回</span>
+      </a>
+      <%- partial('_partial/hero-badge', { theme }) %>
+    </div>
     <article class="post card">
       <header class="post-header">
         <h1 class="post-title"><%= page.title %></h1>

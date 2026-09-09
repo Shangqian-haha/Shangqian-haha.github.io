@@ -1,6 +1,6 @@
 ---
 title: 把博客免费部署到 GitHub Pages
-date: 2026-08-28 22:10:00
+date: 2026-08-18 22:10:00
 categories:
   - 建站教程
 tags:

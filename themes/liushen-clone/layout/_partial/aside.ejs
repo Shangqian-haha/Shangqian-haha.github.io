@@ -32,8 +32,8 @@
     <dl class="webinfo-list">
       <div><dt>文章数目</dt><dd><%= site.posts.length %></dd></div>
       <div><dt>本站总字数</dt><dd><%= totalWords.toLocaleString('zh-CN') %></dd></div>
-      <div><dt>本站访客数</dt><dd id="busuanzi_site_uv"><%= site.posts.length > 0 ? '—' : '' %></dd></div>
-      <div><dt>本站访问量</dt><dd id="busuanzi_site_pv"><%= site.posts.length > 0 ? '—' : '' %></dd></div>
+      <div><dt>本站访客数</dt><dd id="vercount_value_site_uv"><%= site.posts.length > 0 ? '—' : '' %></dd></div>
+      <div><dt>本站访问量</dt><dd id="vercount_value_site_pv"><%= site.posts.length > 0 ? '—' : '' %></dd></div>
       <div>
         <dt>最后更新时间</dt>
         <dd id="webinfo-last-build" data-build-timestamp="<%= lastUpdatedRaw %>"><%= updatedText %></dd>

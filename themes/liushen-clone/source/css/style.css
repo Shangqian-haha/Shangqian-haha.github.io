@@ -395,6 +395,19 @@ html[data-theme="light"] .theme-toggle .fa-sun { display: inline-block; }
 .archive-title { color: var(--fg); }
 
 /* ---------- 文章详情 ---------- */
+.post-topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-top: 34px; margin-bottom: 22px;
+}
+.post-topbar .hero-badge { margin: 0; }
+.post-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 15px; border-radius: 999px;
+  border: 1px solid var(--card-border); background: var(--card-bg);
+  color: var(--fg-soft); font-size: .88rem; cursor: pointer;
+  transition: color .2s, border-color .2s, transform .2s;
+}
+.post-back:hover { color: var(--accent); border-color: var(--card-border-hover); transform: translateX(-2px); }
 .post { padding: 40px 46px; }
 .post-header { margin-bottom: 10px; }
 .post-title { margin: 0 0 14px; font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -.5px; }
