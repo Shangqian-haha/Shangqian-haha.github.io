@@ -1,0 +1,204 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>把博客免费部署到 GitHub Pages · Shang Qian</title>
+<meta name="description" content="不用买服务器，用 GitHub Pages + Actions 实现博客的自动化部署，每次推送自动更新站点。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          <a class="nav-link" href="/">首页</a>
+        
+          <a class="nav-link" href="/archives/">归档</a>
+        
+          <a class="nav-link" href="/categories/">分类</a>
+        
+          <a class="nav-link" href="/tags/">标签</a>
+        
+          <a class="nav-link" href="/shuoshuo/">说说</a>
+        
+          <a class="nav-link" href="/link/">友链</a>
+        
+          <a class="nav-link" href="/about/">关于</a>
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>返回</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/deploy-github-pages</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">把博客免费部署到 GitHub Pages</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-08-18T14:10:00.000Z">2026-08-18</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E5%BB%BA%E7%AB%99%E6%95%99%E7%A8%8B/">建站教程</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/GitHub/">#GitHub</a><a href="/tags/%E9%83%A8%E7%BD%B2/">#部署</a><a href="/tags/CI-CD/">#CI/CD</a>
+            </span>
+          
+        </div>
+        
+          <div class="post-cover"><img src="/img/cover-2.svg" alt="把博客免费部署到 GitHub Pages"></div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E4%BB%93%E5%BA%93"><span class="toc-text">创建仓库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E9%83%A8%E7%BD%B2"><span class="toc-text">配置部署</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8-Actions-%E8%87%AA%E5%8A%A8%E5%8C%96"><span class="toc-text">用 Actions 自动化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>很多人以为搭建个人博客需要买服务器、备案、装环境，其实完全不必。GitHub Pages 提供了免费的静态站点托管，配合 Actions 还能做到「推一次代码，站点自动更新」。</p>
+<h2 id="创建仓库"><a href="#创建仓库" class="headerlink" title="创建仓库"></a>创建仓库</h2><p>新建一个名为 <code>用户名.github.io</code> 的仓库，这个特殊的命名会自动开启 Pages 功能。</p>
+<h2 id="配置部署"><a href="#配置部署" class="headerlink" title="配置部署"></a>配置部署</h2><p>在 Hexo 站点里安装部署插件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
+
+<p>然后修改 <code>_config.yml</code> 的部署配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">git@github.com:yourname/yourname.github.io.git</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">main</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="用-Actions-自动化"><a href="#用-Actions-自动化" class="headerlink" title="用 Actions 自动化"></a>用 Actions 自动化</h2><p>比起手动 <code>hexo deploy</code>，我更喜欢用 GitHub Actions 全自动。在仓库里放一个 <code>.github/workflows/pages.yml</code>：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Deploy</span></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span> [<span class="string">main</span>]</span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">build:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/setup-node@v4</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">npm</span> <span class="string">install</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">run:</span> <span class="string">npx</span> <span class="string">hexo</span> <span class="string">generate</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">peaceiris/actions-gh-pages@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">github_token:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.GITHUB_TOKEN</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">publish_dir:</span> <span class="string">./public</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，一条完整的自动化链路就搭好了：本地写作 → <code>git push</code> → Actions 自动构建 → Pages 更新。全程零服务器成本，专注内容本身就好。</p>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+            <a class="post-nav-item prev" href="/2026/08/23/python-pandas-intro/">
+              <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
+              <span class="nav-title">Python 数据分析入门：从 Pandas 开始</span>
+            </a>
+          
+          
+            <a class="post-nav-item next" href="/2026/08/10/hexo-build-guide/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">Hexo 博客从零搭建全记录</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

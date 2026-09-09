@@ -1,0 +1,301 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>LangChain 入门：让大模型变成你的「乐高积木」 · Shang Qian</title>
+<meta name="description" content="把 LangChain 当成乐高，这篇笔记帮你把六大核心组件、提示词模板、输出解析器串成一条完整的链。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          <a class="nav-link" href="/">首页</a>
+        
+          <a class="nav-link" href="/archives/">归档</a>
+        
+          <a class="nav-link" href="/categories/">分类</a>
+        
+          <a class="nav-link" href="/tags/">标签</a>
+        
+          <a class="nav-link" href="/shuoshuo/">说说</a>
+        
+          <a class="nav-link" href="/link/">友链</a>
+        
+          <a class="nav-link" href="/about/">关于</a>
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>返回</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/langchain-quickstart</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">LangChain 入门：让大模型变成你的「乐高积木」</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-09-03T06:00:00.000Z">2026-09-03</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#大模型</a><a href="/tags/LangChain/">#LangChain</a><a href="/tags/Python/">#Python</a><a href="/tags/LLM/">#LLM</a>
+            </span>
+          
+        </div>
+        
+          <div class="post-cover"><img src="/img/cover-1.svg" alt="LangChain 入门：让大模型变成你的「乐高积木」"></div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81LangChain-%E5%88%B0%E5%BA%95%E6%98%AF%E4%B8%AA%E5%95%A5%EF%BC%9F"><span class="toc-text">一、LangChain 到底是个啥？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%85%AD%E5%A4%A7%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="toc-text">二、六大核心组件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%94%A8-LangChain-%E8%B0%83%E5%A4%A7%E6%A8%A1%E5%9E%8B%EF%BC%9A3-%E8%A1%8C%E4%BB%A3%E7%A0%81"><span class="toc-text">三、用 LangChain 调大模型：3 行代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E8%AE%A9%E6%A8%A1%E5%9E%8B%E2%80%9D%E8%AE%B0%E4%BD%8F%E4%B8%8A%E4%B8%8B%E6%96%87%E2%80%9D%EF%BC%9AMemory"><span class="toc-text">四、让模型”记住上下文”：Memory</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%8F%90%E7%A4%BA%E8%AF%8D%E6%A8%A1%E6%9D%BF%EF%BC%9A%E5%A1%AB%E7%A9%BA%E9%A2%98%E9%A2%98%E5%BA%93"><span class="toc-text">五、提示词模板：填空题题库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E8%BE%93%E5%87%BA%E8%A7%A3%E6%9E%90%E5%99%A8%EF%BC%9A%E8%AE%A9%E6%A8%A1%E5%9E%8B%E2%80%9D%E5%90%AC%E8%AF%9D%E2%80%9D"><span class="toc-text">六、输出解析器：让模型”听话”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%90%91%E9%87%8F%E5%AD%98%E5%82%A8-RAG%EF%BC%9A%E8%AE%A9%E6%A8%A1%E5%9E%8B%E2%80%9D%E8%AF%BB%E4%BD%A0%E8%87%AA%E5%B7%B1%E7%9A%84%E6%96%87%E6%A1%A3%E2%80%9D"><span class="toc-text">七、向量存储 + RAG：让模型”读你自己的文档”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%EF%BC%9A%E5%BC%80%E5%8F%91%E3%80%81%E7%94%9F%E4%BA%A7%E3%80%81%E9%83%A8%E7%BD%B2%E4%B8%89%E4%BB%B6%E5%A5%97"><span class="toc-text">八、生命周期：开发、生产、部署三件套</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%AD%A6%E4%B9%A0%E8%B7%AF%E5%BE%84%E5%BB%BA%E8%AE%AE"><span class="toc-text">九、学习路径建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="toc-text">写在最后</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>最近上课讲到 LangChain，老师反复强调一句话：<strong>“LangChain 是给大模型应用做脚手架的”</strong>。一开始我以为又是什么花里胡哨的概念，听完课后自己动手敲了一遍代码，发现它确实把”调大模型”这件本来挺折腾的事，变得像拼乐高一样有章法。</p>
+<p>这篇笔记是我自己学习时整理的思路，不抄课件，尽量用大白话讲清楚。</p>
+<h2 id="一、LangChain-到底是个啥？"><a href="#一、LangChain-到底是个啥？" class="headerlink" title="一、LangChain 到底是个啥？"></a>一、LangChain 到底是个啥？</h2><p>你直接调 OpenAI 的 API 也能让大模型回答问题，代码也就三五行：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI</span><br><span class="line">client = OpenAI()</span><br><span class="line">r = client.chat.completions.create(</span><br><span class="line">    model=<span class="string">&quot;gpt-3.5-turbo&quot;</span>,</span><br><span class="line">    messages=[&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你好&quot;</span>&#125;]</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(r.choices[<span class="number">0</span>].message.content)</span><br></pre></td></tr></table></figure>
+
+<p>但等你真的想做一个能”连续对话”、能”查自己文档”、能”用工具”的程序时，代码会迅速膨胀到你不想维护。LangChain 就是把这堆脏活累活封装成一组组件，让你像搭积木一样把功能拼起来。</p>
+<p>打个比方：<strong>直接调 API 是手擀面，LangChain 是挂面机</strong>。手擀面好吃但费劲，挂面机做的面也还行，关键是省事。</p>
+<h2 id="二、六大核心组件"><a href="#二、六大核心组件" class="headerlink" title="二、六大核心组件"></a>二、六大核心组件</h2><p>LangChain 的”乐高块”主要就这六块。课件上叫它们 M-P-I-Me-C-A，我给你翻译成人话：</p>
+<table>
+<thead>
+<tr>
+<th>简写</th>
+<th>组件</th>
+<th>它管啥</th>
+<th>生活化比喻</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>M</strong></td>
+<td>Models（模型）</td>
+<td>调各家大模型的统一接口</td>
+<td>万能遥控器</td>
+</tr>
+<tr>
+<td><strong>P</strong></td>
+<td>Prompts（提示词模板）</td>
+<td>把提示词做成可复用的模板</td>
+<td>填空题的题库</td>
+</tr>
+<tr>
+<td><strong>I</strong></td>
+<td>Indexes（数据检索）</td>
+<td>加载文档、切块、向量化、检索</td>
+<td>图书馆检索系统</td>
+</tr>
+<tr>
+<td><strong>Me</strong></td>
+<td>Memory（记忆）</td>
+<td>让模型记住前几轮对话</td>
+<td>记事本</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>Chains（链）</td>
+<td>把上面这些组件串起来</td>
+<td>流水线</td>
+</tr>
+<tr>
+<td><strong>A</strong></td>
+<td>Agents（代理）</td>
+<td>让模型自己决定调啥工具</td>
+<td>私人助理</td>
+</tr>
+</tbody></table>
+<p><strong>一个最简单的对话流程</strong>就是这样的：</p>
+<blockquote>
+<p>用户输入 → Prompt 模板（套上预设文案）→ LLM → OutputParser（把输出整理成想要的结构）→ 结果</p>
+</blockquote>
+<p>这几步串起来就是一个 Chain。等你把 Indexes、Memory、Agents 都加进去，就变成了能查文档、能记上下文、能用工具的”应用”了。</p>
+<h2 id="三、用-LangChain-调大模型：3-行代码"><a href="#三、用-LangChain-调大模型：3-行代码" class="headerlink" title="三、用 LangChain 调大模型：3 行代码"></a>三、用 LangChain 调大模型：3 行代码</h2><p>我把它简化到最极致的版本：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain_openai <span class="keyword">import</span> ChatOpenAI</span><br><span class="line"></span><br><span class="line">llm = ChatOpenAI(model=<span class="string">&quot;gpt-3.5-turbo&quot;</span>, api_key=<span class="string">&quot;你的key&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(llm.invoke(<span class="string">&quot;什么是 LangChain？&quot;</span>).content)</span><br></pre></td></tr></table></figure>
+
+<p>跑通这 3 行，你就完成了 50% 的入门工作。剩下的就是把这 3 行嵌进 Chain 里。</p>
+<h2 id="四、让模型”记住上下文”：Memory"><a href="#四、让模型”记住上下文”：Memory" class="headerlink" title="四、让模型”记住上下文”：Memory"></a>四、让模型”记住上下文”：Memory</h2><p>裸调 <code>invoke()</code> 的问题是：你问”我叫小明”，再问”我叫什么”，模型会说不知道。</p>
+<p>解决办法：把对话历史作为参数传进去：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain_core.messages <span class="keyword">import</span> HumanMessage, AIMessage</span><br><span class="line"></span><br><span class="line">chat_history = []</span><br><span class="line">chat_history.append(HumanMessage(content=<span class="string">&quot;我叫小明&quot;</span>))</span><br><span class="line">chat_history.append(llm.invoke(chat_history))  <span class="comment"># 模型答：&quot;你好小明&quot;</span></span><br><span class="line">chat_history.append(HumanMessage(content=<span class="string">&quot;我叫什么名字？&quot;</span>))</span><br><span class="line"><span class="built_in">print</span>(llm.invoke(chat_history).content)  <span class="comment"># 模型答：&quot;你叫小明&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>原理就是<strong>把历史对话整个塞回 messages 数组</strong>。LangChain 帮你管理这个数组，你不用自己写 <code>append</code> 的循环。</p>
+<blockquote>
+<p>小坑：对话越长，token 消耗越大；正经做项目会引入”摘要记忆”或”窗口记忆”，不是无限堆。</p>
+</blockquote>
+<h2 id="五、提示词模板：填空题题库"><a href="#五、提示词模板：填空题题库" class="headerlink" title="五、提示词模板：填空题题库"></a>五、提示词模板：填空题题库</h2><p>“你是一个{role}，请解释{topic}” —— 这种带 <code>&#123;xxx&#125;</code> 占位符的就是 Prompt Template。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain_core.prompts <span class="keyword">import</span> ChatPromptTemplate</span><br><span class="line"></span><br><span class="line">prompt = ChatPromptTemplate.from_template(</span><br><span class="line">    <span class="string">&quot;你是一个&#123;role&#125;，请解释&#123;topic&#125;&quot;</span></span><br><span class="line">)</span><br><span class="line">msg = prompt.<span class="built_in">format</span>(role=<span class="string">&quot;数据科学家&quot;</span>, topic=<span class="string">&quot;什么是RAG&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(msg)</span><br><span class="line"><span class="comment"># 输出：你是一个数据科学家，请解释什么是RAG</span></span><br></pre></td></tr></table></figure>
+
+<p>这样做的好处：<strong>模板写一次，到处复用</strong>。比如做一个”任意角色 + 任意主题”的解释器，前端传两个字段就行，不用每种组合都手写一个字符串。</p>
+<h2 id="六、输出解析器：让模型”听话”"><a href="#六、输出解析器：让模型”听话”" class="headerlink" title="六、输出解析器：让模型”听话”"></a>六、输出解析器：让模型”听话”</h2><p>大模型的输出默认是一段自由文本，你想让它给 JSON？想给列表？想给特定字段？OutputParser 帮你搞定：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain_core.output_parsers <span class="keyword">import</span> StrOutputParser, JsonOutputParser</span><br><span class="line"></span><br><span class="line">str_parser = StrOutputParser()</span><br><span class="line">result = str_parser.parse(llm.invoke(<span class="string">&quot;说一句话&quot;</span>).content)  <span class="comment"># 纯字符串</span></span><br><span class="line"></span><br><span class="line">json_parser = JsonOutputParser()</span><br><span class="line">data = json_parser.parse(llm.invoke(<span class="string">&quot;给我一个&#123;name, age&#125;的JSON&quot;</span>).content)</span><br><span class="line"><span class="built_in">print</span>(data[<span class="string">&quot;name&quot;</span>])</span><br></pre></td></tr></table></figure>
+
+<p>业务里这点特别有用：你要把模型结果存进数据库&#x2F;传给前端，<strong>结构化数据</strong>比自由文本好用一百倍。</p>
+<h2 id="七、向量存储-RAG：让模型”读你自己的文档”"><a href="#七、向量存储-RAG：让模型”读你自己的文档”" class="headerlink" title="七、向量存储 + RAG：让模型”读你自己的文档”"></a>七、向量存储 + RAG：让模型”读你自己的文档”</h2><p>这块是 LangChain 真正牛的地方。它把”文档加载 → 文本切块 → 向量化 → 存到向量库 → 检索”这条链路全封装了。</p>
+<p><strong>核心流程</strong>：</p>
+<ol>
+<li>把 PDF&#x2F;Markdown 读进来</li>
+<li>按段落切成几百字一块</li>
+<li>每块用 Embedding 模型变成一组浮点数（向量）</li>
+<li>存进 FAISS &#x2F; Chroma &#x2F; Milvus 这样的向量库</li>
+<li>用户提问时，把问题也变成向量，去库里找”距离最近”的几块</li>
+<li>把这几块连同问题一起喂给大模型，让它”参考着”回答</li>
+</ol>
+<p>这就是 RAG（检索增强生成）。<strong>大模型不需要训练，只需要给它相关的资料片段</strong>。</p>
+<p>具体怎么搭，我下一篇笔记单独写 RAG —— 那个话题够撑一整篇。</p>
+<h2 id="八、生命周期：开发、生产、部署三件套"><a href="#八、生命周期：开发、生产、部署三件套" class="headerlink" title="八、生命周期：开发、生产、部署三件套"></a>八、生命周期：开发、生产、部署三件套</h2><p>课件把 LangChain 的生态分三段：</p>
+<ul>
+<li><strong>开发阶段</strong>：用 LangChain 的开源组件拼 MVP</li>
+<li><strong>生产阶段</strong>：用 LangSmith 监控每条链的输入输出、跑分、debug</li>
+<li><strong>部署阶段</strong>：用 LangServe 把链变成 REST API，挂到服务器上</li>
+</ul>
+<p>学生阶段我们基本只碰第一段，但知道有后面这些能少走弯路 —— 以后做项目不愁”上线就崩”。</p>
+<h2 id="九、学习路径建议"><a href="#九、学习路径建议" class="headerlink" title="九、学习路径建议"></a>九、学习路径建议</h2><p>如果你刚入门，按这个顺序走最快：</p>
+<ol>
+<li><strong>跑通 invoke()</strong>（10 分钟）—— 先别管框架，把”调用大模型”这件事跑通</li>
+<li><strong>加 Memory</strong>（20 分钟）—— 实现”记住上下文的聊天”</li>
+<li><strong>用 PromptTemplate</strong>（20 分钟）—— 把提示词参数化</li>
+<li><strong>加 OutputParser</strong>（30 分钟）—— 拿到结构化输出</li>
+<li><strong>上手 RAG</strong>（1-2 小时）—— 加载文档 + 检索 + 生成</li>
+</ol>
+<p>完整过一遍，半天足够了。后面用得到 Agents（自主调用工具）再深入。</p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>LangChain 本身<strong>不难</strong>，难的是”知道什么时候该用哪个组件”。我自己的经验是：<strong>先想清楚你要解决的业务问题，再去看 LangChain 的哪个组件能帮你</strong>。别反过来”为了用而用”。</p>
+<p>下篇写 RAG，把”模型读自己文档”这件事讲透。</p>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+            <a class="post-nav-item prev" href="/2026/09/03/rag-explained/">
+              <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
+              <span class="nav-title">RAG 入门：让大模型「带书考试」</span>
+            </a>
+          
+          
+            <a class="post-nav-item next" href="/2026/08/30/fastapi-basics/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">FastAPI 接口入门：让 Python 学会&#34;开门营业&#34;</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

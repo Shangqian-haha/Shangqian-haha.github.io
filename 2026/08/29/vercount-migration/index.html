@@ -1,0 +1,322 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>访客统计 - busuanzi 与 Vercount · Shang Qian</title>
+<meta name="description" content="博客上线后访客统计一直显示「—」，排查半天才发现 busuanzi 时不时抽风，干脆换到了 Vercount。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          <a class="nav-link" href="/">首页</a>
+        
+          <a class="nav-link" href="/archives/">归档</a>
+        
+          <a class="nav-link" href="/categories/">分类</a>
+        
+          <a class="nav-link" href="/tags/">标签</a>
+        
+          <a class="nav-link" href="/shuoshuo/">说说</a>
+        
+          <a class="nav-link" href="/link/">友链</a>
+        
+          <a class="nav-link" href="/about/">关于</a>
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>返回</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/vercount-migration</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">访客统计 - busuanzi 与 Vercount</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-08-29T12:00:00.000Z">2026-08-29</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E5%BB%BA%E7%AB%99%E6%95%99%E7%A8%8B/">建站教程</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/Hexo/">#Hexo</a><a href="/tags/GitHub-Pages/">#GitHub Pages</a><a href="/tags/Vercount/">#Vercount</a><a href="/tags/busuanzi/">#busuanzi</a><a href="/tags/%E4%B8%8D%E8%92%9C%E5%AD%90/">#不蒜子</a>
+            </span>
+          
+        </div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81busuanzi%EF%BC%88%E4%B8%8D%E8%92%9C%E5%AD%90%EF%BC%89%E6%98%AF%E4%B8%AA%E5%95%A5"><span class="toc-text">一、busuanzi（不蒜子）是个啥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%88%91%E6%98%AF%E6%80%8E%E4%B9%88%E5%8F%91%E7%8E%B0%E5%AE%83%E6%8C%82%E7%9A%84"><span class="toc-text">二、我是怎么发现它挂的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81busuanzi-%E7%9A%84%E2%80%9D%E6%8A%BD%E9%A3%8E%E2%80%9D%E4%B8%89%E5%A4%A7%E8%A1%A8%E7%8E%B0"><span class="toc-text">三、busuanzi 的”抽风”三大表现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%A4%87%E8%83%8E%E9%80%89%E6%89%8B%EF%BC%9AVercount"><span class="toc-text">四、备胎选手：Vercount</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81Hexo-%E9%A1%B9%E7%9B%AE%E9%87%8C%E6%94%B9%E4%B8%A4%E5%A4%84%E5%B0%B1%E5%A4%9F%E4%BA%86"><span class="toc-text">五、Hexo 项目里改两处就够了</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#themes-liushen-clone-layout-partial-aside-ejs"><span class="toc-text">themes&#x2F;liushen-clone&#x2F;layout&#x2F;_partial&#x2F;aside.ejs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#themes-liushen-clone-layout-partial-body-end-ejs"><span class="toc-text">themes&#x2F;liushen-clone&#x2F;layout&#x2F;_partial&#x2F;body-end.ejs</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%80%8E%E4%B9%88%E7%A1%AE%E8%AE%A4%E8%87%AA%E5%B7%B1%E7%9C%9F%E7%9A%84%E5%88%87%E8%BF%87%E5%8E%BB%E4%BA%86"><span class="toc-text">六、怎么确认自己真的切过去了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E9%A6%96%E6%AC%A1%E6%95%B0%E5%AD%97%E4%B8%8D%E6%98%AF%E7%AB%8B%E5%88%BB%E5%87%BA%E7%8E%B0%E7%9A%84"><span class="toc-text">七、首次数字不是立刻出现的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%BA%9B%E5%8F%8D%E6%80%9D"><span class="toc-text">一些反思</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>博客刚搬到 GitHub Pages 那天，我兴冲冲地打开侧栏的「网站信息」卡——</p>
+<p><strong>本站访客数：—</strong><br><strong>本站访问量：—</strong></p>
+<p>那个破折号像两个空洞的眼眶盯着我。”是不是我一个人没访客所以是 0？” 我自我安慰地想。</p>
+<p>但<strong>等了三天</strong>，刷新 N 次，依旧是 <code>—</code>。</p>
+<p>得，工具不干活。</p>
+<h2 id="一、busuanzi（不蒜子）是个啥"><a href="#一、busuanzi（不蒜子）是个啥" class="headerlink" title="一、busuanzi（不蒜子）是个啥"></a>一、busuanzi（不蒜子）是个啥</h2><p><code>busuanzi.ibruce.info</code>，国内很多博主都在用的访客统计。原理特别简单：</p>
+<ul>
+<li>你在页面上挖两个坑：<code>&lt;span id=&quot;busuanzi_site_uv&quot;&gt;</code> 和 <code>&lt;span id=&quot;busuanzi_site_pv&quot;&gt;</code></li>
+<li>引入它的一段 JS</li>
+<li>用户每次打开页面，JS 就偷偷给它的服务端发一条记录</li>
+<li>服务端<strong>累计</strong>一下，把数字回填到那两个 span 里</li>
+</ul>
+<p>听起来很完美对吧？<strong>但这玩意儿特别像家门口的小卖部</strong>——平时挺好用的，老板热情东西又便宜，但<strong>逢年过节老板就关门了</strong>。</p>
+<p>busuanzi 最大的问题：<strong>它是一个国内个人维护的公益项目，没有 SLA，没有工单，没有补偿</strong>。服务挂了就挂了，恢复全看作者心情。</p>
+<h2 id="二、我是怎么发现它挂的"><a href="#二、我是怎么发现它挂的" class="headerlink" title="二、我是怎么发现它挂的"></a>二、我是怎么发现它挂的</h2><p>我一开始是这么怀疑的（典型的甩锅心理）：</p>
+<blockquote>
+<p>是不是 GitHub Pages 不算公网啊？</p>
+</blockquote>
+<p>emmm，是公网的，<strong>任何人都能访问</strong> <code>https://shangqian-haha.github.io/</code>，不蒜子官方也明确写了支持 <code>*.github.io</code>。</p>
+<p>那为啥数字不出来？于是我拿 curl 把首页抓下来看：</p>
+<table>
+<thead>
+<tr>
+<th>检查项</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>公网能拿到 16KB HTML</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>两个 span 都在</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>它的 JS 文件在</td>
+<td>OK</td>
+</tr>
+<tr>
+<td>直接 curl 它家 JS 服务</td>
+<td>OK，2.2 秒返回完整内容</td>
+</tr>
+</tbody></table>
+<p><strong>全都没问题。</strong></p>
+<p>最后只能祭出 F12 抓网络请求。看到那条<strong>统计接口（POST 请求）超时</strong>的那一刻，我就知道：<strong>它的服务端在抽风</strong>。</p>
+<blockquote>
+<p>“服务端有响应但脚本拿不到数据”——这就像你打电话给小卖部老板，<strong>电话接通了但他那边一片杂音听不清</strong>。不是没人在，是人<strong>没精神</strong>。</p>
+</blockquote>
+<h2 id="三、busuanzi-的”抽风”三大表现"><a href="#三、busuanzi-的”抽风”三大表现" class="headerlink" title="三、busuanzi 的”抽风”三大表现"></a>三、busuanzi 的”抽风”三大表现</h2><p>观察几天下来，busuanzi 的不稳定性有这几种：</p>
+<ol>
+<li><strong>高峰期抽风</strong>：晚上 8-11 点国内访问高峰，它的统计接口就慢得离谱。打开自己的博客都能感到访客数字”加载中”卡了老半天。</li>
+<li><strong>维护期没通知</strong>：偶尔它会完全失效半天到一天，<strong>不报错、没公告</strong>，你只能靠「自己博客侧栏一直 <code>—</code>」来发现。</li>
+<li><strong>海外节点慢</strong>：它是国内服务器，我的访客里有海外的，加载慢不说，<strong>计数也不准</strong>。</li>
+</ol>
+<blockquote>
+<p>这就是为啥我最后决定换——不是它不好，是它<strong>太容易掉链子</strong>。</p>
+</blockquote>
+<h2 id="四、备胎选手：Vercount"><a href="#四、备胎选手：Vercount" class="headerlink" title="四、备胎选手：Vercount"></a>四、备胎选手：Vercount</h2><p>不蒜子挂的那天晚上，我顺手搜了几个平替。最终选了 <a target="_blank" rel="noopener" href="https://vercount.one/">Vercount</a>。</p>
+<p>对比几个备胎：</p>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Vercount</strong></td>
+<td>走 Cloudflare CDN、接口和 busuanzi 几乎一样、还能自动同步历史数据</td>
+<td>公益项目，作者也是个人维护</td>
+</tr>
+<tr>
+<td>GoatCounter</td>
+<td>开源、可自建</td>
+<td>要注册账号、UI 比较素</td>
+</tr>
+<tr>
+<td>Cloudflare Analytics</td>
+<td>零代码</td>
+<td>域名要迁到 Cloudflare</td>
+</tr>
+</tbody></table>
+<p><strong>为啥选 Vercount</strong>：</p>
+<ul>
+<li>它和 busuanzi 的 span id 设计几乎一样（只差几个字母）→ <strong>切换零学习成本</strong></li>
+<li>Cloudflare CDN 全球访问都很快，<strong>再不怕海外用户拖慢</strong></li>
+<li>公益归公益，Cloudflare 的基础设施在那，<strong>至少不会高峰期就崩</strong></li>
+</ul>
+<blockquote>
+<p>我跟自己说：这次至少从”小卖部”升级到”24 小时便利店”了。</p>
+</blockquote>
+<h2 id="五、Hexo-项目里改两处就够了"><a href="#五、Hexo-项目里改两处就够了" class="headerlink" title="五、Hexo 项目里改两处就够了"></a>五、Hexo 项目里改两处就够了</h2><p>我用的是自建主题 <code>liushen-clone</code>，改动很小，两个文件：</p>
+<h3 id="themes-liushen-clone-layout-partial-aside-ejs"><a href="#themes-liushen-clone-layout-partial-aside-ejs" class="headerlink" title="themes/liushen-clone/layout/_partial/aside.ejs"></a><code>themes/liushen-clone/layout/_partial/aside.ejs</code></h3><p>把两个 span 的 id 改一下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- 旧 --&gt;</span><br><span class="line">&lt;dd id=&quot;busuanzi_site_uv&quot;&gt;—&lt;/dd&gt;</span><br><span class="line">&lt;dd id=&quot;busuanzi_site_pv&quot;&gt;—&lt;/dd&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- 新 --&gt;</span><br><span class="line">&lt;dd id=&quot;vercount_value_site_uv&quot;&gt;—&lt;/dd&gt;</span><br><span class="line">&lt;dd id=&quot;vercount_value_site_pv&quot;&gt;—&lt;/dd&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="themes-liushen-clone-layout-partial-body-end-ejs"><a href="#themes-liushen-clone-layout-partial-body-end-ejs" class="headerlink" title="themes/liushen-clone/layout/_partial/body-end.ejs"></a><code>themes/liushen-clone/layout/_partial/body-end.ejs</code></h3><p>把脚本也换掉：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- 旧 --&gt;</span><br><span class="line">&lt;script async src=&quot;//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js&quot;&gt;&lt;/script&gt;</span><br><span class="line"></span><br><span class="line">&lt;!-- 新 --&gt;</span><br><span class="line">&lt;script defer src=&quot;https://events.vercount.one/js&quot;&gt;&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>一个小细节：脚本从 <code>async</code> 改成了 <code>defer</code>。<code>async</code> 是”下载完就跑”，<code>defer</code> 是”等页面渲染完再跑”。统计脚本要在 DOM 渲染完后才能找到那两个 span，所以用 <code>defer</code> 更稳。</p>
+</blockquote>
+<h2 id="六、怎么确认自己真的切过去了"><a href="#六、怎么确认自己真的切过去了" class="headerlink" title="六、怎么确认自己真的切过去了"></a>六、怎么确认自己真的切过去了</h2><p><code>hexo clean &amp;&amp; hexo generate</code> 之后，<strong>部署前</strong>先看一眼生成的 HTML：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep -o <span class="string">&#x27;busuanzi\|vercount_value_site_[a-z]*\|events.vercount.one&#x27;</span> public/index.html | <span class="built_in">sort</span> | <span class="built_in">uniq</span> -c</span><br></pre></td></tr></table></figure>
+
+<p>期望看到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1 events.vercount.one</span><br><span class="line">1 vercount_value_site_pv</span><br><span class="line">1 vercount_value_site_uv</span><br></pre></td></tr></table></figure>
+
+<p>如果还有 <code>busuanzi</code> 出现，就是<strong>有缓存没清干净</strong>，先 <code>hexo clean</code> 再来一次。</p>
+<blockquote>
+<p>我那次就是第一次没清干净，部署上去还是老样子，又 <code>clean</code> 一次才正常。<strong>deploy 前必须看一眼</strong>，不然容易白跑一趟。</p>
+</blockquote>
+<h2 id="七、首次数字不是立刻出现的"><a href="#七、首次数字不是立刻出现的" class="headerlink" title="七、首次数字不是立刻出现的"></a>七、首次数字不是立刻出现的</h2><p>部署到 GitHub Pages 之后，<strong>别急</strong>。</p>
+<p>Vercount 需要做两件事：</p>
+<ol>
+<li>从 busuanzi 同步历史数据（如果你之前有的话）</li>
+<li>让边缘节点同步生效</li>
+</ol>
+<p>我这边等了大概 5~10 分钟，刷新页面，访客数从 <code>—</code> 变成了 <code>1</code>。那一个 <code>1</code> 大概是我自己当时的访问，<strong>挺有仪式感的</strong>。</p>
+<p>之后每次有人访问，数字就实时累计了。</p>
+<h2 id="一些反思"><a href="#一些反思" class="headerlink" title="一些反思"></a>一些反思</h2><p>这次踩坑给我提了个醒：</p>
+<ul>
+<li><strong>能用 SaaS 别自托管</strong>。这次的根因就是依赖了一个国内个人维护的公共服务，<strong>出问题没 SLA、没工单、没人通知</strong>。如果博客流量是自己的事，可以忍；但要做正式站点，工具链应该挑有商业保障的。</li>
+<li><strong>多备几个候选</strong>。busuanzi 挂掉的那个晚上，我顺手把 Vercount、GoatCounter、CF Analytics 都搜了一遍列了对比表。下次别的服务挂掉可以快速切换，<strong>不至于临时抱佛脚</strong>。</li>
+<li><strong>日志要打</strong>。这次排查花了快半小时，主要因为没在「网站信息」卡片上加 console.log 看脚本到底返回了什么。下次接第三方脚本，**至少在本地留一份「最后一次成功请求时间」**之类的标记，方便排查。</li>
+<li><strong>写下来</strong>。博客的一个作用就是这种「踩坑记录」，未来自己或别人搜到，能省很多时间。这篇文章也算是个闭环。</li>
+</ul>
+<p>下次再换别的服务时，希望我能想起这次的教训：</p>
+<blockquote>
+<p><strong>先确认是不是公网 → 再确认脚本有没有发请求 → 再确认服务有没有回响应 → 最后才怀疑服务本身挂了。</strong></p>
+</blockquote>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+            <a class="post-nav-item prev" href="/2026/08/29/photography-notes/">
+              <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
+              <span class="nav-title">摄影小记</span>
+            </a>
+          
+          
+            <a class="post-nav-item next" href="/2026/08/26/frontend-learning-path/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">我的前端学习路线</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>Python 数据分析入门：从 Pandas 开始 · Shang Qian</title>
+<meta name="description" content="记录我用 Pandas 处理数据的入门心得，涵盖数据读取、清洗、分组统计这几个最常用的操作。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          <a class="nav-link" href="/">首页</a>
+        
+          <a class="nav-link" href="/archives/">归档</a>
+        
+          <a class="nav-link" href="/categories/">分类</a>
+        
+          <a class="nav-link" href="/tags/">标签</a>
+        
+          <a class="nav-link" href="/shuoshuo/">说说</a>
+        
+          <a class="nav-link" href="/link/">友链</a>
+        
+          <a class="nav-link" href="/about/">关于</a>
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>返回</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/python-pandas-intro</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">Python 数据分析入门：从 Pandas 开始</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-08-23T13:00:00.000Z">2026-08-23</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98/">编程实战</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/Python/">#Python</a><a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">#数据分析</a><a href="/tags/Pandas/">#Pandas</a>
+            </span>
+          
+        </div>
+        
+          <div class="post-cover"><img src="/img/cover-3.svg" alt="Python 数据分析入门：从 Pandas 开始"></div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%85%88%E5%AD%A6%E4%BC%9A%E2%80%9D%E9%80%A0%E2%80%9D%E6%95%B0%E6%8D%AE%EF%BC%9ASeries-%E5%92%8C-DataFrame"><span class="toc-text">一、先学会”造”数据：Series 和 DataFrame</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Series%EF%BC%9A%E4%B8%80%E5%88%97%E6%95%B0%E6%8D%AE"><span class="toc-text">Series：一列数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DataFrame%EF%BC%9A%E4%B8%80%E5%BC%A0%E8%A1%A8"><span class="toc-text">DataFrame：一张表</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%9F%A5%E8%AF%A2%E5%8F%96%E5%80%BC%EF%BC%9Aloc-%E7%9A%84%E5%87%A0%E7%A7%8D%E5%A7%BF%E5%8A%BF"><span class="toc-text">二、查询取值：loc[] 的几种姿势</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%9D%A1%E4%BB%B6%E7%AD%9B%E9%80%89%EF%BC%9A-%E4%B8%89%E4%B8%AA%E7%AC%A6%E5%8F%B7"><span class="toc-text">三、条件筛选：&amp; | ~ 三个符号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%A2%9E%E5%88%A0%E6%94%B9%EF%BC%9A%E6%95%B0%E6%8D%AE%E6%93%8D%E4%BD%9C%E4%B8%89%E4%BB%B6%E5%A5%97"><span class="toc-text">四、增删改：数据操作三件套</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A0%E9%99%A4-drop"><span class="toc-text">删除 drop</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E5%88%97"><span class="toc-text">添加列</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE"><span class="toc-text">修改数据</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%95%B0%E6%8D%AE%E6%B8%85%E6%B4%97%EF%BC%9A%E8%84%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E5%9B%9B%E7%A7%8D%E5%A4%84%E7%90%86"><span class="toc-text">五、数据清洗：脏数据的四种处理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%88%A0%E9%99%A4%E7%A9%BA%E5%80%BC-dropna"><span class="toc-text">1. 删除空值 dropna()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%A1%AB%E5%85%85%E7%A9%BA%E5%80%BC-fillna"><span class="toc-text">2. 填充空值 fillna()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%88%A0%E9%99%A4%E9%87%8D%E5%A4%8D%E8%A1%8C-drop-duplicates"><span class="toc-text">3. 删除重复行 drop_duplicates()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%9B%BF%E6%8D%A2%E5%80%BC-replace"><span class="toc-text">4. 替换值 replace()</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%95%B0%E6%8D%AE%E8%BD%AC%E6%8D%A2%EF%BC%9Aapply-%E5%92%8C-map"><span class="toc-text">六、数据转换：apply 和 map</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#apply-%EF%BC%9A%E5%AF%B9%E4%B8%80%E5%88%97%E6%89%B9%E9%87%8F%E5%A5%97%E5%87%BD%E6%95%B0"><span class="toc-text">apply()：对一列批量套函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#map-%EF%BC%9A%E6%89%B9%E9%87%8F%E6%98%A0%E5%B0%84%EF%BC%88%E5%83%8F%E6%9F%A5%E5%AD%97%E5%85%B8%EF%BC%89"><span class="toc-text">map()：批量映射（像查字典）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%88%86%E7%BB%84%E7%BB%9F%E8%AE%A1-groupby"><span class="toc-text">七、分组统计 groupby()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E8%A1%A8%E8%BF%9E%E6%8E%A5%EF%BC%9Amerge-%E5%92%8C-concat"><span class="toc-text">八、表连接：merge 和 concat</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#merge-%EF%BC%9A%E7%B1%BB%E4%BC%BC-SQL-%E7%9A%84-join"><span class="toc-text">merge()：类似 SQL 的 join</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#concat-%EF%BC%9A%E7%B1%BB%E4%BC%BC-union-all%EF%BC%8C%E4%B8%8A%E4%B8%8B%E6%8B%BC%E6%8E%A5"><span class="toc-text">concat()：类似 union all，上下拼接</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%87%A0%E4%B8%AA%E5%B8%B8%E7%94%A8%E5%B0%8F%E5%87%BD%E6%95%B0"><span class="toc-text">九、几个常用小函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-text">小结</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>作为大数据专业的学生，Python 是绕不开的工具。今天把 Pandas 最常用的几个操作整理一下，方便日后回看。</p>
+<p>下面这套代码用的是课件里的学生数据（张三、李四、王五这几位老熟人），跟着敲一遍，比看十遍文档都管用。</p>
+<h2 id="一、先学会”造”数据：Series-和-DataFrame"><a href="#一、先学会”造”数据：Series-和-DataFrame" class="headerlink" title="一、先学会”造”数据：Series 和 DataFrame"></a>一、先学会”造”数据：Series 和 DataFrame</h2><p>Pandas 有两大核心结构：<strong>Series（一列）</strong> 和 <strong>DataFrame（一张表）</strong>。</p>
+<h3 id="Series：一列数据"><a href="#Series：一列数据" class="headerlink" title="Series：一列数据"></a>Series：一列数据</h3><p>用列表就能造一个：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas</span><br><span class="line"></span><br><span class="line">li = [<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>]</span><br><span class="line">se = pandas.Series(li)</span><br><span class="line"><span class="built_in">print</span>(se, <span class="built_in">type</span>(se))</span><br></pre></td></tr></table></figure>
+
+<p>用字典造，key 自动变成索引：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sites = &#123;<span class="string">&quot;a&quot;</span>: <span class="string">&quot;Google&quot;</span>, <span class="string">&quot;b&quot;</span>: <span class="string">&quot;Runoob&quot;</span>, <span class="number">3</span>: <span class="string">&quot;Wiki&quot;</span>&#125;</span><br><span class="line">se = pandas.Series(sites)</span><br><span class="line"><span class="built_in">print</span>(se, <span class="built_in">type</span>(se))</span><br></pre></td></tr></table></figure>
+
+<h3 id="DataFrame：一张表"><a href="#DataFrame：一张表" class="headerlink" title="DataFrame：一张表"></a>DataFrame：一张表</h3><p>DataFrame 有三种常见构造方式：</p>
+<p><strong>① 用二维列表（没有列名）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">li = [[<span class="string">&quot;张三&quot;</span>, <span class="number">18</span>, <span class="string">&quot;南宁&quot;</span>], [<span class="string">&quot;李四&quot;</span>, <span class="number">20</span>, <span class="string">&quot;北京&quot;</span>], [<span class="string">&quot;王五&quot;</span>, <span class="number">22</span>, <span class="string">&quot;上海&quot;</span>]]</span><br><span class="line">df = pandas.DataFrame(li)</span><br><span class="line"><span class="built_in">print</span>(df)</span><br></pre></td></tr></table></figure>
+
+<p><strong>② 用字典（key 是列名）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">di = &#123;</span><br><span class="line">    <span class="string">&quot;name&quot;</span>: [<span class="string">&quot;张三&quot;</span>, <span class="string">&quot;李四&quot;</span>, <span class="string">&quot;王五&quot;</span>],</span><br><span class="line">    <span class="string">&quot;age&quot;</span>: [<span class="number">18</span>, <span class="number">20</span>, <span class="number">22</span>],</span><br><span class="line">    <span class="string">&quot;city&quot;</span>: [<span class="string">&quot;南宁&quot;</span>, <span class="string">&quot;北京&quot;</span>, <span class="string">&quot;上海&quot;</span>],</span><br><span class="line">&#125;</span><br><span class="line">df = pandas.DataFrame(di)</span><br><span class="line"><span class="built_in">print</span>(df)</span><br></pre></td></tr></table></figure>
+
+<p><strong>③ 用字典列表（最像真实数据）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">li = [</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;张三&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">18</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;南宁&quot;</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;李四&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">20</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;北京&quot;</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;王五&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">22</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;上海&quot;</span>&#125;,</span><br><span class="line">]</span><br><span class="line">df = pandas.DataFrame(li)</span><br><span class="line"><span class="built_in">print</span>(df)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>第三种最常用，因为真实场景里数据往往就是”一行一个字典”的 JSON 格式。</p>
+</blockquote>
+<h2 id="二、查询取值：loc-的几种姿势"><a href="#二、查询取值：loc-的几种姿势" class="headerlink" title="二、查询取值：loc[] 的几种姿势"></a>二、查询取值：loc[] 的几种姿势</h2><p><code>loc[]</code> 是 Pandas 的查数据神器，先建好数据：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"></span><br><span class="line">li = [</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;张三&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">18</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;南宁&quot;</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;李四&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">20</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;北京&quot;</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;王五&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">22</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;上海&quot;</span>&#125;,</span><br><span class="line">]</span><br><span class="line">df = pd.DataFrame(li)</span><br></pre></td></tr></table></figure>
+
+<p><strong>取一个值：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(df.loc[<span class="number">0</span>, <span class="string">&quot;name&quot;</span>])   <span class="comment"># 张三</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>取一行（会降维成 Series）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(df.loc[<span class="number">1</span>], <span class="built_in">type</span>(df.loc[<span class="number">1</span>]))   <span class="comment"># 输出一行 + &lt;class &#x27;Series&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>切片取列：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(df.loc[<span class="number">0</span>:<span class="number">1</span>, <span class="string">&quot;name&quot;</span>])      <span class="comment"># 前两行的 name 列</span></span><br><span class="line"><span class="built_in">print</span>(df.loc[<span class="number">0</span>:<span class="number">1</span>, <span class="string">&quot;name&quot;</span>:<span class="string">&quot;age&quot;</span>]) <span class="comment"># 前两行的 name 到 age 两列</span></span><br><span class="line"><span class="built_in">print</span>(df.loc[:, <span class="string">&quot;name&quot;</span>])         <span class="comment"># 整列 name</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>取指定的多列 &#x2F; 多行：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(df.loc[:, [<span class="string">&quot;name&quot;</span>, <span class="string">&quot;city&quot;</span>]])  <span class="comment"># 只要 name 和 city 两列</span></span><br><span class="line"><span class="built_in">print</span>(df.loc[[<span class="number">0</span>, <span class="number">2</span>]])               <span class="comment"># 只要第 0 行和第 2 行</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>记忆技巧：<code>loc[行, 列]</code>，行在前列在后，中间用逗号隔开。要哪几列就用列表 <code>[&quot;a&quot;, &quot;b&quot;]</code>，要连续就用切片 <code>&quot;a&quot;:&quot;b&quot;</code>。</p>
+</blockquote>
+<h2 id="三、条件筛选：-三个符号"><a href="#三、条件筛选：-三个符号" class="headerlink" title="三、条件筛选：&amp; | ~ 三个符号"></a>三、条件筛选：&amp; | ~ 三个符号</h2><p>筛选是最常用的操作，关键记三个符号：</p>
+<ul>
+<li><code>&amp;</code> 表示 and（并且）</li>
+<li><code>|</code> 表示 or（或者）</li>
+<li><code>~</code> 表示 not（取反）</li>
+</ul>
+<p>先造个带分数的数据：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"></span><br><span class="line">li = [</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;张三&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">18</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;南宁&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">100</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;李四&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">20</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;北京&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">70</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;王五&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">22</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;上海&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">80</span>&#125;,</span><br><span class="line">]</span><br><span class="line">df = pd.DataFrame(li)</span><br></pre></td></tr></table></figure>
+
+<p><strong>年龄大于 20 的人：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(df.loc[(df.age &gt; <span class="number">20</span>)])</span><br></pre></td></tr></table></figure>
+
+<p><strong>年龄 ≥ 20 且 分数 &gt; 75（查名字和城市）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(df.loc[(df.age &gt;= <span class="number">20</span>) &amp; (df.score &gt; <span class="number">75</span>), [<span class="string">&quot;name&quot;</span>, <span class="string">&quot;city&quot;</span>]])</span><br></pre></td></tr></table></figure>
+
+<p><strong>年龄 ≥ 20 或 分数 &gt; 75：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(df.loc[(df.age &gt;= <span class="number">20</span>) | (df.score &gt; <span class="number">75</span>), [<span class="string">&quot;name&quot;</span>, <span class="string">&quot;city&quot;</span>]])</span><br></pre></td></tr></table></figure>
+
+<p><strong>取反（年龄不大于 20 的）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(df.loc[~(df.age &gt; <span class="number">20</span>)])</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>坑：每个条件都要用<strong>括号包起来</strong>，再用 <code>&amp;</code> &#x2F; <code>|</code> 连接，否则会报错。</p>
+</blockquote>
+<p><strong>类型转换小技巧</strong>——如果 age 列是字符串，比较前先 <code>astype</code> 转成数字：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">li = [</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;张三&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="string">&quot;18&quot;</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;南宁&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">100</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;李四&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="string">&quot;20&quot;</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;北京&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">70</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;王五&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="string">&quot;22&quot;</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;上海&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">80</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;王五&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="string">&quot;23&quot;</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;上海&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">80</span>&#125;,</span><br><span class="line">]</span><br><span class="line">df = pd.DataFrame(li)</span><br><span class="line"><span class="built_in">print</span>(df.loc[(df.age.astype(<span class="built_in">int</span>) &gt; <span class="number">20</span>)])</span><br></pre></td></tr></table></figure>
+
+<p><strong>快速看头尾：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(df.head(<span class="number">3</span>))  <span class="comment"># 前 3 行</span></span><br><span class="line"><span class="built_in">print</span>(df.tail(<span class="number">3</span>))  <span class="comment"># 后 3 行</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="四、增删改：数据操作三件套"><a href="#四、增删改：数据操作三件套" class="headerlink" title="四、增删改：数据操作三件套"></a>四、增删改：数据操作三件套</h2><h3 id="删除-drop"><a href="#删除-drop" class="headerlink" title="删除 drop"></a>删除 drop</h3><p><code>axis</code> 是关键：<code>axis=0</code> 删行，<code>axis=1</code> 删列。<code>inplace=True</code> 表示直接改原表。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">df.drop(<span class="number">0</span>, axis=<span class="number">0</span>, inplace=<span class="literal">True</span>)       <span class="comment"># 删除第 0 行</span></span><br><span class="line">df.drop(<span class="string">&quot;age&quot;</span>, axis=<span class="number">1</span>, inplace=<span class="literal">True</span>)    <span class="comment"># 删除 age 列</span></span><br><span class="line">df.drop([<span class="string">&quot;age&quot;</span>, <span class="string">&quot;score&quot;</span>], axis=<span class="number">1</span>, inplace=<span class="literal">True</span>)  <span class="comment"># 删多列</span></span><br><span class="line">df.drop([<span class="number">0</span>, <span class="number">2</span>], axis=<span class="number">0</span>, inplace=<span class="literal">True</span>)   <span class="comment"># 删多行</span></span><br></pre></td></tr></table></figure>
+
+<p>不加 <code>inplace=True</code> 就是生成新表，原表不动：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df1 = df.drop(<span class="string">&quot;age&quot;</span>, axis=<span class="number">1</span>)   <span class="comment"># df 不变，df1 是删掉 age 后的新表</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>按条件删行</strong>（删掉名字叫李四的行）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">index1 = df.loc[(df.name == <span class="string">&quot;李四&quot;</span>)].index  <span class="comment"># 先找到李四那行的索引</span></span><br><span class="line">df.drop(index1, axis=<span class="number">0</span>, inplace=<span class="literal">True</span>)        <span class="comment"># 再按索引删掉</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="添加列"><a href="#添加列" class="headerlink" title="添加列"></a>添加列</h3><p><strong>加常量列：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df[<span class="string">&quot;classname&quot;</span>] = <span class="string">&quot;75班&quot;</span>   <span class="comment"># 整列都是同一个值</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>加非常量列（一行一个值）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df[<span class="string">&quot;sex&quot;</span>] = [<span class="string">&quot;男&quot;</span>, <span class="string">&quot;女&quot;</span>, <span class="string">&quot;男&quot;</span>, <span class="string">&quot;男&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<p><strong>加带空值的列（用 <code>np.nan</code> 表示空）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">df[<span class="string">&quot;sex&quot;</span>] = [<span class="string">&quot;男&quot;</span>, <span class="string">&quot;女&quot;</span>, np.nan, <span class="string">&quot;男&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改数据"><a href="#修改数据" class="headerlink" title="修改数据"></a>修改数据</h3><p>思路就是八个字：<strong>先查出来，再重新赋值</strong>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 把最后一行的 city 从&quot;上海&quot;改成&quot;南京&quot;</span></span><br><span class="line">df.loc[<span class="number">3</span>, <span class="string">&quot;city&quot;</span>] = <span class="string">&quot;南京&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="五、数据清洗：脏数据的四种处理"><a href="#五、数据清洗：脏数据的四种处理" class="headerlink" title="五、数据清洗：脏数据的四种处理"></a>五、数据清洗：脏数据的四种处理</h2><h3 id="1-删除空值-dropna"><a href="#1-删除空值-dropna" class="headerlink" title="1. 删除空值 dropna()"></a>1. 删除空值 dropna()</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">li = [</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;张三&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="string">&quot;18&quot;</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;南宁&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">100</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;李四&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="string">&quot;20&quot;</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;北京&quot;</span>, <span class="string">&quot;score&quot;</span>: np.nan&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;王五&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="string">&quot;22&quot;</span>, <span class="string">&quot;city&quot;</span>: np.nan, <span class="string">&quot;score&quot;</span>: <span class="number">80</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;王五&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="string">&quot;23&quot;</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;上海&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">80</span>&#125;,</span><br><span class="line">]</span><br><span class="line">df = pd.DataFrame(li)</span><br><span class="line"></span><br><span class="line">df1 = df.dropna()                              <span class="comment"># 删除所有含空值的行</span></span><br><span class="line">df = df.dropna(subset=[<span class="string">&quot;city&quot;</span>], axis=<span class="number">0</span>)        <span class="comment"># 只删 city 列含空值的行</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-填充空值-fillna"><a href="#2-填充空值-fillna" class="headerlink" title="2. 填充空值 fillna()"></a>2. 填充空值 fillna()</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 用均值填 score 列，用&quot;未知&quot;填 city 列</span></span><br><span class="line">avg_score = df[<span class="string">&quot;score&quot;</span>].mean()</span><br><span class="line">df = df.fillna(value=&#123;<span class="string">&quot;city&quot;</span>: <span class="string">&quot;未知&quot;</span>, <span class="string">&quot;score&quot;</span>: avg_score&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>还有向下填充（拿上一行的值填）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">df = df.set_index(<span class="string">&quot;sno&quot;</span>)   <span class="comment"># 先把 sno 设为索引</span></span><br><span class="line">df.ffill(inplace=<span class="literal">True</span>)     <span class="comment"># 向下填充（bfill 是向上填充）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-删除重复行-drop-duplicates"><a href="#3-删除重复行-drop-duplicates" class="headerlink" title="3. 删除重复行 drop_duplicates()"></a>3. 删除重复行 drop_duplicates()</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除 name 重复的行，保留最后一次出现（keep=&quot;last&quot;）</span></span><br><span class="line">df = df.drop_duplicates(<span class="string">&quot;name&quot;</span>, keep=<span class="string">&quot;last&quot;</span>, ignore_index=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p><code>keep=&quot;first&quot;</code> 保留第一次，<code>ignore_index=True</code> 重新编号。</p>
+<h3 id="4-替换值-replace"><a href="#4-替换值-replace" class="headerlink" title="4. 替换值 replace()"></a>4. 替换值 replace()</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 把 score 列里的 -10（异常值）替换成 0</span></span><br><span class="line">df[<span class="string">&quot;score&quot;</span>] = df[<span class="string">&quot;score&quot;</span>].replace(-<span class="number">10</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、数据转换：apply-和-map"><a href="#六、数据转换：apply-和-map" class="headerlink" title="六、数据转换：apply 和 map"></a>六、数据转换：apply 和 map</h2><h3 id="apply-：对一列批量套函数"><a href="#apply-：对一列批量套函数" class="headerlink" title="apply()：对一列批量套函数"></a>apply()：对一列批量套函数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">age_add</span>(<span class="params">age</span>):</span><br><span class="line">    <span class="keyword">return</span> age + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">df[<span class="string">&quot;new_age&quot;</span>] = df[<span class="string">&quot;age&quot;</span>].apply(age_add)   <span class="comment"># 每行年龄都 +1</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="map-：批量映射（像查字典）"><a href="#map-：批量映射（像查字典）" class="headerlink" title="map()：批量映射（像查字典）"></a>map()：批量映射（像查字典）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># sex 列 1 → 男，0 → 女</span></span><br><span class="line">df[<span class="string">&quot;sex&quot;</span>] = df[<span class="string">&quot;sex&quot;</span>].<span class="built_in">map</span>(&#123;<span class="number">1</span>: <span class="string">&quot;男&quot;</span>, <span class="number">0</span>: <span class="string">&quot;女&quot;</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>apply</code> 是”套函数”，<code>map</code> 是”查字典”，两者都是对一列做批量转换，选哪个看场景。</p>
+</blockquote>
+<h2 id="七、分组统计-groupby"><a href="#七、分组统计-groupby" class="headerlink" title="七、分组统计 groupby()"></a>七、分组统计 groupby()</h2><p><code>groupby</code> 是数据分析的利器，配合聚合函数出结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">li = [</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;张三&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">18</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;南宁&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">100</span>, <span class="string">&quot;dept&quot;</span>: <span class="string">&quot;IT&quot;</span>, <span class="string">&quot;sal&quot;</span>: <span class="number">3000</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;李四&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">20</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;北京&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">88</span>, <span class="string">&quot;dept&quot;</span>: <span class="string">&quot;IT&quot;</span>, <span class="string">&quot;sal&quot;</span>: <span class="number">5000</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;王五&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">22</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;上海&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">80</span>, <span class="string">&quot;dept&quot;</span>: <span class="string">&quot;财务&quot;</span>, <span class="string">&quot;sal&quot;</span>: <span class="number">4500</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;lili&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">23</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;南京&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">80</span>, <span class="string">&quot;dept&quot;</span>: <span class="string">&quot;销售&quot;</span>, <span class="string">&quot;sal&quot;</span>: <span class="number">2000</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;smark&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">24</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;南京&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">80</span>, <span class="string">&quot;dept&quot;</span>: <span class="string">&quot;财务&quot;</span>, <span class="string">&quot;sal&quot;</span>: <span class="number">4550</span>&#125;,</span><br><span class="line">    &#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;davi&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">23</span>, <span class="string">&quot;city&quot;</span>: <span class="string">&quot;南京&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">80</span>, <span class="string">&quot;dept&quot;</span>: <span class="string">&quot;销售&quot;</span>, <span class="string">&quot;sal&quot;</span>: <span class="number">2000</span>&#125;,</span><br><span class="line">]</span><br><span class="line">df = pd.DataFrame(li)</span><br></pre></td></tr></table></figure>
+
+<p><strong>每个部门的平均薪资：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result = df.groupby([<span class="string">&quot;dept&quot;</span>, <span class="string">&quot;city&quot;</span>])[<span class="string">&quot;sal&quot;</span>].mean()</span><br></pre></td></tr></table></figure>
+
+<p><strong>每个部门的最高薪资：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result = df.groupby(<span class="string">&quot;dept&quot;</span>)[<span class="string">&quot;sal&quot;</span>].<span class="built_in">max</span>()</span><br></pre></td></tr></table></figure>
+
+<p><strong>一次算多个指标（agg 聚合）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">df_group = df.groupby(<span class="string">&quot;dept&quot;</span>)[<span class="string">&quot;sal&quot;</span>].agg([<span class="string">&quot;mean&quot;</span>, <span class="string">&quot;max&quot;</span>, <span class="string">&quot;min&quot;</span>])</span><br></pre></td></tr></table></figure>
+
+<h2 id="八、表连接：merge-和-concat"><a href="#八、表连接：merge-和-concat" class="headerlink" title="八、表连接：merge 和 concat"></a>八、表连接：merge 和 concat</h2><h3 id="merge-：类似-SQL-的-join"><a href="#merge-：类似-SQL-的-join" class="headerlink" title="merge()：类似 SQL 的 join"></a>merge()：类似 SQL 的 join</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 按 id 把两张表合并</span></span><br><span class="line">df3 = pd.merge(df1, df2, on=<span class="string">&quot;id&quot;</span>, how=<span class="string">&quot;inner&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><code>how</code> 参数对应四种连接：<code>inner</code>（内）&#x2F; <code>left</code>（左）&#x2F; <code>right</code>（右）&#x2F; <code>outer</code>（外）。</p>
+<h3 id="concat-：类似-union-all，上下拼接"><a href="#concat-：类似-union-all，上下拼接" class="headerlink" title="concat()：类似 union all，上下拼接"></a>concat()：类似 union all，上下拼接</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 新增一行数据，拼到原表下面</span></span><br><span class="line">di = &#123;<span class="string">&quot;sno&quot;</span>: <span class="number">1008</span>, <span class="string">&quot;name&quot;</span>: <span class="string">&quot;黄老九&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="number">57</span>, <span class="string">&quot;sex&quot;</span>: <span class="string">&quot;男&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="number">60</span>&#125;</span><br><span class="line">df3 = pd.DataFrame(di, index=[<span class="number">0</span>]).set_index(<span class="string">&quot;sno&quot;</span>)</span><br><span class="line">df4 = pd.concat([df, df3])</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>merge</code> 是”左右拼列”，<code>concat</code> 是”上下拼行”，别搞混。</p>
+</blockquote>
+<h2 id="九、几个常用小函数"><a href="#九、几个常用小函数" class="headerlink" title="九、几个常用小函数"></a>九、几个常用小函数</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 排序：先按 score 降序，score 相同再按 sal 升序</span></span><br><span class="line">df_sort = df.sort_values(by=[<span class="string">&quot;score&quot;</span>, <span class="string">&quot;sal&quot;</span>], ascending=[<span class="literal">False</span>, <span class="literal">True</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 筛选：名字在给定列表里的行</span></span><br><span class="line">df2 = df.loc[(df.name.isin([<span class="string">&quot;李四&quot;</span>, <span class="string">&quot;赵六&quot;</span>, <span class="string">&quot;田七&quot;</span>]))]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 随机抽几行看数据</span></span><br><span class="line">df6 = df.sample(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重命名列</span></span><br><span class="line">df.rename(</span><br><span class="line">    columns=&#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;姓名&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="string">&quot;年龄&quot;</span>, <span class="string">&quot;sex&quot;</span>: <span class="string">&quot;性别&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="string">&quot;分数&quot;</span>&#125;,</span><br><span class="line">    inplace=<span class="literal">True</span>,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>工具只是手段，理解数据背后的业务含义才是关键。接下来打算再深入学一下可视化，把 Matplotlib 和 Seaborn 用起来。</p>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+            <a class="post-nav-item prev" href="/2026/08/26/frontend-learning-path/">
+              <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
+              <span class="nav-title">我的前端学习路线</span>
+            </a>
+          
+          
+            <a class="post-nav-item next" href="/2026/08/18/deploy-github-pages/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">把博客免费部署到 GitHub Pages</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

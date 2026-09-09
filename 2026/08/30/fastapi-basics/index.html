@@ -1,0 +1,331 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>FastAPI 接口入门：让 Python 学会&#34;开门营业&#34; · Shang Qian</title>
+<meta name="description" content="用大白话讲清楚 FastAPI 怎么搭接口：路由、四大请求方法、参数怎么传、文件怎么收，还有那个自动生成的 /docs 文档到底有多香。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          <a class="nav-link" href="/">首页</a>
+        
+          <a class="nav-link" href="/archives/">归档</a>
+        
+          <a class="nav-link" href="/categories/">分类</a>
+        
+          <a class="nav-link" href="/tags/">标签</a>
+        
+          <a class="nav-link" href="/shuoshuo/">说说</a>
+        
+          <a class="nav-link" href="/link/">友链</a>
+        
+          <a class="nav-link" href="/about/">关于</a>
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>返回</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/fastapi-basics</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">FastAPI 接口入门：让 Python 学会&#34;开门营业&#34;</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-08-30T03:00:00.000Z">2026-08-30</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98/">编程实战</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/Python/">#Python</a><a href="/tags/FastAPI/">#FastAPI</a><a href="/tags/%E5%90%8E%E7%AB%AF/">#后端</a><a href="/tags/%E6%8E%A5%E5%8F%A3/">#接口</a>
+            </span>
+          
+        </div>
+        
+          <div class="post-cover"><img src="/img/cover-1.svg" alt="FastAPI 接口入门：让 Python 学会&#34;开门营业&#34;"></div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81FastAPI-%E6%98%AF%E5%95%A5%EF%BC%9F%E4%B8%80%E5%8F%A5%E8%AF%9D%EF%BC%9A%E7%BB%99-Python-%E8%A3%85%E4%B8%8A%E2%80%9D%E5%89%8D%E5%8F%B0%E2%80%9D"><span class="toc-text">一、FastAPI 是啥？一句话：给 Python 装上”前台”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%AC%AC%E4%B8%80%E6%AE%B5%E4%BB%A3%E7%A0%81%EF%BC%9A%E4%BA%94%E6%AD%A5%E5%BC%80%E4%B8%AA%E2%80%9D%E7%A9%BA%E5%BA%97%E9%93%BA%E2%80%9D"><span class="toc-text">二、第一段代码：五步开个”空店铺”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%8E%A5%E5%8F%A3%E5%B0%B1%E5%9B%9B%E4%B8%AA%E8%A6%81%E7%B4%A0%EF%BC%8C%E8%AE%B0%E4%BD%8F%E8%BF%99%E5%9B%9B%E7%82%B9%E5%B0%B1%E5%85%A5%E9%97%A8%E4%BA%86"><span class="toc-text">三、接口就四个要素，记住这四点就入门了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%9C%80%E7%9C%81%E5%BF%83%E7%9A%84%E5%9C%B0%E6%96%B9%EF%BC%9A%E8%87%AA%E5%8A%A8%E7%94%9F%E6%88%90%E7%9A%84-docs-%E6%96%87%E6%A1%A3"><span class="toc-text">四、最省心的地方：自动生成的 &#x2F;docs 文档</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E7%BB%99%E6%8E%A5%E5%8F%A3%E2%80%9D%E8%B4%B4%E6%A0%87%E7%AD%BE%E2%80%9D%EF%BC%9A%E8%A3%85%E9%A5%B0%E5%99%A8%E7%9A%84%E6%89%A9%E5%B1%95%E5%8F%82%E6%95%B0"><span class="toc-text">五、给接口”贴标签”：装饰器的扩展参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%8E%A5%E5%8F%A3%E5%86%99%E5%A4%9A%E4%BA%86%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9FAPIRouter-%E5%88%86%E8%B4%A7%E6%9E%B6"><span class="toc-text">六、接口写多了怎么办？APIRouter 分货架</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%8F%82%E6%95%B0%E5%88%B0%E5%BA%95%E6%80%8E%E4%B9%88%E4%BC%A0%EF%BC%9F%E6%90%9E%E6%87%82%E8%BF%99%E5%87%A0%E7%A7%8D%E5%B0%B1%E5%A4%9F%E4%BA%86"><span class="toc-text">七、参数到底怎么传？搞懂这几种就够了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%93%8D%E5%BA%94%E6%A8%A1%E5%9E%8B%EF%BC%9A%E8%AE%A9%E6%8E%A5%E5%8F%A3%E2%80%9D%E8%AF%A5%E8%AF%B4%E7%9A%84%E8%AF%B4%EF%BC%8C%E4%B8%8D%E8%AF%A5%E8%AF%B4%E7%9A%84%E6%86%8B%E5%9B%9E%E5%8E%BB%E2%80%9D"><span class="toc-text">八、响应模型：让接口”该说的说，不该说的憋回去”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-text">小结</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>以前觉得”写后端接口”是件特别神秘的事，直到上手 FastAPI，才发现原来就是给 Python 函数贴个标签，然后它自己就变成能对外服务的接口了。这篇把我从课件里学到的东西整理一遍，纯大白话，保证看完能”依葫芦画瓢”跑起来。</p>
+<h2 id="一、FastAPI-是啥？一句话：给-Python-装上”前台”"><a href="#一、FastAPI-是啥？一句话：给-Python-装上”前台”" class="headerlink" title="一、FastAPI 是啥？一句话：给 Python 装上”前台”"></a>一、FastAPI 是啥？一句话：给 Python 装上”前台”</h2><p>你写的 Python 函数平时只能自己跑自己用，FastAPI 做的事就是<strong>把它变成别人也能通过网址调用的服务</strong>。</p>
+<p>打个比方：你在美团点外卖，结账时选了微信支付。美团 APP 不知道你微信里有多少钱，微信也不可能把密码告诉美团——它们俩中间靠的就是**接口（API）**在传话：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">美团 APP  →  调用微信的接口  →  微信扣款  →  把结果传回来</span><br></pre></td></tr></table></figure>
+
+<p>FastAPI 就是帮你”开店”的工具，你负责定义每个接口（卖什么、怎么收费），它负责接待客人（收请求、给响应）。而且它最香的一点：<strong>代码写完，接口文档自动生成</strong>，不用你手写，打开浏览器就能看到、能测。</p>
+<p>先把环境装好：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pip install fastapi uvicorn          <span class="comment"># fastapi 是框架，uvicorn 是跑起来的服务器</span></span><br><span class="line">pip install fastapi_cdn_host         <span class="comment"># 加速文档加载，可选</span></span><br><span class="line">pip install python-multipart         <span class="comment"># 后面传 form 表单要用</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="二、第一段代码：五步开个”空店铺”"><a href="#二、第一段代码：五步开个”空店铺”" class="headerlink" title="二、第一段代码：五步开个”空店铺”"></a>二、第一段代码：五步开个”空店铺”</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI</span><br><span class="line"><span class="keyword">import</span> fastapi_cdn_host</span><br><span class="line"><span class="keyword">import</span> uvicorn</span><br><span class="line"></span><br><span class="line">app = FastAPI()                      <span class="comment"># 1. 搭一个空网站架子</span></span><br><span class="line">fastapi_cdn_host.patch_docs(app)     <span class="comment"># 2. 优化文档加载（可不写）</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.get(<span class="params"><span class="string">&quot;/&quot;</span></span>)                        </span><span class="comment"># 3. 首页接口：访问根路径就执行下面函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">index</span>():</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;这是网站的首页&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app.get(<span class="params"><span class="string">&quot;/hello&quot;</span></span>)                   </span><span class="comment"># 4. 再来一个 /hello 接口</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">hello</span>():</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;data&quot;</span>: <span class="string">&quot;hello fastapi&quot;</span>&#125; <span class="comment"># 返回字典，FastAPI 自动转成 JSON</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    uvicorn.run(<span class="string">&quot;文件名:app&quot;</span>, port=<span class="number">8000</span>, reload=<span class="literal">True</span>)  <span class="comment"># 5. 跑起来</span></span><br></pre></td></tr></table></figure>
+
+<p>看到没，核心就是 <code>@app.get(&quot;路径&quot;)</code> 这个<strong>装饰器</strong>——它就像给函数贴了个”收货地址”标签，FastAPI 看到有人访问这个地址，就把请求送到对应的函数手里。</p>
+<p>跑起来后浏览器打开：</p>
+<ul>
+<li><code>http://localhost:8000/</code> → 显示”这是网站的首页”</li>
+<li><code>http://localhost:8000/hello</code> → 显示 <code>&#123;&quot;data&quot;: &quot;hello fastapi&quot;&#125;</code></li>
+</ul>
+<h2 id="三、接口就四个要素，记住这四点就入门了"><a href="#三、接口就四个要素，记住这四点就入门了" class="headerlink" title="三、接口就四个要素，记住这四点就入门了"></a>三、接口就四个要素，记住这四点就入门了</h2><p>一个接口说穿了就是四个东西：</p>
+<table>
+<thead>
+<tr>
+<th>要素</th>
+<th>通俗解释</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>接口地址</td>
+<td>接口的”门牌号”</td>
+<td><code>http://localhost:8000/hello</code></td>
+</tr>
+<tr>
+<td>请求方法</td>
+<td>访问的”方式”</td>
+<td>GET（查数据）、POST（加数据）</td>
+</tr>
+<tr>
+<td>请求参数</td>
+<td>传过去的”信息”</td>
+<td>比如查用户时传个用户 ID</td>
+</tr>
+<tr>
+<td>返回数据</td>
+<td>接口给你的”结果”</td>
+<td><code>&#123;&quot;data&quot;: &quot;hello fastapi&quot;&#125;</code></td>
+</tr>
+</tbody></table>
+<p>四大请求方法，用生活例子一下就记住：</p>
+<table>
+<thead>
+<tr>
+<th>装饰器</th>
+<th>方法</th>
+<th>干什么</th>
+<th>生活例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>@app.get</code></td>
+<td>GET</td>
+<td>查数据（只读）</td>
+<td>查快递到哪了</td>
+</tr>
+<tr>
+<td><code>@app.post</code></td>
+<td>POST</td>
+<td>新增数据</td>
+<td>注册账号</td>
+</tr>
+<tr>
+<td><code>@app.put</code></td>
+<td>PUT</td>
+<td>更新数据</td>
+<td>改个人资料</td>
+</tr>
+<tr>
+<td><code>@app.delete</code></td>
+<td>DELETE</td>
+<td>删数据</td>
+<td>取消订单</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.get(<span class="params"><span class="string">&quot;/get&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get</span>():</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;请求方法&quot;</span>: <span class="string">&quot;GET方法&quot;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.post(<span class="params"><span class="string">&quot;/post&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">post</span>():</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;请求方法&quot;</span>: <span class="string">&quot;POST方法&quot;</span>&#125;</span><br><span class="line"><span class="comment"># put、delete 同理，把 @app.post 换成 @app.put / @app.delete 就行</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="四、最省心的地方：自动生成的-docs-文档"><a href="#四、最省心的地方：自动生成的-docs-文档" class="headerlink" title="四、最省心的地方：自动生成的 &#x2F;docs 文档"></a>四、最省心的地方：自动生成的 &#x2F;docs 文档</h2><p>别的框架，接口文档得自己手写，写完还可能和代码对不上。FastAPI 不一样——<strong>代码就是文档</strong>。</p>
+<p>服务跑起来后，直接打开 <code>http://localhost:8000/docs</code>，所有你定义的接口都整整齐齐列在那儿，每个接口都能点 “Try it out” 直接在线测试，输入参数、点 Execute，结果和状态码（200 表示成功）立刻显示。对小白极度友好。</p>
+<p>想自己测也可以用 Postman：新建请求 → 方法选 GET → 地址填 <code>http://localhost:8000/hello</code> → 点 Send，右侧 Response 区就会冒出 <code>&#123;&quot;data&quot;: &quot;hello fastapi&quot;&#125;</code>。</p>
+<h2 id="五、给接口”贴标签”：装饰器的扩展参数"><a href="#五、给接口”贴标签”：装饰器的扩展参数" class="headerlink" title="五、给接口”贴标签”：装饰器的扩展参数"></a>五、给接口”贴标签”：装饰器的扩展参数</h2><p>接口多了以后，文档里会乱。这时可以给装饰器加几个参数，让文档更清晰、更好管理：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app.get(<span class="params"></span></span></span><br><span class="line"><span class="params"><span class="meta">    <span class="string">&quot;/get&quot;</span>,</span></span></span><br><span class="line"><span class="params"><span class="meta">    tags=[<span class="string">&quot;用户管理&quot;</span>],                  <span class="comment"># 分类标签，文档里会分组显示</span></span></span></span><br><span class="line"><span class="params"><span class="meta">    summary=<span class="string">&quot;查询用户信息&quot;</span>,              <span class="comment"># 一句话简介</span></span></span></span><br><span class="line"><span class="params"><span class="meta">    description=<span class="string">&quot;根据用户ID查询基础信息&quot;</span>, <span class="comment"># 详细说明</span></span></span></span><br><span class="line"><span class="params"><span class="meta">    response_description=<span class="string">&quot;返回用户信息字典&quot;</span>, <span class="comment"># 返回结果的说明</span></span></span></span><br><span class="line"><span class="params"><span class="meta">    deprecated=<span class="literal">True</span>,                   <span class="comment"># 标记&quot;已废弃&quot;，文档里会标红</span></span></span></span><br><span class="line"><span class="params"><span class="meta"></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get</span>():</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;请求方法&quot;</span>: <span class="string">&quot;GET方法&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>记住一句话：<strong>基础装饰器让接口”能用”，这些扩展参数让接口”好懂、好管理”</strong>。</p>
+<h2 id="六、接口写多了怎么办？APIRouter-分货架"><a href="#六、接口写多了怎么办？APIRouter-分货架" class="headerlink" title="六、接口写多了怎么办？APIRouter 分货架"></a>六、接口写多了怎么办？APIRouter 分货架</h2><p>接口全塞一个文件里，写多了就像”超市所有商品堆一个货架”，找都找不到。APIRouter 就是<strong>按品类分货架</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">项目/</span><br><span class="line">├── main.py          # 主入口，负责汇总</span><br><span class="line">├── app01/url.py     # 食品类接口</span><br><span class="line">└── app02/url.py     # 家居类接口</span><br></pre></td></tr></table></figure>
+
+<p>分模块里写法几乎一样，只是把 <code>FastAPI</code> 换成 <code>APIRouter</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># app01/url.py</span></span><br><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> APIRouter</span><br><span class="line">app01 = APIRouter()</span><br><span class="line"></span><br><span class="line"><span class="meta">@app01.get(<span class="params"><span class="string">&quot;/food&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">food</span>():</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;food_name&quot;</span>: <span class="string">&quot;馒头&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主文件里用 <code>include_router</code> 把分货架”挂”进来：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI</span><br><span class="line"><span class="keyword">from</span> app01.url <span class="keyword">import</span> app01</span><br><span class="line"><span class="keyword">from</span> app02.url <span class="keyword">import</span> app02</span><br><span class="line"></span><br><span class="line">app = FastAPI()</span><br><span class="line">app.include_router(app01, tags=[<span class="string">&quot;this is app01&quot;</span>])</span><br><span class="line">app.include_router(app02, tags=[<span class="string">&quot;this is app02&quot;</span>])</span><br></pre></td></tr></table></figure>
+
+<p>这样接口再多，也能按模块分得清清楚楚。</p>
+<h2 id="七、参数到底怎么传？搞懂这几种就够了"><a href="#七、参数到底怎么传？搞懂这几种就够了" class="headerlink" title="七、参数到底怎么传？搞懂这几种就够了"></a>七、参数到底怎么传？搞懂这几种就够了</h2><p>前端和后端传数据，常见就这几种方式：</p>
+<p><strong>1. 路径参数——直接写在网址里</strong></p>
+<p><code>http://localhost:8000/getuser/1001</code> 里的 <code>1001</code> 就是参数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app01.get(<span class="params"><span class="string">&quot;/getuser/&#123;userid&#125;&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getuser</span>(<span class="params">userid: <span class="built_in">int</span></span>):          <span class="comment"># 声明成 int，FastAPI 自动校验</span></span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;userid&quot;</span>: userid, <span class="string">&quot;username&quot;</span>: <span class="string">&quot;lili&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果访问 <code>/getuser/abc</code>（传了字符串），FastAPI 会自动返回 422 校验错误，省得你自己写判断。</p>
+<p><strong>2. 查询参数——网址后面加 <code>?key=value</code></strong></p>
+<p><code>http://localhost:8000/getjob?kw=python&amp;xl=本科</code> 这种，适合筛选、搜索：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@app02.get(<span class="params"><span class="string">&quot;/getjob&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getjob</span>(<span class="params">kw: <span class="built_in">str</span>, xl: <span class="type">Optional</span>[<span class="built_in">str</span>] = <span class="literal">None</span></span>):  <span class="comment"># kw 必传，xl 可选</span></span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;关键词&quot;</span>: kw, <span class="string">&quot;学历&quot;</span>: xl&#125;</span><br></pre></td></tr></table></figure>
+
+<p>没有默认值的参数就是”必传”，不传直接报错；给了默认值 <code>= None</code> 的就是”可选”。</p>
+<p><strong>3. 请求体——POST 传复杂数据（Pydantic 模型）</strong></p>
+<p>路径参数和查询参数都拼在 URL 上，明晃晃的，不适合传复杂或私密的东西。请求体就像”寄快递”——URL 是快递站地址，请求体是包裹里那张填满信息的快递单。</p>
+<p>FastAPI 用 Pydantic 模型当”数据模板”，你规定了字段，它自动帮你校验：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pydantic <span class="keyword">import</span> BaseModel, Field</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">User</span>(<span class="title class_ inherited__">BaseModel</span>):</span><br><span class="line">    <span class="built_in">id</span>: <span class="built_in">int</span>                          <span class="comment"># 必填整数</span></span><br><span class="line">    name: <span class="built_in">str</span>                        <span class="comment"># 必填字符串</span></span><br><span class="line">    age: <span class="built_in">int</span> = Field(default=<span class="number">18</span>, gt=<span class="number">2</span>, lt=<span class="number">100</span>)  <span class="comment"># 默认18，且 &gt;2 且 &lt;100</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app03.post(<span class="params"><span class="string">&quot;/user&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">user</span>(<span class="params">user: User</span>):               <span class="comment"># 参数声明成 User 类型</span></span><br><span class="line">    <span class="keyword">return</span> user                      <span class="comment"># FastAPI 自动解析、校验、封装</span></span><br></pre></td></tr></table></figure>
+
+<p>传错类型、漏传必填，都会给你返回清晰的 422 报错，堪称”免费的前端校验员”。</p>
+<p><strong>4. Form 表单——网页登录那种键值对</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> Form</span><br><span class="line"></span><br><span class="line"><span class="meta">@app04.post(<span class="params"><span class="string">&quot;/regis&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">regis</span>(<span class="params">userid: <span class="built_in">str</span> = Form(<span class="params"></span>), passwd: <span class="built_in">str</span> = Form(<span class="params"></span>)</span>):</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;userid&quot;</span>: userid&#125;</span><br></pre></td></tr></table></figure>
+
+<p>区别很简单：JSON 请求体像”详细简历”（能嵌套），Form 表单像”快递单”（扁平键值对）。</p>
+<p><strong>5. 文件上传——优先用 UploadFile</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> fastapi <span class="keyword">import</span> UploadFile, File</span><br><span class="line"></span><br><span class="line"><span class="meta">@app05.post(<span class="params"><span class="string">&quot;/uploadfile&quot;</span></span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">upload_file</span>(<span class="params">file: UploadFile = File(<span class="params"></span>)</span>):</span><br><span class="line">    file_path = <span class="string">f&quot;img/<span class="subst">&#123;file.filename&#125;</span>&quot;</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(file_path, <span class="string">&quot;wb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> file.file:      <span class="comment"># 流式写入，省内存</span></span><br><span class="line">            f.write(line)</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="string">&quot;filename&quot;</span>: file.filename&#125;</span><br></pre></td></tr></table></figure>
+
+<p>小文件可以用 <code>bytes = File()</code> 直接读进内存，大文件（视频那种）就一定要用 <code>UploadFile</code>，它流式读取，不会把内存撑爆。</p>
+<h2 id="八、响应模型：让接口”该说的说，不该说的憋回去”"><a href="#八、响应模型：让接口”该说的说，不该说的憋回去”" class="headerlink" title="八、响应模型：让接口”该说的说，不该说的憋回去”"></a>八、响应模型：让接口”该说的说，不该说的憋回去”</h2><p>有个特别实用的功能叫<strong>响应模型</strong>，专门解决”手滑把密码也返回出去”的安全问题：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">User_in</span>(<span class="title class_ inherited__">BaseModel</span>):   <span class="comment"># 接收模板：密码这些都得有</span></span><br><span class="line">    <span class="built_in">id</span>: <span class="built_in">int</span></span><br><span class="line">    username: <span class="built_in">str</span></span><br><span class="line">    passwd: <span class="built_in">str</span></span><br><span class="line">    email: <span class="built_in">str</span></span><br><span class="line">    fullname: <span class="built_in">str</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">User_out</span>(<span class="title class_ inherited__">BaseModel</span>):  <span class="comment"># 返回模板：只留该给的</span></span><br><span class="line">    username: <span class="built_in">str</span></span><br><span class="line">    email: <span class="built_in">str</span></span><br><span class="line">    fullname: <span class="built_in">str</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@app06.post(<span class="params"><span class="string">&quot;/user_create&quot;</span>, response_model=User_out</span>)</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">user_create</span>(<span class="params">user: User_in</span>):</span><br><span class="line">    <span class="keyword">return</span> user              <span class="comment"># 自动把 id、passwd 过滤掉</span></span><br></pre></td></tr></table></figure>
+
+<p><code>response_model=User_out</code> 这一句，就相当于告诉 FastAPI：”返回的东西只能长 User_out 这样”。密码、ID 这些敏感字段自动被挡在门外，安全感拉满。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>FastAPI 的学习曲线是真的平，核心就一条线：</p>
+<ol>
+<li><code>@app.请求方法(&quot;路径&quot;)</code> 贴标签，函数就变成接口；</li>
+<li>参数四种传法：路径参数、查询参数、请求体、Form&#x2F;文件；</li>
+<li>接口多了用 <code>APIRouter</code> 分模块，<code>include_router</code> 汇总；</li>
+<li>返回前套个 <code>response_model</code>，敏感字段自动过滤；</li>
+<li>全程有 <code>/docs</code> 文档兜底，写完就能测。</li>
+</ol>
+<p>工具只是手段，能跑通、能看懂、能照着改，就是最好的开始。剩下的，就交给 <code>uvicorn</code> 跑起来，然后打开 <code>localhost:8000/docs</code> 享受那份”我居然也能写后端”的成就感吧。</p>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+            <a class="post-nav-item prev" href="/2026/09/03/langchain-quickstart/">
+              <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
+              <span class="nav-title">LangChain 入门：让大模型变成你的「乐高积木」</span>
+            </a>
+          
+          
+            <a class="post-nav-item next" href="/2026/08/29/photography-notes/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">摄影小记</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

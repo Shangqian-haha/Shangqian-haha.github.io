@@ -1,0 +1,333 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>数据分析入门：从&#34;会取数&#34;到&#34;懂业务&#34; · Shang Qian</title>
+<meta name="description" content="搞懂数据分析到底在干嘛、和数仓工程师的区别在哪、以及数据分析师真正该练的技能到底是什么。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          <a class="nav-link" href="/">首页</a>
+        
+          <a class="nav-link" href="/archives/">归档</a>
+        
+          <a class="nav-link" href="/categories/">分类</a>
+        
+          <a class="nav-link" href="/tags/">标签</a>
+        
+          <a class="nav-link" href="/shuoshuo/">说说</a>
+        
+          <a class="nav-link" href="/link/">友链</a>
+        
+          <a class="nav-link" href="/about/">关于</a>
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>返回</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/data-analysis-intro</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">数据分析入门：从&#34;会取数&#34;到&#34;懂业务&#34;</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-09-07T08:00:00.000Z">2026-09-07</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">#数据分析</a><a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E5%B8%88/">#数据分析师</a><a href="/tags/%E4%B8%9A%E5%8A%A1%E5%88%86%E6%9E%90/">#业务分析</a>
+            </span>
+          
+        </div>
+        
+          <div class="post-cover"><img src="/img/cover-1.svg" alt="数据分析入门：从&#34;会取数&#34;到&#34;懂业务&#34;"></div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E5%88%B0%E5%BA%95%E6%98%AF%E4%B8%AA%E5%95%A5"><span class="toc-text">一、数据分析到底是个啥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E4%B8%80%E4%B8%AA%E7%9C%9F%E5%AE%9E%E6%A1%88%E4%BE%8B%EF%BC%9A%E6%A3%AE%E9%A9%AC%E7%BD%91%E7%BA%A2%E5%B8%A6%E8%B4%A7"><span class="toc-text">二、一个真实案例：森马网红带货</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%B7%A5%E4%BD%9C%E5%86%85%E5%AE%B9%E9%95%BF%E5%95%A5%E6%A0%B7"><span class="toc-text">三、工作内容长啥样</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%8A%80%E8%83%BD%E8%A6%81%E6%B1%82%EF%BC%9A%E4%B8%9A%E5%8A%A1%E6%89%8D%E6%98%AF%E5%A4%A7%E5%A4%B4"><span class="toc-text">四、技能要求：业务才是大头</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E4%B8%A4%E4%B8%AA%E5%B8%B8%E8%A7%81%E8%AF%AF%E5%8C%BA"><span class="toc-text">五、两个常见误区</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA%E4%B8%80%EF%BC%9A%E6%8A%8A%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E5%B8%88%E5%BD%93%E6%95%B0%E4%BB%93%E5%B7%A5%E7%A8%8B%E5%B8%88"><span class="toc-text">误区一：把数据分析师当数仓工程师</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AF%E5%8C%BA%E4%BA%8C%EF%BC%9A%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90-%E5%86%99-Python-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%EF%BC%8C%E6%88%96%E8%80%85-%E5%81%9A-Excel-SQL-%E5%8F%96%E6%95%B0"><span class="toc-text">误区二：数据分析 &#x3D; 写 Python &#x2F; 机器学习，或者 &#x3D; 做 Excel &#x2F; SQL 取数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="toc-text">写在最后</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>很多人对数据分析有误解，我一开始也是。</p>
+<p>以为数据分析就是”会写 SQL 把数取出来”，再高级点就是”用 Python 跑个机器学习”。直到上了这堂课才发现：<strong>数据分析的重心根本不在工具，而在业务</strong>。</p>
+<p>这篇笔记把我对”数据分析”这件事的认知掰正过程记下来。</p>
+<h2 id="一、数据分析到底是个啥"><a href="#一、数据分析到底是个啥" class="headerlink" title="一、数据分析到底是个啥"></a>一、数据分析到底是个啥</h2><p>课件给的定义挺正式：</p>
+<blockquote>
+<p>数据分析是结合多学科知识，通过<strong>收集、清洗、转换、建模和解释</strong>数据，提取价值信息、洞察规律并支持决策的过程。</p>
+</blockquote>
+<p>我翻译成人话：<strong>就是”从一堆乱七八糟的数据里，找出有用的结论，帮老板做决定”</strong>。</p>
+<p>它的四个核心目标，也是数据分析的四个层次：</p>
+<table>
+<thead>
+<tr>
+<th>目标</th>
+<th>回答什么问题</th>
+<th>大白话</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>描述现状</strong></td>
+<td>发生了什么？</td>
+<td>这月卖了多少钱、涨了还是跌了</td>
+</tr>
+<tr>
+<td><strong>诊断原因</strong></td>
+<td>为什么发生？</td>
+<td>为啥这月跌了？因为网红带货没起来</td>
+</tr>
+<tr>
+<td><strong>预测趋势</strong></td>
+<td>未来会发生什么？</td>
+<td>下季度大概能卖多少</td>
+</tr>
+<tr>
+<td><strong>优化决策</strong></td>
+<td>应该怎么做？</td>
+<td>该砍掉哪个渠道、投哪个网红</td>
+</tr>
+</tbody></table>
+<p>一句话记住：<strong>描述 → 诊断 → 预测 → 决策</strong>，从易到难，价值也从低到高。</p>
+<h2 id="二、一个真实案例：森马网红带货"><a href="#二、一个真实案例：森马网红带货" class="headerlink" title="二、一个真实案例：森马网红带货"></a>二、一个真实案例：森马网红带货</h2><p>课件用森马公司举了个特别接地气的例子，我原样搬过来，因为它把”数据分析能干啥”讲透了。</p>
+<p><strong>背景</strong>：森马是国内服装公司，网红带货是它重要的营销手段。过去三年网红带货 GMV（成交总额）一直涨，但<strong>今年放缓了</strong>，公司有点慌。</p>
+<p><strong>痛点</strong>：</p>
+<ol>
+<li>要找到”网红带货营销额放缓”的<strong>原因</strong></li>
+<li>要明确能行动的 OKR 和关键目标</li>
+<li>还想用数据<strong>挖掘新的海外网红资源</strong>，扩大渠道</li>
+</ol>
+<p>你看，公司要的不是”给我拉个销售表”，而是**”帮我搞清楚为什么卖不动了，再告诉我该怎么办”**。</p>
+<p>这就是数据分析师的活：不是交一张表，是交一个<strong>带结论、带建议的分析</strong>。</p>
+<h2 id="三、工作内容长啥样"><a href="#三、工作内容长啥样" class="headerlink" title="三、工作内容长啥样"></a>三、工作内容长啥样</h2><p>课件上把工作内容拆成三步：</p>
+<ol>
+<li><strong>收集数据</strong>（针对具体业务，把需要的数据抓全）</li>
+<li><strong>数据处理与分析</strong>（清洗、转换、建模、解释，提取价值）</li>
+<li><strong>出结论给建议</strong>（最终目的是<strong>提高商业利润</strong>）</li>
+</ol>
+<blockquote>
+<p>划重点：<strong>第三步才是核心</strong>。前两步是手段，最后”出结论给建议”才是数据分析师存在的意义。光会取数、不会给结论，那叫”取数工具人”。</p>
+</blockquote>
+<h2 id="四、技能要求：业务才是大头"><a href="#四、技能要求：业务才是大头" class="headerlink" title="四、技能要求：业务才是大头"></a>四、技能要求：业务才是大头</h2><p>这是这堂课最颠覆我认知的一张图。数据分析师的技能配比：</p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>占比</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>业务能力</strong></td>
+<td><strong>60%</strong></td>
+<td>懂需求、懂行业、懂痛点</td>
+</tr>
+<tr>
+<td><strong>SQL</strong></td>
+<td>35%</td>
+<td>大多数场景 SQL 就能解决</td>
+</tr>
+<tr>
+<td><strong>Excel</strong></td>
+<td>为辅</td>
+<td>做周报日报、日常数据处理</td>
+</tr>
+<tr>
+<td><strong>Python 算法</strong></td>
+<td><strong>5%</strong></td>
+<td>不要过多涉猎机器学习</td>
+</tr>
+</tbody></table>
+<p><strong>看到没？业务能力占了 60%，Python 机器学习只占 5%。</strong></p>
+<p>我以前一直以为数据分析 &#x3D; 学一堆机器学习算法。结果课件直接泼冷水：<strong>“不要过多涉猎机器学习”</strong>。</p>
+<p>为啥？因为真实工作里：</p>
+<ul>
+<li>大部分问题是”这个月为什么降了”，SQL 一查就知道，根本用不到模型</li>
+<li>Excel 够做日常报表</li>
+<li>Python 算法是少数”预测型”场景才用得上</li>
+</ul>
+<p><strong>结论：先把手上的 SQL 和业务吃透，比学一堆花里胡哨的算法实在得多。</strong></p>
+<h2 id="五、两个常见误区"><a href="#五、两个常见误区" class="headerlink" title="五、两个常见误区"></a>五、两个常见误区</h2><h3 id="误区一：把数据分析师当数仓工程师"><a href="#误区一：把数据分析师当数仓工程师" class="headerlink" title="误区一：把数据分析师当数仓工程师"></a>误区一：把数据分析师当数仓工程师</h3><p>这俩真不是一回事：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>数仓工程师</th>
+<th>数据分析师</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>产出</td>
+<td>可复用的<strong>数据资产</strong>（数据仓库、ETL 脚本、数据字典）</td>
+<td>针对性的<strong>分析报告</strong>（决策建议）</td>
+</tr>
+<tr>
+<td>服务对象</td>
+<td>整个公司的数据应用</td>
+<td>具体业务问题</td>
+</tr>
+<tr>
+<td>举个产出</td>
+<td>稳定运行的数仓</td>
+<td>《网红带货效果分析报告》</td>
+</tr>
+</tbody></table>
+<p>数仓是”铺路搭桥”，数据分析是”开车送货”。前者建设基础设施，后者直接对业务负责。</p>
+<h3 id="误区二：数据分析-写-Python-机器学习，或者-做-Excel-SQL-取数"><a href="#误区二：数据分析-写-Python-机器学习，或者-做-Excel-SQL-取数" class="headerlink" title="误区二：数据分析 &#x3D; 写 Python &#x2F; 机器学习，或者 &#x3D; 做 Excel &#x2F; SQL 取数"></a>误区二：数据分析 &#x3D; 写 Python &#x2F; 机器学习，或者 &#x3D; 做 Excel &#x2F; SQL 取数</h3><p>这两个是<strong>两个极端</strong>，都不对：</p>
+<ul>
+<li>❌ “数据分析就是写 Python 搞机器学习调优”——太窄了，把 5% 当成了全部</li>
+<li>❌ “数据分析就是做 Excel 表格、SQL 取数”——太浅了，把手段当成了目的</li>
+</ul>
+<p><strong>真正的数据分析</strong>：用 SQL&#x2F;Excel&#x2F;Python 这些工具，<strong>解决业务问题、给出决策建议</strong>。工具是”术”，业务是”道”。</p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>这堂课我最大的收获是一句话：</p>
+<blockquote>
+<p><strong>深入业务</strong>。</p>
+</blockquote>
+<p>数据分析师的价值不在你会多少工具，而在你<strong>能不能用数据帮业务赚到钱、省下钱</strong>。</p>
+<p>给想入门的同学三个建议：</p>
+<ol>
+<li><strong>先把 SQL 练到能解决 90% 的取数问题</strong>（这是吃饭的家伙）</li>
+<li><strong>再补业务认知</strong>——去了解你所在行业的常识、痛点、指标</li>
+<li><strong>机器学习最后再碰</strong>，等前面两样扎实了再学不迟</li>
+</ol>
+<p>工具会过时，但”懂业务”这个能力永远值钱。</p>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+            <a class="post-nav-item prev" href="/2026/09/07/metrics-system-intro/">
+              <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
+              <span class="nav-title">指标体系入门：电商人必须会看的那堆数字</span>
+            </a>
+          
+          
+            <a class="post-nav-item next" href="/2026/09/03/ai-agent-intro/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">AI Agent 入门：从&#34;会回答&#34;到&#34;会干活&#34;</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

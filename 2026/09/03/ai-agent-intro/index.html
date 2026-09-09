@@ -1,0 +1,422 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>AI Agent 入门：从&#34;会回答&#34;到&#34;会干活&#34; · Shang Qian</title>
+<meta name="description" content="讲清楚 AI Agent 到底是什么、它和普通大模型的区别在哪、四大组件怎么协作、五个主流框架怎么选。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          <a class="nav-link" href="/">首页</a>
+        
+          <a class="nav-link" href="/archives/">归档</a>
+        
+          <a class="nav-link" href="/categories/">分类</a>
+        
+          <a class="nav-link" href="/tags/">标签</a>
+        
+          <a class="nav-link" href="/shuoshuo/">说说</a>
+        
+          <a class="nav-link" href="/link/">友链</a>
+        
+          <a class="nav-link" href="/about/">关于</a>
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>返回</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/ai-agent-intro</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">AI Agent 入门：从&#34;会回答&#34;到&#34;会干活&#34;</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-09-03T07:30:00.000Z">2026-09-03</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#大模型</a><a href="/tags/AI-Agent/">#AI Agent</a><a href="/tags/LangChain/">#LangChain</a><a href="/tags/LangGraph/">#LangGraph</a><a href="/tags/AutoGen/">#AutoGen</a>
+            </span>
+          
+        </div>
+        
+          <div class="post-cover"><img src="/img/cover-1.svg" alt="AI Agent 入门：从&#34;会回答&#34;到&#34;会干活&#34;"></div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81Agent-%E5%88%B0%E5%BA%95%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-text">一、Agent 到底是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%A4%A7%E6%A8%A1%E5%9E%8B%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E7%9B%B4%E6%8E%A5%E5%BD%93-Agent%EF%BC%9F"><span class="toc-text">二、大模型为什么不能直接当 Agent？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E4%BC%A0%E7%BB%9F-LLM-vs-AI-Agent"><span class="toc-text">三、传统 LLM vs AI Agent</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%9B%9B%E5%A4%A7%E5%9F%BA%E7%A1%80%E7%BB%84%E4%BB%B6"><span class="toc-text">四、四大基础组件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E5%86%B3%E7%AD%96%E9%97%AD%E7%8E%AF%EF%BC%9A%E6%84%9F%E7%9F%A5-%E8%A7%84%E5%88%92-%E8%A1%8C%E5%8A%A8-%E8%A7%82%E5%AF%9F"><span class="toc-text">五、决策闭环：感知-规划-行动-观察</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E4%B8%A4%E5%A4%A7%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B"><span class="toc-text">六、两大核心能力</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BB%BB%E5%8A%A1%E6%8B%86%E8%A7%A3%EF%BC%88Task-Decomposition%EF%BC%89"><span class="toc-text">1. 任务拆解（Task Decomposition）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%8F%8D%E6%80%9D%E6%94%B9%E8%BF%9B%EF%BC%88Reflection%EF%BC%89"><span class="toc-text">2. 反思改进（Reflection）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81Plan-and-Execute-%E6%A8%A1%E5%BC%8F"><span class="toc-text">七、Plan-and-Execute 模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E4%BA%94%E5%A4%A7%E5%BC%80%E5%8F%91%E6%A1%86%E6%9E%B6%E5%AF%B9%E6%AF%94"><span class="toc-text">八、五大开发框架对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%AE%9E%E8%B7%B5%E9%A1%B9%E7%9B%AE%EF%BC%9A%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA-Agent"><span class="toc-text">九、实践项目：你的第一个 Agent</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88-Agent-%E6%98%AF%E2%80%9D%E9%9D%A9%E5%91%BD%E2%80%9D"><span class="toc-text">十、为什么 Agent 是”革命”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="toc-text">写在最后</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>如果说 2023 年是大模型的元年，2024 年就是 <strong>AI Agent 的元年</strong>。</p>
+<p>这一年里冒出来一堆名词：AutoGPT、LangGraph、Manus、Devin……背后都是同一个东西——<strong>让大模型从”回答问题”进化到”完成任务”</strong>。</p>
+<p>这篇笔记把上课讲的 AI Agent 概念拆开讲，零基础也能看懂。</p>
+<h2 id="一、Agent-到底是什么？"><a href="#一、Agent-到底是什么？" class="headerlink" title="一、Agent 到底是什么？"></a>一、Agent 到底是什么？</h2><p>课件上给了两个领域对 Agent 的定义，都很学术。我翻译成大白话：</p>
+<ul>
+<li><strong>计算机领域</strong>：一个能代表你、<strong>自动</strong>干活的软件（不需要你一直戳它）</li>
+<li><strong>AI 领域</strong>：一个能<strong>感知环境、做决策、执行动作</strong>的智能系统</li>
+</ul>
+<p><strong>两者的共同点</strong>：自主、持续、不需要人一步步指挥。</p>
+<blockquote>
+<p>举个生活例子：扫地机器人</p>
+<ul>
+<li>感知：看到桌脚、红外测距</li>
+<li>规划：决定走 S 形还是贴边</li>
+<li>行动：启动轮子、打开吸尘</li>
+<li>观察：电量低了 → 回充电桩</li>
+</ul>
+<p>全程没让你指挥。这就是”Agent”——有自主目标，能自我调整。</p>
+</blockquote>
+<h2 id="二、大模型为什么不能直接当-Agent？"><a href="#二、大模型为什么不能直接当-Agent？" class="headerlink" title="二、大模型为什么不能直接当 Agent？"></a>二、大模型为什么不能直接当 Agent？</h2><p>理论上 GPT-4 已经很强了，但课件列了三条它做不到的事：</p>
+<ul>
+<li>✕ <strong>不能像人一样规划思考</strong>（不会主动拆任务）</li>
+<li>✕ <strong>不会用工具</strong>（不能自己查日历、发邮件、跑代码）</li>
+<li>✕ <strong>没有持久记忆</strong>（聊完就忘，下次又是陌生人）</li>
+</ul>
+<p>所以课件给了个公式：</p>
+<blockquote>
+<p><strong>AI Agent &#x3D; LLM + 记忆 + 工具 + 规划</strong></p>
+</blockquote>
+<p>LLM 负责”思考”，但单独一个 LLM 啥也干不了。给它加上记忆、工具、规划能力，它才能真正”办事”。</p>
+<h2 id="三、传统-LLM-vs-AI-Agent"><a href="#三、传统-LLM-vs-AI-Agent" class="headerlink" title="三、传统 LLM vs AI Agent"></a>三、传统 LLM vs AI Agent</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>传统 LLM</th>
+<th>AI Agent</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>交互模式</td>
+<td>一问一答</td>
+<td>目标驱动</td>
+</tr>
+<tr>
+<td>任务复杂度</td>
+<td>单步简单</td>
+<td>多步复杂</td>
+</tr>
+<tr>
+<td>工具使用</td>
+<td>无</td>
+<td>能调 API &#x2F; 搜索 &#x2F; 跑代码</td>
+</tr>
+<tr>
+<td>记忆</td>
+<td>没</td>
+<td>短期 + 长期</td>
+</tr>
+<tr>
+<td>自主性</td>
+<td>你问它答</td>
+<td>给目标自己跑</td>
+</tr>
+</tbody></table>
+<p><strong>一句话总结</strong>：传统大模型是”你问它答”，AI Agent 是”你给目标它自己搞定”。</p>
+<h2 id="四、四大基础组件"><a href="#四、四大基础组件" class="headerlink" title="四、四大基础组件"></a>四、四大基础组件</h2><p>AI Agent 的”四件套”：</p>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>别名</th>
+<th>类比人</th>
+<th>干啥</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>LLM</strong></td>
+<td>大脑</td>
+<td>大脑</td>
+<td>理解、推理、生成</td>
+</tr>
+<tr>
+<td><strong>Memory</strong></td>
+<td>海马体</td>
+<td>海马体</td>
+<td>短期+长期记忆</td>
+</tr>
+<tr>
+<td><strong>Tools</strong></td>
+<td>双手</td>
+<td>双手</td>
+<td>调外部 API&#x2F;服务</td>
+</tr>
+<tr>
+<td><strong>Planning</strong></td>
+<td>思维</td>
+<td>思维</td>
+<td>拆任务、反思改进</td>
+</tr>
+</tbody></table>
+<p>四者协作的流程：</p>
+<blockquote>
+<p>接收任务 → LLM 理解 → Planning 拆解子任务 → 调 Tools 执行 → Memory 记录 → 观察结果 → 反思改进 → 交付</p>
+</blockquote>
+<p>这就是 Agent 的”完整工作流”。</p>
+<h2 id="五、决策闭环：感知-规划-行动-观察"><a href="#五、决策闭环：感知-规划-行动-观察" class="headerlink" title="五、决策闭环：感知-规划-行动-观察"></a>五、决策闭环：感知-规划-行动-观察</h2><p>课件上画了张图特别清楚，我用智能家居的场景展开：</p>
+<blockquote>
+<p>用户说：”我觉得有点冷”</p>
+<ol>
+<li><strong>感知</strong>（Perception）：识别用户意图 &#x3D; 想升温</li>
+<li><strong>规划</strong>（Planning）：决定调高温度到 23°C</li>
+<li><strong>行动</strong>（Action）：执行调温指令</li>
+<li><strong>观察</strong>（Observation）：传感器反馈当前 23°C</li>
+</ol>
+<p>用户再反馈：”还不够暖”</p>
+<p>→ 回到规划 → 调到 25°C → 观察 → 用户满意 → 结束</p>
+</blockquote>
+<p><strong>关键点</strong>：这是一个<strong>持续循环</strong>，不是一次执行完就拉倒。</p>
+<h2 id="六、两大核心能力"><a href="#六、两大核心能力" class="headerlink" title="六、两大核心能力"></a>六、两大核心能力</h2><h3 id="1-任务拆解（Task-Decomposition）"><a href="#1-任务拆解（Task-Decomposition）" class="headerlink" title="1. 任务拆解（Task Decomposition）"></a>1. 任务拆解（Task Decomposition）</h3><p>把大任务拆成可控的子任务。</p>
+<p>比如”写一篇 AI Agent 报告”：</p>
+<ul>
+<li>收集资料</li>
+<li>整理大纲</li>
+<li>撰写正文</li>
+<li>校对润色</li>
+</ul>
+<p>Agent 接到任务，自己拆、自己排序、自己完成。</p>
+<p>进阶玩法：<strong>Tree of Thoughts（思维树）</strong>。不是一条路走到底，而是在每一步生成多个分支，<strong>评估+搜索</strong>选最优解。适合那种”答案不唯一、需要探索”的问题（比如 24 点、迷宫）。</p>
+<h3 id="2-反思改进（Reflection）"><a href="#2-反思改进（Reflection）" class="headerlink" title="2. 反思改进（Reflection）"></a>2. 反思改进（Reflection）</h3><p>Agent 不是一错就完蛋，它能<strong>复盘自己的行为</strong>、从错误里学。</p>
+<p>课件上提到了 <strong>ReAct 框架</strong>（Reasoning + Acting）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Thought:  分析当前状态</span><br><span class="line">Action:   执行具体操作</span><br><span class="line">Observation: 观察执行结果</span><br><span class="line">→ 重复循环</span><br></pre></td></tr></table></figure>
+
+<p>每一步都先想再干，错了就调整。<strong>这就是”三思而后行”的算法版</strong>。</p>
+<h2 id="七、Plan-and-Execute-模式"><a href="#七、Plan-and-Execute-模式" class="headerlink" title="七、Plan-and-Execute 模式"></a>七、Plan-and-Execute 模式</h2><p>ReAct 是”边想边做”，还有一种叫 <strong>Plan-and-Execute</strong> ——“先想好再动手”。</p>
+<p>适用场景对比：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>思路</th>
+<th>适合</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ReAct</td>
+<td>边想边做，灵活调整</td>
+<td>探索性、动态任务</td>
+</tr>
+<tr>
+<td>Plan-and-Execute</td>
+<td>先列全计划，再逐步执行</td>
+<td>流程明确、可预见</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>写代码、写周报、数据分析这些<strong>结构化任务</strong>用 Plan-and-Execute 更稳。<br>调试 bug、找资料这些<strong>需要摸索的任务</strong>用 ReAct 更灵活。</p>
+</blockquote>
+<h2 id="八、五大开发框架对比"><a href="#八、五大开发框架对比" class="headerlink" title="八、五大开发框架对比"></a>八、五大开发框架对比</h2><p>课件上给了张表：</p>
+<table>
+<thead>
+<tr>
+<th>框架</th>
+<th>代理模式</th>
+<th>核心特点</th>
+<th>适合场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>LangChain</strong></td>
+<td>单代理</td>
+<td>模块化、生态丰富</td>
+<td>通用开发</td>
+</tr>
+<tr>
+<td><strong>LangGraph</strong></td>
+<td>状态流</td>
+<td>有向图，循环分支控制</td>
+<td>复杂决策流程</td>
+</tr>
+<tr>
+<td><strong>Semantic Kernel</strong></td>
+<td>单代理</td>
+<td>微软生态、插件化</td>
+<td>企业 .NET &#x2F; Azure</td>
+</tr>
+<tr>
+<td><strong>AutoGen</strong></td>
+<td>多代理</td>
+<td>多角色对话协商</td>
+<td>多 Agent 协同研究</td>
+</tr>
+<tr>
+<td><strong>CrewAI</strong></td>
+<td>多代理</td>
+<td>角色分工、流程可视化</td>
+<td>团队协作模拟</td>
+</tr>
+</tbody></table>
+<p><strong>选型建议</strong>：</p>
+<ul>
+<li>做单 Agent、想生态最全 → <strong>LangChain</strong>（或 LangGraph，要复杂流程时）</li>
+<li>做多 Agent 协同研究 → <strong>AutoGen</strong></li>
+<li>在 .NET 体系下 → <strong>Semantic Kernel</strong></li>
+<li>想直观地”管一群虚拟员工” → <strong>CrewAI</strong></li>
+</ul>
+<p>我目前主要用 LangChain + LangGraph，生态资料最多。</p>
+<h2 id="九、实践项目：你的第一个-Agent"><a href="#九、实践项目：你的第一个-Agent" class="headerlink" title="九、实践项目：你的第一个 Agent"></a>九、实践项目：你的第一个 Agent</h2><p>课件留了两个练习：</p>
+<ol>
+<li><strong>The First Agent</strong>：从零搭一个基础 Agent，跑通”理解任务 → 给答案”的流程</li>
+<li><strong>AI Agent + Tools + Memory</strong>：给 Agent 加上<strong>工具调用</strong>和<strong>记忆系统</strong>，让它能处理多步任务</li>
+</ol>
+<p>这两个项目做完，就跨过”会用 Agent”的门槛了。代码课件没贴出来，我下篇笔记自己手写一份带详细注释的版本。</p>
+<h2 id="十、为什么-Agent-是”革命”"><a href="#十、为什么-Agent-是”革命”" class="headerlink" title="十、为什么 Agent 是”革命”"></a>十、为什么 Agent 是”革命”</h2><p>老师讲课时反复强调一句话：</p>
+<blockquote>
+<p>AI Agent 让 AI 从”回答问题”进化为”完成任务”。</p>
+</blockquote>
+<p>这不光是技术升级，是<strong>人机关系的根本变化</strong>：</p>
+<ul>
+<li>以前：你得会”问”，才得到好答案</li>
+<li>现在：你只要会”布置任务”，让 AI 自己想办法</li>
+</ul>
+<p><strong>它不会取代你，但它会放大你和不会用 Agent 的人之间的差距</strong>。</p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>学完 Agent 这节课，最大的感触：<strong>别再把大模型当”聊天机器人”用了</strong>。它是一个能调工具、能记东西、能拆任务的”半自主助理”。学会给它布置任务，比学会写提示词还更省事。</p>
+<p>下一步计划：</p>
+<ol>
+<li>用 LangGraph 搭一个能查笔记 + 写日报的 Agent</li>
+<li>跑通”任务拆解 + 反思改进”的完整闭环</li>
+<li>把代码和踩坑整理成笔记</li>
+</ol>
+<p>慢慢来，AI Agent 是接下来 2-3 年最有想象力的方向。</p>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+            <a class="post-nav-item prev" href="/2026/09/07/data-analysis-intro/">
+              <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
+              <span class="nav-title">数据分析入门：从&#34;会取数&#34;到&#34;懂业务&#34;</span>
+            </a>
+          
+          
+            <a class="post-nav-item next" href="/2026/09/03/prompt-engineering-guide/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">提示工程实战：跟大模型说话也有&#34;话术&#34;</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

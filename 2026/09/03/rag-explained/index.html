@@ -1,0 +1,357 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>RAG 入门：让大模型「带书考试」 · Shang Qian</title>
+<meta name="description" content="把 RAG 比作开卷考试，这篇笔记带你搞懂为什么需要 RAG、向量化到底是个啥、检索生成怎么串起来。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          <a class="nav-link" href="/">首页</a>
+        
+          <a class="nav-link" href="/archives/">归档</a>
+        
+          <a class="nav-link" href="/categories/">分类</a>
+        
+          <a class="nav-link" href="/tags/">标签</a>
+        
+          <a class="nav-link" href="/shuoshuo/">说说</a>
+        
+          <a class="nav-link" href="/link/">友链</a>
+        
+          <a class="nav-link" href="/about/">关于</a>
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>返回</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/rag-explained</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">RAG 入门：让大模型「带书考试」</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-09-03T06:30:00.000Z">2026-09-03</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#大模型</a><a href="/tags/RAG/">#RAG</a><a href="/tags/LLM/">#LLM</a><a href="/tags/%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90/">#检索增强生成</a><a href="/tags/%E5%90%91%E9%87%8F%E6%95%B0%E6%8D%AE%E5%BA%93/">#向量数据库</a>
+            </span>
+          
+        </div>
+        
+          <div class="post-cover"><img src="/img/cover-2.svg" alt="RAG 入门：让大模型「带书考试」"></div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-RAG%EF%BC%9F"><span class="toc-text">一、为什么需要 RAG？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81RAG-vs-Fine-tuning%EF%BC%9A%E6%A3%80%E7%B4%A2%E8%BF%98%E6%98%AF%E5%BE%AE%E8%B0%83%EF%BC%9F"><span class="toc-text">二、RAG vs Fine-tuning：检索还是微调？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B%EF%BC%9A%E7%B4%A2%E5%BC%95-%E6%A3%80%E7%B4%A2%E7%94%9F%E6%88%90"><span class="toc-text">三、工作流程：索引 + 检索生成</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%80%EF%BC%9A%E7%B4%A2%E5%BC%95%EF%BC%88Indexing%EF%BC%8C%E6%8F%90%E5%89%8D%E5%81%9A%EF%BC%89"><span class="toc-text">阶段一：索引（Indexing，提前做）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B6%E6%AE%B5%E4%BA%8C%EF%BC%9A%E6%A3%80%E7%B4%A2-%E7%94%9F%E6%88%90%EF%BC%88Retrieval-Generation%EF%BC%8C%E5%AE%9E%E6%97%B6%E5%81%9A%EF%BC%89"><span class="toc-text">阶段二：检索 + 生成（Retrieval &amp; Generation，实时做）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%90%91%E9%87%8F%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9FEmbeddings-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-text">四、向量是什么？Embeddings 是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E7%9B%B8%E4%BC%BC%E5%BA%A6%E6%80%8E%E4%B9%88%E7%AE%97%EF%BC%9F"><span class="toc-text">五、相似度怎么算？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%96%87%E6%A1%A3%E6%80%8E%E4%B9%88%E5%88%87%EF%BC%9F%E5%9B%9B%E7%A7%8D%E5%88%87%E6%B3%95"><span class="toc-text">六、文档怎么切？四种切法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%90%91%E9%87%8F%E6%95%B0%E6%8D%AE%E5%BA%93%E6%80%8E%E4%B9%88%E9%80%89%EF%BC%9F"><span class="toc-text">七、向量数据库怎么选？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E6%B7%B7%E5%90%88%E6%A3%80%E7%B4%A2%EF%BC%9ABM25-%E5%90%91%E9%87%8F"><span class="toc-text">八、混合检索：BM25 + 向量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%B9%B3%E5%8F%B0%E5%AE%9E%E6%88%98"><span class="toc-text">九、平台实战</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E4%B8%80%E4%B8%AA%E6%9C%80%E7%AE%80-RAG-%E4%BB%A3%E7%A0%81%E9%AA%A8%E6%9E%B6"><span class="toc-text">十、一个最简 RAG 代码骨架</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="toc-text">写在最后</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>老师在课上打了个比方，我觉得特别贴切：<strong>普通大模型是闭卷考试，RAG 是开卷考试</strong>。</p>
+<p>闭卷考试靠记忆，再聪明的学生也会忘；开卷考试带本参考书，遇到不会的翻一翻。RAG 就是给大模型这本”参考书”。</p>
+<p>这篇笔记把 RAG 从概念到流程拆开讲，零基础也能跟上。</p>
+<h2 id="一、为什么需要-RAG？"><a href="#一、为什么需要-RAG？" class="headerlink" title="一、为什么需要 RAG？"></a>一、为什么需要 RAG？</h2><p>大模型再强，也有三个绕不开的问题：</p>
+<ol>
+<li><strong>知识不是实时的</strong> —— GPT-4 训练数据有截止日期，问它”昨天欧冠谁赢了”它答不上来</li>
+<li><strong>不了解私有知识</strong> —— 你的业务数据、内部文档，训练时压根没碰过</li>
+<li><strong>会”幻觉”</strong> —— 一本正经地胡说八道，编造看似合理但完全错误的内容</li>
+</ol>
+<p>RAG（Retrieval Augmented Generation，检索增强生成）就是用”检索外部资料 + 让模型参考着回答”来解决这三个问题。</p>
+<blockquote>
+<p>举个工作里的例子：让大模型回答”我们公司去年的差旅报销规则”，它肯定不知道。但如果你把差旅手册喂给 RAG，它就能从手册里找到对应条款，再组织成答案给你。</p>
+</blockquote>
+<h2 id="二、RAG-vs-Fine-tuning：检索还是微调？"><a href="#二、RAG-vs-Fine-tuning：检索还是微调？" class="headerlink" title="二、RAG vs Fine-tuning：检索还是微调？"></a>二、RAG vs Fine-tuning：检索还是微调？</h2><p>课件里有个对比表我直接搬过来：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>RAG</th>
+<th>Fine-tuning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>原理</td>
+<td>检索资料 + 让模型参考</td>
+<td>改模型的内部参数</td>
+</tr>
+<tr>
+<td>数据需求</td>
+<td>准备文档库</td>
+<td>准备大量问答对</td>
+</tr>
+<tr>
+<td>成本</td>
+<td>低（不算 embedding 几乎免费）</td>
+<td>高（GPU + 数据标注）</td>
+</tr>
+<tr>
+<td>更新难度</td>
+<td>加新文档即可</td>
+<td>要重新训练</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>知识频繁更新、需引用来源</td>
+<td>任务风格统一、私有化逻辑</td>
+</tr>
+</tbody></table>
+<p><strong>简单记忆</strong>：RAG 是”加参考书”，微调是”重新教一遍”。大多数企业场景 RAG 就够了，微调留给”模型要彻底掌握某种风格&#x2F;逻辑”的少数场景。</p>
+<h2 id="三、工作流程：索引-检索生成"><a href="#三、工作流程：索引-检索生成" class="headerlink" title="三、工作流程：索引 + 检索生成"></a>三、工作流程：索引 + 检索生成</h2><p>RAG 系统分两阶段：</p>
+<h3 id="阶段一：索引（Indexing，提前做）"><a href="#阶段一：索引（Indexing，提前做）" class="headerlink" title="阶段一：索引（Indexing，提前做）"></a>阶段一：索引（Indexing，提前做）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">加载文件 → 读取文本 → 文本分割 → 向量化 → 存入向量库</span><br></pre></td></tr></table></figure>
+
+<p>把文档喂进系统：</p>
+<ul>
+<li><strong>加载</strong>：支持 PDF &#x2F; Word &#x2F; Markdown &#x2F; HTML 等等</li>
+<li><strong>分割</strong>：按段落、句子、字符切成几百字的小块（chunk）</li>
+<li><strong>向量化</strong>：每块文本变成一组浮点数（向量）</li>
+<li><strong>入库</strong>：存进向量数据库（如 FAISS、Chroma、Milvus）</li>
+</ul>
+<p>这一步<strong>离线</strong>做一次就好，除非文档更新。</p>
+<h3 id="阶段二：检索-生成（Retrieval-Generation，实时做）"><a href="#阶段二：检索-生成（Retrieval-Generation，实时做）" class="headerlink" title="阶段二：检索 + 生成（Retrieval &amp; Generation，实时做）"></a>阶段二：检索 + 生成（Retrieval &amp; Generation，实时做）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">用户提问 → 问题向量化 → 相似度匹配 → 构建 Prompt → LLM 生成</span><br></pre></td></tr></table></figure>
+
+<p>当用户提问时：</p>
+<ol>
+<li>把问题也变成向量</li>
+<li>去向量库搜”距离最近”的 Top K 个文档块</li>
+<li>把这些块 + 用户问题拼成一个 Prompt</li>
+<li>喂给大模型，让它”参考着”回答</li>
+</ol>
+<p><strong>这就是 RAG 的全部核心</strong>。别被那些花里胡哨的词吓到。</p>
+<h2 id="四、向量是什么？Embeddings-是什么？"><a href="#四、向量是什么？Embeddings-是什么？" class="headerlink" title="四、向量是什么？Embeddings 是什么？"></a>四、向量是什么？Embeddings 是什么？</h2><p>这可能是最多人卡住的地方，我尽量讲人话。</p>
+<p><strong>向量</strong>：一组浮点数，比如 <code>[0.12, -0.34, 0.56, ..., 0.78]</code>（实际可能是 768 维或 1536 维）。</p>
+<p><strong>Embeddings</strong>：把一段文本转成向量的过程&#x2F;结果。模型叫 Embedding Model，比如 OpenAI 的 <code>text-embedding-ada-002</code>。</p>
+<p><strong>关键性质</strong>：语义相近的文本，向量距离更近。</p>
+<blockquote>
+<p>举例：<br>“今天天气真好” 和 “今天阳光明媚” → 向量距离很近<br>“今天天气真好” 和 “中子星是怎么形成的” → 向量距离很远</p>
+</blockquote>
+<p>这就是为什么能用”向量距离”找”语义相似”的文档。</p>
+<h2 id="五、相似度怎么算？"><a href="#五、相似度怎么算？" class="headerlink" title="五、相似度怎么算？"></a>五、相似度怎么算？</h2><p>三种主流算法：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>思路</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>欧氏距离</strong></td>
+<td>两点直线距离</td>
+<td>直观，但受向量长度影响</td>
+</tr>
+<tr>
+<td><strong>余弦相似度</strong></td>
+<td>看夹角，忽略长度</td>
+<td><strong>RAG 最常用</strong></td>
+</tr>
+<tr>
+<td><strong>内积 &#x2F; 点积</strong></td>
+<td>各维度相乘求和</td>
+<td>兼顾方向和大小</td>
+</tr>
+</tbody></table>
+<p>实际项目里<strong>几乎都用余弦相似度</strong>。记住一句话就够：<strong>夹角越小，文本越像</strong>。</p>
+<h2 id="六、文档怎么切？四种切法"><a href="#六、文档怎么切？四种切法" class="headerlink" title="六、文档怎么切？四种切法"></a>六、文档怎么切？四种切法</h2><p>文档切块是个大学问。常见四种：</p>
+<ol>
+<li><strong>按句子切分</strong>：以句号&#x2F;换行分块，干净但长度不可控</li>
+<li><strong>按字符数切分</strong>：固定 N 字一块，简单粗暴可能切在句中</li>
+<li><strong>Overlapping Window（重叠窗口）</strong>：每块和上一块重叠 100-200 字，<strong>保上下文连贯</strong></li>
+<li><strong>递归切分</strong>：LangChain 默认的 <code>RecursiveCharacterTextSplitter</code>，按段落&#x2F;句子&#x2F;词递归切，<strong>推荐</strong></li>
+</ol>
+<p>经验值：每块 200-800 字，重叠 10-20%。太短信息不足，太长检索粒度太粗。</p>
+<h2 id="七、向量数据库怎么选？"><a href="#七、向量数据库怎么选？" class="headerlink" title="七、向量数据库怎么选？"></a>七、向量数据库怎么选？</h2><p>主流四个：</p>
+<table>
+<thead>
+<tr>
+<th>数据库</th>
+<th>特点</th>
+<th>适合场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Chroma</strong></td>
+<td>轻量、Python 友好</td>
+<td>快速原型、本地开发</td>
+</tr>
+<tr>
+<td><strong>FAISS</strong></td>
+<td>Meta 开源、性能强</td>
+<td>研究场景、本地部署</td>
+</tr>
+<tr>
+<td><strong>Milvus</strong></td>
+<td>分布式、毫秒级万亿向量</td>
+<td>大规模生产</td>
+</tr>
+<tr>
+<td><strong>Pinecone</strong></td>
+<td>全托管、按量付费</td>
+<td>不想运维</td>
+</tr>
+</tbody></table>
+<p><strong>学生阶段选 Chroma</strong>，一个 <code>pip install</code> 就能跑。生产环境用 Milvus。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install chromadb</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> chromadb</span><br><span class="line">client = chromadb.Client()  <span class="comment"># 内存模式</span></span><br><span class="line">collection = client.create_collection(<span class="string">&quot;my_docs&quot;</span>)</span><br><span class="line">collection.add(documents=[<span class="string">&quot;xxx&quot;</span>, <span class="string">&quot;yyy&quot;</span>], ids=[<span class="string">&quot;1&quot;</span>, <span class="string">&quot;2&quot;</span>])</span><br><span class="line">results = collection.query(query_texts=[<span class="string">&quot;查询&quot;</span>], n_results=<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="八、混合检索：BM25-向量"><a href="#八、混合检索：BM25-向量" class="headerlink" title="八、混合检索：BM25 + 向量"></a>八、混合检索：BM25 + 向量</h2><p>课件上提到了”混合检索”——把<strong>传统关键词搜索（BM25）</strong> 和 <strong>向量语义搜索</strong> 结合起来。</p>
+<p>为啥？纯向量检索对”精确关键词”不敏感（比如产品编号、专业术语）。把 BM25 当作兜底，两者分数加权融合，效果更稳。</p>
+<p>这是进阶话题，初学先跳过，知道有这回事就行。</p>
+<h2 id="九、平台实战"><a href="#九、平台实战" class="headerlink" title="九、平台实战"></a>九、平台实战</h2><p>实际做项目时你不一定从零搭，国内几个平台都提供了开箱即用的 RAG：</p>
+<ul>
+<li><strong>阿里云百炼</strong>：上传数据 → 自动建索引 → API 调用</li>
+<li><strong>智谱 BigModel</strong>：内置知识库管理，HTTP 接口</li>
+<li><strong>ModelScope &#x2F; HuggingFace</strong>：开源模型 + 社区 RAG pipeline</li>
+</ul>
+<blockquote>
+<p>个人看法：学习阶段手写一遍流程，工作中直接用平台，能省一周工作量。</p>
+</blockquote>
+<h2 id="十、一个最简-RAG-代码骨架"><a href="#十、一个最简-RAG-代码骨架" class="headerlink" title="十、一个最简 RAG 代码骨架"></a>十、一个最简 RAG 代码骨架</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain_community.document_loaders <span class="keyword">import</span> TextLoader</span><br><span class="line"><span class="keyword">from</span> langchain_text_splitters <span class="keyword">import</span> RecursiveCharacterTextSplitter</span><br><span class="line"><span class="keyword">from</span> langchain_openai <span class="keyword">import</span> OpenAIEmbeddings, ChatOpenAI</span><br><span class="line"><span class="keyword">from</span> langchain_community.vectorstores <span class="keyword">import</span> FAISS</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 加载文档</span></span><br><span class="line">docs = TextLoader(<span class="string">&quot;knowledge.txt&quot;</span>).load()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 切块</span></span><br><span class="line">splitter = RecursiveCharacterTextSplitter(chunk_size=<span class="number">500</span>, chunk_overlap=<span class="number">50</span>)</span><br><span class="line">chunks = splitter.split_documents(docs)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 向量化 + 存 FAISS</span></span><br><span class="line">vectordb = FAISS.from_documents(chunks, OpenAIEmbeddings())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 检索 + 生成</span></span><br><span class="line">retriever = vectordb.as_retriever()</span><br><span class="line">query = <span class="string">&quot;公司的差旅住宿标准是什么？&quot;</span></span><br><span class="line">relevant = retriever.invoke(query)</span><br><span class="line">context = <span class="string">&quot;\n&quot;</span>.join([d.page_content <span class="keyword">for</span> d <span class="keyword">in</span> relevant])</span><br><span class="line"></span><br><span class="line">prompt = <span class="string">f&quot;参考以下资料回答问题：\n<span class="subst">&#123;context&#125;</span>\n\n问题：<span class="subst">&#123;query&#125;</span>&quot;</span></span><br><span class="line">llm = ChatOpenAI(model=<span class="string">&quot;gpt-3.5-turbo&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(llm.invoke(prompt).content)</span><br></pre></td></tr></table></figure>
+
+<p>读懂这段，你就掌握了 80% 的 RAG 实战。</p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>RAG 不神秘，核心就三件事：<strong>把文档变向量、把问题变向量、找最近的喂给模型</strong>。</p>
+<p>但工程上有很多坑：chunk 怎么切、Embedding 怎么选、Top K 取多少、Prompt 怎么拼——这些细节要靠项目积累。</p>
+<p>下一步准备用 Chroma + LangChain 搭一个能查自己笔记的 RAG 助手，到时候把踩坑记录写出来。</p>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+            <a class="post-nav-item prev" href="/2026/09/03/prompt-engineering-guide/">
+              <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
+              <span class="nav-title">提示工程实战：跟大模型说话也有&#34;话术&#34;</span>
+            </a>
+          
+          
+            <a class="post-nav-item next" href="/2026/09/03/langchain-quickstart/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">LangChain 入门：让大模型变成你的「乐高积木」</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

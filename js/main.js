@@ -45,6 +45,21 @@
     progress.style.width = pct + '%';
   }
 
+  /* ---------- 文章页返回按钮 ---------- */
+  var postBack = document.getElementById('post-back');
+  if (postBack) {
+    postBack.addEventListener('click', function (e) {
+      var referrer = document.referrer;
+      var sameOrigin = false;
+      try { sameOrigin = !!referrer && new URL(referrer).host === location.host; } catch (err) {}
+      if (sameOrigin) {
+        e.preventDefault();
+        history.back();
+      }
+      // 非站内进入（直接打开 / 新标签页）时走默认 href，回到归档页
+    });
+  }
+
   /* ---------- 返回顶部 ---------- */
   var backTop = document.getElementById('back-top');
   function updateBackTop() {
