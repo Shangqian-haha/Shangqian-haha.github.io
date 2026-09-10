@@ -160,7 +160,7 @@
           
         </div>
         
-          <div class="post-cover"><img src="/img/cover-2.svg" alt="RAG 入门：让大模型「带书考试」"></div>
+          <div class="post-cover"><img src="/img/cover_rag-explained.png" alt="RAG 入门：让大模型「带书考试」"></div>
         
       </header>
 
@@ -224,7 +224,8 @@
 </tr>
 </tbody></table>
 <p><strong>简单记忆</strong>：RAG 是”加参考书”，微调是”重新教一遍”。大多数企业场景 RAG 就够了，微调留给”模型要彻底掌握某种风格&#x2F;逻辑”的少数场景。</p>
-<h2 id="三、工作流程：索引-检索生成"><a href="#三、工作流程：索引-检索生成" class="headerlink" title="三、工作流程：索引 + 检索生成"></a>三、工作流程：索引 + 检索生成</h2><p>RAG 系统分两阶段：</p>
+<h2 id="三、工作流程：索引-检索生成"><a href="#三、工作流程：索引-检索生成" class="headerlink" title="三、工作流程：索引 + 检索生成"></a>三、工作流程：索引 + 检索生成</h2><p>RAG 系统分两阶段。先看一张完整的请求流程图——上面那个虚线框是<strong>离线</strong>只做一次的索引，下面那条线是<strong>每次提问</strong>都会走一遍的检索生成：</p>
+<p><img src="/img/rag-request-flow.png" alt="RAG 完整请求流程：上排为离线索引（原始文档 → Embedding → 写入向量数据库），下排为在线检索生成（用户提问 → 向量检索 Top-K → Prompt 拼接 → LLM 生成）"></p>
 <h3 id="阶段一：索引（Indexing，提前做）"><a href="#阶段一：索引（Indexing，提前做）" class="headerlink" title="阶段一：索引（Indexing，提前做）"></a>阶段一：索引（Indexing，提前做）</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">加载文件 → 读取文本 → 文本分割 → 向量化 → 存入向量库</span><br></pre></td></tr></table></figure>
 
 <p>把文档喂进系统：</p>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>用 AI + Obsidian 搭一个「会长大」的知识库 · Shang Qian</title>
+<meta name="description" content="从零搭一个 LLM 知识库：9 个编号文件夹、5 套笔记模板、6 个 MOC 索引、AI 负责拆题与补链接，最后长成 55 个节点、147 条关联的知识图谱。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          
+          
+            <a class="nav-link" href="/">首页</a>
+          
+        
+          
+          
+            <div class="nav-item has-dropdown">
+              <button class="nav-link nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                <span>文章汇总</span>
+                <i class="fa-solid fa-chevron-down nav-chevron" aria-hidden="true"></i>
+              </button>
+              <ul class="nav-dropdown">
+                
+                  <li><a class="nav-dropdown-link" href="/archives/">归档</a></li>
+                
+                  <li><a class="nav-dropdown-link" href="/categories/">分类</a></li>
+                
+                  <li><a class="nav-dropdown-link" href="/tags/">标签</a></li>
+                
+              </ul>
+            </div>
+          
+        
+          
+          
+            <a class="nav-link" href="/shuoshuo/">说说</a>
+          
+        
+          
+          
+            <a class="nav-link" href="/link/">友链</a>
+          
+        
+          
+          
+            <a class="nav-link" href="/about/">关于</a>
+          
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+      <button class="header-scroll-top-btn" id="header-scroll-top-btn" type="button" title="返回顶部" aria-label="返回顶部" aria-hidden="true">
+        <span class="header-scroll-top-progress" aria-hidden="true"></span>
+        <span class="header-scroll-top-percent" aria-hidden="true">0</span>
+        <i class="fa-solid fa-arrow-up header-scroll-top-icon" aria-hidden="true"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>cd ..</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/obsidian-ai-knowledge-base</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">用 AI + Obsidian 搭一个「会长大」的知识库</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-09-10T02:00:00.000Z">2026-09-10</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E7%9F%A5%E8%AF%86%E7%AE%A1%E7%90%86/">知识管理</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#大模型</a><a href="/tags/Obsidian/">#Obsidian</a><a href="/tags/%E7%9F%A5%E8%AF%86%E5%BA%93/">#知识库</a><a href="/tags/AI/">#AI</a><a href="/tags/MOC/">#MOC</a><a href="/tags/%E7%9F%A5%E8%AF%86%E7%AE%A1%E7%90%86/">#知识管理</a>
+            </span>
+          
+        </div>
+        
+          <div class="post-cover"><img src="/img/cover_obsidian-ai-knowledge-base.jpg" alt="用 AI + Obsidian 搭一个「会长大」的知识库"></div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%85%88%E6%83%B3%E6%B8%85%E6%A5%9A%EF%BC%9A%E6%94%B6%E8%97%8F%E5%A4%B9%E4%B8%8D%E6%98%AF%E7%9F%A5%E8%AF%86%E5%BA%93"><span class="toc-text">一、先想清楚：收藏夹不是知识库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%B7%A5%E5%85%B7%E9%80%89%E5%9E%8B%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%80%E5%90%8E%E8%90%BD%E5%9C%A8-Obsidian"><span class="toc-text">二、工具选型：为什么最后落在 Obsidian</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%EF%BC%9A9-%E4%B8%AA%E6%96%87%E4%BB%B6%E5%A4%B9%EF%BC%8C%E9%87%8D%E7%82%B9%E6%98%AF%E7%BC%96%E5%8F%B7"><span class="toc-text">三、目录结构：9 个文件夹，重点是编号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E4%BA%94%E5%A5%97%E6%A8%A1%E6%9D%BF%EF%BC%9A%E8%AE%A9%E6%AF%8F%E7%AF%87%E7%AC%94%E8%AE%B0%E9%83%BD%E6%9C%89%E4%B8%80%E6%A0%B7%E7%9A%84%E9%AA%A8%E6%9E%B6"><span class="toc-text">四、五套模板：让每篇笔记都有一样的骨架</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81MOC%EF%BC%9A%E7%BB%99%E7%9F%A5%E8%AF%86%E5%BA%93%E8%A3%85%E4%B8%8A%E7%B4%A2%E5%BC%95"><span class="toc-text">五、MOC：给知识库装上索引</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81AI-%E5%88%B0%E5%BA%95%E5%B9%B2%E4%BB%80%E4%B9%88%EF%BC%9A%E5%AE%83%E6%98%AF%E6%95%B4%E7%90%86%E5%B7%A5%EF%BC%8C%E4%B8%8D%E6%98%AF%E4%BD%9C%E8%80%85"><span class="toc-text">六、AI 到底干什么：它是整理工，不是作者</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E6%88%90%E6%9E%9C%EF%BC%9A55-%E4%B8%AA%E8%8A%82%E7%82%B9%E3%80%81147-%E6%9D%A1%E5%85%B3%E8%81%94"><span class="toc-text">七、成果：55 个节点、147 条关联</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%85%AB%E4%B8%AA%E5%9D%91"><span class="toc-text">八、八个坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E4%B8%80%E5%91%A8%E5%90%8E%E8%87%AA%E6%9F%A5%E6%B8%85%E5%8D%95"><span class="toc-text">九、一周后自查清单</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%90%8E"><span class="toc-text">最后</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>我前阵子整理电脑，发现笔记散在几个地方。</p>
+<p>课件 PDF、浏览器收藏夹里几十个”待看”的技术贴、备忘录里偶尔冒出来的半句话、微信里转发给自己的几篇长文——东西不算多，但找的时候全靠运气。打开备忘录想找上次记的东西，大概率得翻半天。</p>
+<p>最让我难受的一次，是看一份 Transformer 资料时随手记了句”位置编码（Positional Encoding）”。过了两周想用，搜遍所有地方，愣是没找到。</p>
+<p>后来想了想：不是笔记太少，是没个体系。</p>
+<p>所以这次花了点时间，用 Obsidian 配合 AI，专门给”大语言模型”这块知识搭了个库。目前的状态是：<strong>9 大主题分支、55 篇笔记、147 条知识关联</strong>。</p>
+<p>这篇把整套结构、模板、AI 用法和踩过的坑都记下来。</p>
+<h2 id="一、先想清楚：收藏夹不是知识库"><a href="#一、先想清楚：收藏夹不是知识库" class="headerlink" title="一、先想清楚：收藏夹不是知识库"></a>一、先想清楚：收藏夹不是知识库</h2><p>很多人（包括以前的我）会把这两件事混起来。其实它们的目标完全不一样：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>收藏夹</th>
+<th>知识库</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>存什么</td>
+<td>原文、链接、截图</td>
+<td>你自己消化后的笔记</td>
+</tr>
+<tr>
+<td>怎么找</td>
+<td>靠记忆一层层翻</td>
+<td>靠搜索和双链直达</td>
+</tr>
+<tr>
+<td>笔记之间</td>
+<td>互相孤立</td>
+<td>互相引用</td>
+</tr>
+<tr>
+<td>时间越久</td>
+<td>越堆越乱</td>
+<td>越用越密</td>
+</tr>
+</tbody></table>
+<p>我给自己定了三条验收标准，缺一条就说明这个库还没立住：</p>
+<ol>
+<li><strong>能检索</strong>——任何一个名词，三秒内能在库里找到它</li>
+<li><strong>能关联</strong>——从”注意力机制”能一路点着链接走到”Transformer”</li>
+<li><strong>能生长</strong>——新知识进来时，你知道它该落在哪儿</li>
+</ol>
+<p>第 3 条最关键。收藏夹也能满足前两条的幻觉，但它没有”生长的地方”，只会变胖。</p>
+<h2 id="二、工具选型：为什么最后落在-Obsidian"><a href="#二、工具选型：为什么最后落在-Obsidian" class="headerlink" title="二、工具选型：为什么最后落在 Obsidian"></a>二、工具选型：为什么最后落在 Obsidian</h2><p>我认真比过四种，最后选了 Obsidian：</p>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>数据形态</th>
+<th>强项</th>
+<th>弱项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Obsidian</strong></td>
+<td>本地 Markdown 纯文本</td>
+<td>双链、关系图谱、插件生态、离线可用</td>
+<td>协作弱、上手有一点门槛</td>
+</tr>
+<tr>
+<td>Notion</td>
+<td>云端块 + 数据库</td>
+<td>数据库视图、多人实时协作</td>
+<td>导出格式不干净、强依赖网络</td>
+</tr>
+<tr>
+<td>Logseq</td>
+<td>本地 Markdown（大纲式）</td>
+<td>块引用、日记流</td>
+<td>写”概念笔记”不如 Obsidian 顺手</td>
+</tr>
+<tr>
+<td>飞书 &#x2F; 语雀</td>
+<td>云端富文本</td>
+<td>团队共享、评论</td>
+<td>数据存在别人的服务器上</td>
+</tr>
+</tbody></table>
+<p>选它的三个理由，都不是”因为它好看”：</p>
+<p><strong>第一，数据是我的。</strong> 整个库就是一堆 <code>.md</code> 文件，哪天不用 Obsidian 了，VS Code、Typora 照样打开。这叫<strong>逃生能力</strong>——我不会因为换了个软件就丢掉五年笔记。</p>
+<p><strong>第二，双链是这个系统的发动机。</strong> 写一句 <code>[[注意力机制 Attention]]</code>，关系就自动存下来了，那张花里胡哨的关系图谱只是副产品。这是 Notion 那种”数据库思维”给不了的东西。</p>
+<p><strong>第三，价格干净。</strong> 官方定价页（obsidian.md&#x2F;pricing）写得明明白白：<strong>个人使用免费，无限制、无需注册、核心功能和社区插件全部包含</strong>。可选的是加购服务：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>价格</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>个人使用</td>
+<td>免费</td>
+<td>无限制，全部核心功能</td>
+</tr>
+<tr>
+<td>Sync</td>
+<td>$4 &#x2F;用户&#x2F;月（年付）、$5（月付）</td>
+<td>端到端加密的跨设备同步</td>
+</tr>
+<tr>
+<td>Publish</td>
+<td>$8 &#x2F;站点&#x2F;月（年付）、$10（月付）</td>
+<td>把笔记发布成网站</td>
+</tr>
+<tr>
+<td>Commercial</td>
+<td>$50 &#x2F;用户&#x2F;年</td>
+<td>商业授权</td>
+</tr>
+<tr>
+<td>Catalyst</td>
+<td>$25（一次性）</td>
+<td>支持开发者，可提前用 Beta 版</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>一个容易误传的点</strong>：官方 FAQ 明确写了——<strong>商业用途并不强制付费</strong>。它只是”鼓励”在组织内使用的人购买授权，好让 Obsidian 保持 100% 用户支持。另外学生、教师、非营利组织员工，Sync 和 Publish 都有 <strong>40% 折扣</strong>。</p>
+</blockquote>
+<p>版本方面，我用的是桌面版 v1.x，插件只留了三款：<strong>Dataview</strong>（把笔记当数据库查询）、<strong>Templater</strong>（模板自动化）、<strong>Style Settings</strong>（调样式）。就这三个，够用很久了。</p>
+<h2 id="三、目录结构：9-个文件夹，重点是编号"><a href="#三、目录结构：9-个文件夹，重点是编号" class="headerlink" title="三、目录结构：9 个文件夹，重点是编号"></a>三、目录结构：9 个文件夹，重点是编号</h2><p>先说结论：<strong>不要一上来就研究分类学。</strong> 用”编号 + 一层目录”就够了。我这 9 个分支：</p>
+<table>
+<thead>
+<tr>
+<th>文件夹</th>
+<th>装什么</th>
+<th>典型笔记</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>00-收件箱</code></td>
+<td>还没想好放哪的</td>
+<td>临时摘录、待整理的链接</td>
+</tr>
+<tr>
+<td><code>01-基础概念</code></td>
+<td>名词解释级</td>
+<td>什么是大语言模型、Token 与词元、参数与模型规模、涌现能力 Emergent Abilities</td>
+</tr>
+<tr>
+<td><code>02-架构原理</code></td>
+<td>模型内部怎么运转</td>
+<td>Transformer、注意力机制 Attention、位置编码 Positional Encoding、上下文窗口 Context Window</td>
+</tr>
+<tr>
+<td><code>03-模型对比</code></td>
+<td>各家模型横向比</td>
+<td>模型对比总览、Qwen 系列、LLaMA 系列、DeepSeek 系列、Claude 系列、Gemini 系列、GPT-4 与 GPT-4o</td>
+</tr>
+<tr>
+<td><code>04-训练与微调</code></td>
+<td>模型是怎么练出来的</td>
+<td>预训练 Pre-training、监督微调 SFT、指令微调 Instruction Tuning、RLHF 与对齐、LoRA 与 QLoRA</td>
+</tr>
+<tr>
+<td><code>05-提示词工程</code></td>
+<td>怎么跟模型说话</td>
+<td>提示词工程入门、少样本提示 Few-shot、思维链 Chain-of-Thought</td>
+</tr>
+<tr>
+<td><code>06-应用场景</code></td>
+<td>能拿它干什么</td>
+<td>RAG 检索增强生成、AI Agent 智能体、Function Calling 工具调用、代码助手、智能客服与对话系统</td>
+</tr>
+<tr>
+<td><code>07-学习资源</code></td>
+<td>学它的资料</td>
+<td>学习路线图、必读论文清单、推荐书籍、推荐课程</td>
+</tr>
+<tr>
+<td><code>08-模板</code></td>
+<td>笔记的模具</td>
+<td>概念笔记模板、模型笔记模板、论文阅读模板、应用案例模板、学习资源模板</td>
+</tr>
+</tbody></table>
+<p>看着挺简单，但有三个细节是踩过坑才明白的：</p>
+<p><strong>1. 编号是为了排序。</strong> Obsidian 左侧文件树按名称排序。加了 <code>00-</code> <code>01-</code> 之后，顺序就固定了，不会今天打开<code>基础概念</code>在第一个、明天在第七个。这个稳定性比你想的重要——它是你脑子里的地图。</p>
+<p><strong>2. 一条笔记只进一个文件夹。</strong> 文件夹管<strong>归属</strong>（唯一），关系交给<strong>双链</strong>（可以有很多）。不然你会在”这篇到底放 02 还是 06”上纠结十分钟，纠结完就不想写了。</p>
+<p><strong>3. <code>00-收件箱</code> 必须存在。</strong> 它是缓冲带。看到好东西但不想中断当前思路，先扔进去，每周清一次。没有这个池子，你会在”这篇该放哪”上耗光所有热情。</p>
+<h2 id="四、五套模板：让每篇笔记都有一样的骨架"><a href="#四、五套模板：让每篇笔记都有一样的骨架" class="headerlink" title="四、五套模板：让每篇笔记都有一样的骨架"></a>四、五套模板：让每篇笔记都有一样的骨架</h2><p>有人觉得模板是形式主义。但知识库真正的敌人不是”写得少”，是**”写得不一样”**——这篇有三个字段、那篇一个都没有，半年后你自己都不知道当初记的是什么。</p>
+<p>我用得最多的是概念笔记模板：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">type: concept</span><br><span class="line">status: seedling        # seedling / growing / evergreen</span><br><span class="line">created: 2026-09-10</span><br><span class="line">tags:</span><br><span class="line"><span class="bullet">  -</span> LLM/基础概念</span><br><span class="line"><span class="section">source:</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line"><span class="section"># &#123;&#123;title&#125;&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="section">## 一句话定义</span></span><br><span class="line">（用一句人话讲清楚，不许抄原文）</span><br><span class="line"></span><br><span class="line"><span class="section">## 为什么需要它</span></span><br><span class="line">（它解决了什么问题？没有它之前大家是怎么干的？）</span><br><span class="line"></span><br><span class="line"><span class="section">## 怎么工作</span></span><br><span class="line">（机制。能画图就画图）</span><br><span class="line"></span><br><span class="line"><span class="section">## 类比</span></span><br><span class="line">（它跟生活里的什么东西像）</span><br><span class="line"></span><br><span class="line"><span class="section">## 常见误解</span></span><br><span class="line"><span class="bullet">-</span></span><br><span class="line"></span><br><span class="line"><span class="section">## 相关</span></span><br><span class="line"><span class="bullet">-</span> [[]]</span><br></pre></td></tr></table></figure>
+
+<p>剩下四套（模型笔记、论文阅读、应用案例、学习资源）骨架同源，只是换字段——比如模型笔记会多出 <code>参数规模</code>、<code>上下文长度</code>、<code>开源与否</code>，论文阅读会多出 <code>arXiv 编号</code>、<code>核心贡献</code>、<code>局限</code>。</p>
+<p>那 <code>status</code> 字段是我最喜欢的：</p>
+<ul>
+<li><code>seedling</code>：刚建，可能只有一句话</li>
+<li><code>growing</code>：有骨架了，但还是漏的</li>
+<li><code>evergreen</code>：稳定了，可以当参考了</li>
+</ul>
+<p>它解决的是一个很隐蔽的心理问题——<strong>允许你写半成品</strong>。很多人的知识库死于”这篇没写完，先不发”，结果收件箱堆成山。有了 <code>seedling</code>，五分钟也能落一条。</p>
+<h2 id="五、MOC：给知识库装上索引"><a href="#五、MOC：给知识库装上索引" class="headerlink" title="五、MOC：给知识库装上索引"></a>五、MOC：给知识库装上索引</h2><p>MOC &#x3D; Map of Content，内容地图。说人话就是<strong>一张目录页</strong>。我一共建了 6 个：</p>
+<p><code>MOC-基础概念</code>、<code>MOC-架构原理</code>、<code>MOC-模型对比</code>、<code>MOC-训练与微调</code>、<code>MOC-应用场景</code>、<code>MOC-学习资源</code></p>
+<p>它长这样，全是链接：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># MOC-架构原理</span></span><br><span class="line"></span><br><span class="line"><span class="quote">&gt; 模型内部怎么运转。从&quot;一句话怎么变成下一个词&quot;开始。</span></span><br><span class="line"></span><br><span class="line"><span class="section">## 骨架</span></span><br><span class="line"><span class="bullet">-</span> [[Transformer]] —— 一切的起点</span><br><span class="line"><span class="bullet">-</span> [[注意力机制 Attention]]</span><br><span class="line"><span class="bullet">-</span> [[位置编码 Positional Encoding]]</span><br><span class="line"></span><br><span class="line"><span class="section">## 工程相关</span></span><br><span class="line"><span class="bullet">-</span> [[上下文窗口 Context Window]]</span><br><span class="line"><span class="bullet">-</span> [[模型量化 Quantization]]</span><br><span class="line"><span class="bullet">-</span> [[推理与解码 Decoding]] [[向量数据库]]</span><br><span class="line"></span><br><span class="line"><span class="section">## 待补</span></span><br><span class="line"><span class="bullet">-</span> [ ] 混合专家 MoE</span><br><span class="line"><span class="bullet">-</span> [ ] 稀疏注意力</span><br></pre></td></tr></table></figure>
+
+<p><strong>为什么必须有 MOC？</strong> 因为双链图谱一过 50 篇就会变成一团毛线球。</p>
+<p>你可以看我第一张截图里的关系图谱：如果没有枢纽节点，所有笔记会均匀地互相连接，看起来热闹，实际上没有结构——就像一堆人互相都点头认识，但没有一个是能召集大家的。</p>
+<p>MOC 就是那个召集人。而且它有个特权：<strong>只有 MOC 允许”什么都往里塞”</strong>。别的笔记要克制、要原子化，MOC 不用。</p>
+<h2 id="六、AI-到底干什么：它是整理工，不是作者"><a href="#六、AI-到底干什么：它是整理工，不是作者" class="headerlink" title="六、AI 到底干什么：它是整理工，不是作者"></a>六、AI 到底干什么：它是整理工，不是作者</h2><p>这段是全文我最想强调的。</p>
+<p>先把不该让 AI 干的事说清楚：</p>
+<table>
+<thead>
+<tr>
+<th>不要让它做</th>
+<th>为什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>替你理解概念</td>
+<td>它给你的是”看起来对”的转述，你脑子里还是空的</td>
+</tr>
+<tr>
+<td>直接写终稿</td>
+<td>会有术语错配、版本混淆，专业领域还会编数据</td>
+</tr>
+<tr>
+<td>替你决定分类</td>
+<td>它不知道你的心智模型，分出来的组你根本找不着</td>
+</tr>
+</tbody></table>
+<p>我实际用下来，它真正有价值的是四件事。</p>
+<p><strong>1. 拆题</strong>——给一份课件或一篇论文，拆成”原子笔记清单”：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">下面是一份课件的文字内容。请帮我拆成若干条&quot;原子笔记&quot;。</span><br><span class="line">粒度参考：一条笔记 = 一个能在 5 分钟内读完的概念。</span><br><span class="line">输出格式：概念名 | 一句话说明 | 它和哪些已有概念相关</span><br><span class="line">不要展开写内容，只要清单。</span><br><span class="line"></span><br><span class="line">已有笔记列表：</span><br><span class="line">（把 07-学习资源 里的笔记名贴进来）</span><br></pre></td></tr></table></figure>
+
+<p>这一步的价值是<strong>把”一整块 PPT”变成”往哪放”的答案</strong>。</p>
+<p><strong>2. 按模板生成初稿</strong>——把上面拆出来的概念名，一条条配着模板丢给它，生成待加工的骨架。注意是”骨架”：定义和类比必须我自己填。</p>
+<p><strong>3. 补链接</strong>——这是投入产出比最高的一步：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">这是我们知识库现有的全部笔记名：</span><br><span class="line">（贴列表）</span><br><span class="line"></span><br><span class="line">这是我新写的一篇笔记：</span><br><span class="line">（贴内容）</span><br><span class="line"></span><br><span class="line">请指出这篇笔记里哪些词应该加 [[ ]] 链接到已有笔记。</span><br><span class="line">只输出「原文片段 → 目标笔记名」的对应关系，不要改我的正文。</span><br></pre></td></tr></table></figure>
+
+<p>我漏链接的情况非常多，尤其是同一概念的中英文两种写法（”注意力机制” vs “Attention”）。</p>
+<p><strong>4. 查漏</strong>——让它找孤立节点：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">以下笔记的入链数为 0：（贴列表）</span><br><span class="line">请判断这些笔记是不是&quot;该被链接但漏了&quot;。</span><br><span class="line">如果是，告诉我应该从哪篇笔记链过来。</span><br></pre></td></tr></table></figure>
+
+<p><strong>唯一的纪律是：AI 的输出必须过一遍手。</strong> 判断标准很朴素——读完这段内容，你能不能用大白话给朋友复述一遍？不能，就说明这段笔记还没变成你的，不如不建。</p>
+<h2 id="七、成果：55-个节点、147-条关联"><a href="#七、成果：55-个节点、147-条关联" class="headerlink" title="七、成果：55 个节点、147 条关联"></a>七、成果：55 个节点、147 条关联</h2><p>搭到现在的样子。</p>
+<p>Obsidian 的关系图谱：</p>
+<p><img src="/img/obsidian-graph-view.png" alt="Obsidian 关系图谱：55 个笔记节点互相连接，中间的 MOC 是枢纽"></p>
+<p>同一批笔记，换个方式看（按主题着色的 3D 知识星球）：</p>
+<p><img src="/img/llm-knowledge-planet.png" alt="知识星球：按 9 大主题分支着色的 3D 知识图谱，55 笔记节点 &#x2F; 147 知识连接"></p>
+<p><strong>怎么读图谱？</strong> 我把它当”体检报告”，主要看三件事：</p>
+<ul>
+<li><strong>密集区 &#x3D; 已经成型的地方。</strong> 中间那块（架构原理 + 基础概念）连得最密，说明这块我确实搞懂了，能互相印证。</li>
+<li><strong>孤岛 &#x3D; 还没接上。</strong> 孤零零飘在外面的点，要么是刚建的 <code>seedling</code>，要么是分类放错了。每周处理一批。</li>
+<li><strong>平均关联数 &#x3D; 密度。</strong> 这个数字最能说明问题：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>笔记节点</td>
+<td>55</td>
+</tr>
+<tr>
+<td>知识关联</td>
+<td>147</td>
+</tr>
+<tr>
+<td>主题分支</td>
+<td>9</td>
+</tr>
+<tr>
+<td>已成型模板</td>
+<td>5</td>
+</tr>
+<tr>
+<td>MOC 索引</td>
+<td>6</td>
+</tr>
+<tr>
+<td>平均每篇关联数</td>
+<td>≈ 2.7</td>
+</tr>
+</tbody></table>
+<p><strong>平均 2.7 条，说实话偏低。</strong> 我理解一个健康运转的库应该在 4~5 之间。这说明我还有相当一部分笔记是”孤零零躺着”的——图谱把这个问题直接摆在脸上了，这比任何自我感觉都准。</p>
+<h2 id="八、八个坑"><a href="#八、八个坑" class="headerlink" title="八、八个坑"></a>八、八个坑</h2><ol>
+<li><strong>先建目录再写笔记，是错的。</strong> 对着九个空文件夹你会完全不知道写什么。正确顺序是：先随手写 10 篇，再回头按它们的样子总结出目录。</li>
+<li><strong>文件夹和标签不要混用。</strong> 我的规矩是——文件夹管归属（唯一），标签管属性（可多个）。<code>#LLM/基础概念</code> 这种层级标签很好用，但别拿它当第二个文件夹。</li>
+<li><strong>别追求一次写完美。</strong> 靠 <code>status: seedling</code> 机制放过自己，也放过知识库。</li>
+<li><strong>AI 生成的内容必须过手。</strong> 幻觉在专业术语上特别隐蔽——它会把 LoRA 和 QLoRA 说成一回事，写得还挺自信。</li>
+<li><strong>一定要备份。</strong> <code>git init</code> 一个私有仓库，一天一次。<code>.obsidian/</code> 目录建议一起提交，那是你的插件配置和快捷键，丢了要重来一遍；但<strong>排除 <code>.obsidian/workspace.json</code></strong>，那是”当前开了哪几个窗口”的状态，每次都会变，提交了纯属噪音。</li>
+<li><strong>收件箱不清 &#x3D; 知识库死掉。</strong> 这是最常见也最致命的死法。定个闹钟，每周日清一次。</li>
+<li><strong>别一上来装二十个插件。</strong> 装了不用会拖慢启动，还可能互相冲突。我只有三个。</li>
+<li><strong>图谱好看不等于有用。</strong> 它是体检报告，不是成绩单。它能告诉你哪里空，不能替你理解。</li>
+</ol>
+<h2 id="九、一周后自查清单"><a href="#九、一周后自查清单" class="headerlink" title="九、一周后自查清单"></a>九、一周后自查清单</h2><p>攒够一周再来看这几条，比看十篇教程都管用：</p>
+<ul>
+<li><input disabled="" type="checkbox"> 目录建好了，且不超过 10 个文件夹</li>
+<li><input disabled="" type="checkbox"> 至少有 1 套固定模板</li>
+<li><input disabled="" type="checkbox"> 至少有 3 个 MOC</li>
+<li><input disabled="" type="checkbox"> 收件箱不超过 10 条</li>
+<li><input disabled="" type="checkbox"> 配了 git 备份，且排除了 <code>workspace.json</code></li>
+<li><input disabled="" type="checkbox"> 每篇笔记都有 <code>status</code> 字段</li>
+</ul>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>知识库最反直觉的一点是：<strong>它一开始一定是空的，而且会难用一段时间。</strong></p>
+<p>坚持到大概 30 篇，你会第一次体验到”搜一下，它就跳出来了”的快感；到 50 篇，图谱开始有形状，你能看出自己的知识缺口；再往后，你就不是在”记笔记”了——是在<strong>养一个东西</strong>。</p>
+<p>这套结构我目前搭到了 55 篇。下一步是把 <code>06-应用场景</code> 那块补上实操案例，毕竟概念看懂了，不代表真能写出代码来。</p>
+<blockquote>
+<p>记笔记的终点不是”我记过”，而是”我能在需要的时候调出来”。</p>
+</blockquote>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+          
+            <a class="post-nav-item next" href="/2026/09/09/user-analysis/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">用户分析入门：给每个用户画一张&#34;画像&#34;</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>
