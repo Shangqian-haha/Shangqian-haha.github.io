@@ -10,7 +10,7 @@ tags:
   - LangGraph
   - AutoGen
 description: 讲清楚 AI Agent 到底是什么、它和普通大模型的区别在哪、四大组件怎么协作、五个主流框架怎么选。
-cover: /img/cover-1.svg
+cover: /img/cover_ai-agent-intro.jpg
 ---
 
 如果说 2023 年是大模型的元年，2024 年就是 **AI Agent 的元年**。

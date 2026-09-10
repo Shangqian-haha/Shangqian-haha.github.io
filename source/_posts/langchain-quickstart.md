@@ -9,7 +9,7 @@ tags:
   - LLM
   - Python
 description: 把 LangChain 当成乐高，这篇笔记帮你把六大核心组件、提示词模板、输出解析器串成一条完整的链。
-cover: /img/cover-1.svg
+cover: /img/cover_langchain-quickstart.png
 ---
 
 最近上课讲到 LangChain，老师反复强调一句话：**"LangChain 是给大模型应用做脚手架的"**。一开始我以为又是什么花里胡哨的概念，听完课后自己动手敲了一遍代码，发现它确实把"调大模型"这件本来挺折腾的事，变得像拼乐高一样有章法。

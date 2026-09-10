@@ -8,7 +8,7 @@ tags:
   - 数据分析师
   - 业务分析
 description: 搞懂数据分析到底在干嘛、和数仓工程师的区别在哪、以及数据分析师真正该练的技能到底是什么。
-cover: /img/cover-1.svg
+cover: /img/cover_data-analysis-intro.jpg
 ---
 
 很多人对数据分析有误解，我一开始也是。

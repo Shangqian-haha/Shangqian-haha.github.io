@@ -10,6 +10,7 @@ tags:
   - 不蒜子
   - GitHub Pages
 description: 博客上线后访客统计一直显示「—」，排查半天才发现 busuanzi 时不时抽风，干脆换到了 Vercount。
+cover: /img/cover_vercount-migration.jpg
 ---
 
 博客刚搬到 GitHub Pages 那天，我兴冲冲地打开侧栏的「网站信息」卡——
@@ -23,7 +24,7 @@ description: 博客上线后访客统计一直显示「—」，排查半天才�
 
 得，工具不干活。
 
-## 一、busuanzi（不蒜子）是个啥
+## 一、busuanzi（不蒜子）是什么
 
 `busuanzi.ibruce.info`，国内很多博主都在用的访客统计。原理特别简单：
 

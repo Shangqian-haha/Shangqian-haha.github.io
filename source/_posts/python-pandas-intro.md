@@ -8,7 +8,7 @@ tags:
   - 数据分析
   - Pandas
 description: 记录我用 Pandas 处理数据的入门心得，涵盖数据读取、清洗、分组统计这几个最常用的操作。
-cover: /img/cover-3.svg
+cover: /img/cover_python-pandas-intro.png
 ---
 
 作为大数据专业的学生，Python 是绕不开的工具。今天把 Pandas 最常用的几个操作整理一下，方便日后回看。

@@ -8,7 +8,7 @@ tags:
   - 博客
   - GitHub Pages
 description: 从安装 Node.js 到部署上线，一步步记录我用 Hexo 搭建个人博客的全过程，以及踩过的坑。
-cover: /img/cover-1.svg
+cover: /img/cover_hexo-build-guide.png
 ---
 
 折腾博客这件事，其实是个无底洞。但正是这种「折腾」，让我在一次次推倒重来里，把前端、部署、域名、SEO 这些原本陌生的东西摸了个遍。这篇文章把我从零搭起这个博客的完整过程记录下来，顺便把踩过的坑也一起摊开，省得你再趟一遍。

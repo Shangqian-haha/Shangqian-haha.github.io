@@ -9,7 +9,7 @@ tags:
   - 电商
   - KPI
 description: 从指标体系的定义讲到电商六大模块的常用指标，每个都配了具体数字例子，帮你彻底搞懂那些绕口的 KPI 到底在算啥。
-cover: /img/cover-2.svg
+cover: /img/cover_metrics-system-intro.jpg
 ---
 
 刚开始看电商数据报表，我整个人是懵的：GMV、UV、PV、转化率、客单价、复购率……一堆英文缩写和百分比，**感觉每个都认识，连起来就不知道在说啥**。

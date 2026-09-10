@@ -9,7 +9,7 @@ tags:
   - 后端
   - 接口
 description: 用大白话讲清楚 FastAPI 怎么搭接口：路由、四大请求方法、参数怎么传、文件怎么收，还有那个自动生成的 /docs 文档到底有多香。
-cover: /img/cover-1.svg
+cover: /img/cover_fastapi-basics.png
 ---
 
 以前觉得"写后端接口"是件特别神秘的事，直到上手 FastAPI，才发现原来就是给 Python 函数贴个标签，然后它自己就变成能对外服务的接口了。这篇把我从课件里学到的东西整理一遍，纯大白话，保证看完能"依葫芦画瓢"跑起来。

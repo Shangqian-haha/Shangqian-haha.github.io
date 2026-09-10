@@ -10,7 +10,7 @@ tags:
   - 检索增强生成
   - 向量数据库
 description: 把 RAG 比作开卷考试，这篇笔记带你搞懂为什么需要 RAG、向量化到底是个啥、检索生成怎么串起来。
-cover: /img/cover-2.svg
+cover: /img/cover_rag-explained.png
 ---
 
 老师在课上打了个比方，我觉得特别贴切：**普通大模型是闭卷考试，RAG 是开卷考试**。
@@ -47,7 +47,9 @@ RAG（Retrieval Augmented Generation，检索增强生成）就是用"检索外�
 
 ## 三、工作流程：索引 + 检索生成
 
-RAG 系统分两阶段：
+RAG 系统分两阶段。先看一张完整的请求流程图——上面那个虚线框是**离线**只做一次的索引，下面那条线是**每次提问**都会走一遍的检索生成：
+
+![RAG 完整请求流程：上排为离线索引（原始文档 → Embedding → 写入向量数据库），下排为在线检索生成（用户提问 → 向量检索 Top-K → Prompt 拼接 → LLM 生成）](/img/rag-request-flow.png)
 
 ### 阶段一：索引（Indexing，提前做）
 

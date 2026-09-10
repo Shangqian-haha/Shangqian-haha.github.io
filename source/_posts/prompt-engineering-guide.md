@@ -9,7 +9,7 @@ tags:
   - 提示工程
   - LLM
 description: 把"会跟 AI 说话"当成一门手艺，这篇笔记从入门到进阶，把提示工程的两大原则、五大要素、四大技巧一次讲清。
-cover: /img/cover-3.svg
+cover: /img/cover_prompt-engineering-guide.jpg
 ---
 
 跟大模型聊天这件事，**说得好和说得差，差距能大到让你怀疑它换了个模型**。
