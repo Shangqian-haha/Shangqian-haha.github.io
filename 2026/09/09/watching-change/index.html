@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>看变化入门：从数据涨跌里读出业务真相 · Shang Qian</title>
+<meta name="description" content="学会区分&#34;变化数&#34;和&#34;变化率&#34;，看懂环比和同比到底在比什么——一篇讲透数据分析里最常用的&#34;看变化&#34;方法论。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          
+          
+            <a class="nav-link" href="/">首页</a>
+          
+        
+          
+          
+            <div class="nav-item has-dropdown">
+              <button class="nav-link nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                <span>文章汇总</span>
+                <i class="fa-solid fa-chevron-down nav-chevron" aria-hidden="true"></i>
+              </button>
+              <ul class="nav-dropdown">
+                
+                  <li><a class="nav-dropdown-link" href="/archives/">归档</a></li>
+                
+                  <li><a class="nav-dropdown-link" href="/categories/">分类</a></li>
+                
+                  <li><a class="nav-dropdown-link" href="/tags/">标签</a></li>
+                
+              </ul>
+            </div>
+          
+        
+          
+          
+            <a class="nav-link" href="/shuoshuo/">说说</a>
+          
+        
+          
+          
+            <a class="nav-link" href="/link/">友链</a>
+          
+        
+          
+          
+            <a class="nav-link" href="/about/">关于</a>
+          
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+      <button class="header-scroll-top-btn" id="header-scroll-top-btn" type="button" title="返回顶部" aria-label="返回顶部" aria-hidden="true">
+        <span class="header-scroll-top-progress" aria-hidden="true"></span>
+        <span class="header-scroll-top-percent" aria-hidden="true">0</span>
+        <i class="fa-solid fa-arrow-up header-scroll-top-icon" aria-hidden="true"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>cd ..</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/watching-change</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">看变化入门：从数据涨跌里读出业务真相</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-09-09T07:00:00.000Z">2026-09-09</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">#数据分析</a><a href="/tags/%E7%9C%8B%E5%8F%98%E5%8C%96/">#看变化</a><a href="/tags/%E5%8F%98%E5%8C%96%E7%8E%87/">#变化率</a><a href="/tags/%E7%8E%AF%E6%AF%94/">#环比</a><a href="/tags/%E5%90%8C%E6%AF%94/">#同比</a>
+            </span>
+          
+        </div>
+        
+          <div class="post-cover"><img src="/img/cover_watching-change.jpg" alt="看变化入门：从数据涨跌里读出业务真相"></div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AF%E3%80%8C%E7%9C%8B%E5%8F%98%E5%8C%96%E3%80%8D"><span class="toc-text">一、什么是「看变化」</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%8F%98%E5%8C%96%E6%95%B0-vs-%E5%8F%98%E5%8C%96%E7%8E%87%EF%BC%9A%E7%BB%9D%E5%AF%B9%E9%87%8F-vs-%E7%9B%B8%E5%AF%B9%E9%87%8F"><span class="toc-text">二、变化数 vs 变化率：绝对量 vs 相对量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%8E%AF%E6%AF%94-vs-%E5%90%8C%E6%AF%94%EF%BC%9A%E7%9F%AD%E6%9C%9F-vs-%E9%95%BF%E6%9C%9F"><span class="toc-text">三、环比 vs 同比：短期 vs 长期</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E6%AF%94%EF%BC%88Month-over-Month%EF%BC%89"><span class="toc-text">环比（Month-over-Month）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AF%94%EF%BC%88Year-over-Year%EF%BC%89"><span class="toc-text">同比（Year-over-Year）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E7%85%A7%E8%A1%A8"><span class="toc-text">对照表</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E9%94%99%E7%94%A8%E7%8E%AF%E6%AF%94%E7%9A%84%E4%BB%A3%E4%BB%B7%EF%BC%9A%E5%9B%BD%E5%BA%86%E8%8A%82%E6%A1%88%E4%BE%8B"><span class="toc-text">四、错用环比的代价：国庆节案例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E4%B8%A4%E4%B8%AA%E5%B8%B8%E8%A7%81%E5%9D%91"><span class="toc-text">五、两个常见坑</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%9F%E5%A4%AA%E5%B0%8F%EF%BC%8C%E5%8F%98%E5%8C%96%E7%8E%87%E8%A2%AB%E6%94%BE%E5%A4%A7"><span class="toc-text">坑一：基期太小，变化率被放大</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91%E4%BA%8C%EF%BC%9A%E5%91%A8%E6%9C%9F%E9%94%99%E4%BD%8D"><span class="toc-text">坑二：周期错位</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="toc-text">写在最后</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>之前看数据，我经常只盯着绝对值：这月 GMV 120 万，上月 100 万，涨了 20 万。</p>
+<p>然后呢？<strong>涨 20 万到底是好事还是坏事？</strong></p>
+<p>后来才明白，光看绝对值会骗人。这堂课讲的就是数据分析最基础、也最常用的一种方法论——<strong>看变化</strong>。</p>
+<h2 id="一、什么是「看变化」"><a href="#一、什么是「看变化」" class="headerlink" title="一、什么是「看变化」"></a>一、什么是「看变化」</h2><p>课件的定义很直白：</p>
+<blockquote>
+<p><strong>看变化 &#x3D; 发现趋势</strong>。通过对比不同时间点的数据，发现趋势与异常，回答一个核心问题：数据涨了还是跌了？涨了多少？跌了多少？</p>
+</blockquote>
+<p>说人话：<strong>就是拿两个时间点的数据放一起比一比，看是涨是跌、幅度多大</strong>。</p>
+<p>它适用的场景，几乎覆盖所有日常业务：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>例子</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>销量走势</td>
+<td>6 月比 5 月卖得多还是少？</td>
+</tr>
+<tr>
+<td>用户增长</td>
+<td>这月新用户是涨了还是跌了？</td>
+</tr>
+<tr>
+<td>收入监控</td>
+<td>季度营收有没有掉？</td>
+</tr>
+<tr>
+<td>转化率波动</td>
+<td>活动期间转化率是否异常？</td>
+</tr>
+</tbody></table>
+<p>一句话记住：<strong>看变化是数据分析的”入门武功”，往后所有高级分析都建立在它上面</strong>。</p>
+<h2 id="二、变化数-vs-变化率：绝对量-vs-相对量"><a href="#二、变化数-vs-变化率：绝对量-vs-相对量" class="headerlink" title="二、变化数 vs 变化率：绝对量 vs 相对量"></a>二、变化数 vs 变化率：绝对量 vs 相对量</h2><p>很多人其实没分清这两个概念。课件用一个最简单的例子把它们拆开：</p>
+<blockquote>
+<p><strong>场景</strong>：某店铺 6 月销售额 100 万，7 月涨到 120 万。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>度量</th>
+<th>计算</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>变化数（绝对量）</strong></td>
+<td>本期 − 上期 &#x3D; 120 − 100</td>
+<td><strong>+20 万</strong></td>
+</tr>
+<tr>
+<td><strong>变化率（相对量）</strong></td>
+<td>（120 − 100）÷ 100 × 100%</td>
+<td><strong>+20%</strong></td>
+</tr>
+</tbody></table>
+<p>看起来差不多？但关注的点完全不一样：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>变化数</th>
+<th>变化率</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>定义</strong></td>
+<td>本期 − 上期</td>
+<td>（本期 − 上期）÷ 上期 × 100%</td>
+</tr>
+<tr>
+<td><strong>回答</strong></td>
+<td>涨了多少？跌了多少？</td>
+<td>涨了百分之几？跌了百分之几？</td>
+</tr>
+<tr>
+<td><strong>单位</strong></td>
+<td>与原数据相同（万元、人）</td>
+<td>百分比（%），无量纲</td>
+</tr>
+<tr>
+<td><strong>优势</strong></td>
+<td>直观、好懂</td>
+<td>能跨量级、跨维度比较</td>
+</tr>
+<tr>
+<td><strong>局限</strong></td>
+<td>不能跨量级</td>
+<td>上期太小时波动会被放大</td>
+</tr>
+</tbody></table>
+<p><strong>关键洞察</strong>：课件里那个特别妙的对比例子——</p>
+<blockquote>
+<p>同样是 GMV 涨 0.3 亿元：2019 年（0.5→1.0）增长率 <strong>30%</strong>；2021 年（1.3→1.5）增长率 <strong>23.1%</strong>。<br>变化数相同，但变化率不同。<strong>变化率更能反映增长的”含金量”</strong>。</p>
+</blockquote>
+<h2 id="三、环比-vs-同比：短期-vs-长期"><a href="#三、环比-vs-同比：短期-vs-长期" class="headerlink" title="三、环比 vs 同比：短期 vs 长期"></a>三、环比 vs 同比：短期 vs 长期</h2><p>这是最容易被搞混的两个概念。课件用两个对照场景把它们讲透。</p>
+<h3 id="环比（Month-over-Month）"><a href="#环比（Month-over-Month）" class="headerlink" title="环比（Month-over-Month）"></a>环比（Month-over-Month）</h3><blockquote>
+<p><strong>定义</strong>：本期与上一期（通常是上个月）比较，反映<strong>短期</strong>变化趋势。<br><strong>公式</strong>：环比增长率 &#x3D;（本期 − 上期）÷ 上期 × 100%</p>
+</blockquote>
+<p>例子：</p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>GMV（万）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>6 月（上期）</td>
+<td>120</td>
+</tr>
+<tr>
+<td>7 月（本期）</td>
+<td>150</td>
+</tr>
+<tr>
+<td><strong>环比增长</strong></td>
+<td>（150−120）&#x2F; 120 &#x3D; <strong>+25%</strong></td>
+</tr>
+</tbody></table>
+<p><strong>特点</strong>：捕捉短期趋势和季节性波动，适合做月度运营复盘、活动效果评估。</p>
+<h3 id="同比（Year-over-Year）"><a href="#同比（Year-over-Year）" class="headerlink" title="同比（Year-over-Year）"></a>同比（Year-over-Year）</h3><blockquote>
+<p><strong>定义</strong>：本期与去年同期比较，<strong>消除季节性影响</strong>，反映长期增长趋势。<br><strong>公式</strong>：同比增长率 &#x3D;（本期 − 去年同期）÷ 去年同期 × 100%</p>
+</blockquote>
+<p>例子：</p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>GMV（万）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2024 年 7 月（去年同期）</td>
+<td>100</td>
+</tr>
+<tr>
+<td>2025 年 7 月（本期）</td>
+<td>150</td>
+</tr>
+<tr>
+<td><strong>同比增长</strong></td>
+<td>（150−100）&#x2F; 100 &#x3D; <strong>+50%</strong></td>
+</tr>
+</tbody></table>
+<p><strong>特点</strong>：消除季节性、反映长期增长，适合做年度业绩评估、战略决策。</p>
+<h3 id="对照表"><a href="#对照表" class="headerlink" title="对照表"></a>对照表</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>环比</th>
+<th>同比</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>比较对象</td>
+<td>本期 vs 上期（相邻月）</td>
+<td>本期 vs 去年同期</td>
+</tr>
+<tr>
+<td>时间跨度</td>
+<td>短期（1 个月）</td>
+<td>长期（12 个月）</td>
+</tr>
+<tr>
+<td>核心优势</td>
+<td>捕捉短期趋势</td>
+<td>消除季节性</td>
+</tr>
+<tr>
+<td>主要局限</td>
+<td>受季节性影响大</td>
+<td>无法反映短期变化</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>月度复盘、活动评估</td>
+<td>年度评估、战略决策</td>
+</tr>
+</tbody></table>
+<h2 id="四、错用环比的代价：国庆节案例"><a href="#四、错用环比的代价：国庆节案例" class="headerlink" title="四、错用环比的代价：国庆节案例"></a>四、错用环比的代价：国庆节案例</h2><p>这一段是课件里最让我警醒的部分——<strong>用错方法，结论能离谱到天上</strong>。</p>
+<blockquote>
+<p><strong>场景</strong>：某 App 国庆节前 7 天 vs 国庆节期间。</p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>活跃用户</th>
+<th>GMV</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>国庆节前 7 天</td>
+<td>4,300</td>
+<td>87,900 元</td>
+</tr>
+<tr>
+<td>国庆节期间</td>
+<td>38,700</td>
+<td>728,000 元</td>
+</tr>
+<tr>
+<td><strong>环比增长率</strong></td>
+<td><strong>+800%</strong></td>
+<td><strong>+728%</strong></td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>如果只看环比，结论就是：”<strong>促销大获成功，活跃用户涨了 800%！</strong>“ ❌</p>
+<p><strong>但这是错的</strong>。原因——国庆节本身就有强季节性，国庆期间所有 App 的活跃用户都会涨。</p>
+<p>正确的做法是<strong>用同比拆解</strong>：</p>
+<blockquote>
+<p><strong>历年国庆节期间活跃用户对比</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>活跃用户</th>
+<th>较前 7 天增幅</th>
+<th>是否做促销</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>前年国庆</td>
+<td>14,000</td>
+<td>+506%</td>
+<td>否</td>
+</tr>
+<tr>
+<td>去年国庆</td>
+<td>23,000</td>
+<td>+501%</td>
+<td>是</td>
+</tr>
+<tr>
+<td>今年国庆</td>
+<td>38,700</td>
+<td>+800%</td>
+<td>是</td>
+</tr>
+</tbody></table>
+</blockquote>
+<p>看出门道了：前年、去年<strong>没做促销</strong>也有约 500% 的自然增长。<strong>今年 800% 里，有 500% 是国庆节送的，剩下 300% 才是促销带来的</strong>。</p>
+<blockquote>
+<p>⚠️ <strong>一句话记住</strong>：遇到特殊时间点（双 11、国庆、春节），<strong>用同比才靠谱</strong>；错用环比，结论能偏出几倍。</p>
+</blockquote>
+<h2 id="五、两个常见坑"><a href="#五、两个常见坑" class="headerlink" title="五、两个常见坑"></a>五、两个常见坑</h2><h3 id="坑一：基期太小，变化率被放大"><a href="#坑一：基期太小，变化率被放大" class="headerlink" title="坑一：基期太小，变化率被放大"></a>坑一：基期太小，变化率被放大</h3><blockquote>
+<p>比如上月只卖了 100 块，本月卖了 500 块，<strong>变化率 +400%</strong>——听着很吓人，但绝对量才涨了 400 块。</p>
+</blockquote>
+<p><strong>对策</strong>：永远把变化率和变化数放一起看，别只盯着百分比。</p>
+<h3 id="坑二：周期错位"><a href="#坑二：周期错位" class="headerlink" title="坑二：周期错位"></a>坑二：周期错位</h3><blockquote>
+<p>把”近 30 天”和”上一自然月”放一起比，<strong>周期长度不一样</strong>（30 天 vs 28~31 天），结论肯定不准。</p>
+</blockquote>
+<p><strong>对策</strong>：月对月、年对年，<strong>周期长度一致才比</strong>。</p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>「看变化」是数据分析里<strong>门槛最低、也最容易被低估</strong>的方法论。一句话总结：</p>
+<blockquote>
+<p><strong>变化数看绝对量，变化率看相对量；环比看短期，同比看长期</strong>。</p>
+</blockquote>
+<p>三个实用建议：</p>
+<ol>
+<li><strong>永远带”两个数”</strong>：只有变化数或只有变化率都会骗你，两个一起看才稳</li>
+<li><strong>特殊时间别用环比</strong>：双 11、春节、国庆这种节令性场景，老老实实用同比</li>
+<li><strong>跨量级比较靠变化率</strong>：100 万涨到 120 万和 1 亿涨到 1.2 亿，绝对数差 100 倍，但增长率都是 20%，<strong>这时候看百分比才有意义</strong></li>
+</ol>
+<p>工具会变，但”看变化”的思路永远用得上。</p>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+            <a class="post-nav-item prev" href="/2026/09/09/making-comparison/">
+              <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
+              <span class="nav-title">作比较入门：没有参照系的数据只是孤零零的数字</span>
+            </a>
+          
+          
+            <a class="post-nav-item next" href="/2026/09/09/user-analysis/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">用户分析入门：给每个用户画一张&#34;画像&#34;</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>
