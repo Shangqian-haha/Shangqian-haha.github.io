@@ -518,8 +518,20 @@ html[data-theme="light"] .theme-toggle .fa-sun { display: inline-block; }
 .post-header { margin-bottom: 10px; }
 .post-title { margin: 0 0 14px; font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -.5px; }
 .post-meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: .88rem; color: var(--muted); margin-bottom: 18px; }
-.post-cover { border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 8px; }
-.post-cover img { width: 100%; }
+.post-cover {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin: 0 auto 8px;
+  aspect-ratio: 16 / 9;
+  max-width: 720px;
+  background: var(--bg-soft);
+}
+.post-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 .post-content-wrap {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 220px;
