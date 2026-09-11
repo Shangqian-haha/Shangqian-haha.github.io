@@ -155,7 +155,7 @@
           
           
             <span class="meta-item"><i class="fa-solid fa-tag"></i>
-              <a href="/tags/Python/">#Python</a><a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">#数据分析</a><a href="/tags/Pandas/">#Pandas</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">#数据分析</a><a href="/tags/Python/">#Python</a><a href="/tags/Pandas/">#Pandas</a>
             </span>
           
         </div>
@@ -170,13 +170,17 @@
           
             <aside class="post-toc">
               <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
-              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%85%88%E5%AD%A6%E4%BC%9A%E2%80%9D%E9%80%A0%E2%80%9D%E6%95%B0%E6%8D%AE%EF%BC%9ASeries-%E5%92%8C-DataFrame"><span class="toc-text">一、先学会”造”数据：Series 和 DataFrame</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Series%EF%BC%9A%E4%B8%80%E5%88%97%E6%95%B0%E6%8D%AE"><span class="toc-text">Series：一列数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DataFrame%EF%BC%9A%E4%B8%80%E5%BC%A0%E8%A1%A8"><span class="toc-text">DataFrame：一张表</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%9F%A5%E8%AF%A2%E5%8F%96%E5%80%BC%EF%BC%9Aloc-%E7%9A%84%E5%87%A0%E7%A7%8D%E5%A7%BF%E5%8A%BF"><span class="toc-text">二、查询取值：loc[] 的几种姿势</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%9D%A1%E4%BB%B6%E7%AD%9B%E9%80%89%EF%BC%9A-%E4%B8%89%E4%B8%AA%E7%AC%A6%E5%8F%B7"><span class="toc-text">三、条件筛选：&amp; | ~ 三个符号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%A2%9E%E5%88%A0%E6%94%B9%EF%BC%9A%E6%95%B0%E6%8D%AE%E6%93%8D%E4%BD%9C%E4%B8%89%E4%BB%B6%E5%A5%97"><span class="toc-text">四、增删改：数据操作三件套</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A0%E9%99%A4-drop"><span class="toc-text">删除 drop</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E5%88%97"><span class="toc-text">添加列</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE"><span class="toc-text">修改数据</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%95%B0%E6%8D%AE%E6%B8%85%E6%B4%97%EF%BC%9A%E8%84%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E5%9B%9B%E7%A7%8D%E5%A4%84%E7%90%86"><span class="toc-text">五、数据清洗：脏数据的四种处理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%88%A0%E9%99%A4%E7%A9%BA%E5%80%BC-dropna"><span class="toc-text">1. 删除空值 dropna()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%A1%AB%E5%85%85%E7%A9%BA%E5%80%BC-fillna"><span class="toc-text">2. 填充空值 fillna()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%88%A0%E9%99%A4%E9%87%8D%E5%A4%8D%E8%A1%8C-drop-duplicates"><span class="toc-text">3. 删除重复行 drop_duplicates()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%9B%BF%E6%8D%A2%E5%80%BC-replace"><span class="toc-text">4. 替换值 replace()</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%95%B0%E6%8D%AE%E8%BD%AC%E6%8D%A2%EF%BC%9Aapply-%E5%92%8C-map"><span class="toc-text">六、数据转换：apply 和 map</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#apply-%EF%BC%9A%E5%AF%B9%E4%B8%80%E5%88%97%E6%89%B9%E9%87%8F%E5%A5%97%E5%87%BD%E6%95%B0"><span class="toc-text">apply()：对一列批量套函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#map-%EF%BC%9A%E6%89%B9%E9%87%8F%E6%98%A0%E5%B0%84%EF%BC%88%E5%83%8F%E6%9F%A5%E5%AD%97%E5%85%B8%EF%BC%89"><span class="toc-text">map()：批量映射（像查字典）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%88%86%E7%BB%84%E7%BB%9F%E8%AE%A1-groupby"><span class="toc-text">七、分组统计 groupby()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E8%A1%A8%E8%BF%9E%E6%8E%A5%EF%BC%9Amerge-%E5%92%8C-concat"><span class="toc-text">八、表连接：merge 和 concat</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#merge-%EF%BC%9A%E7%B1%BB%E4%BC%BC-SQL-%E7%9A%84-join"><span class="toc-text">merge()：类似 SQL 的 join</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#concat-%EF%BC%9A%E7%B1%BB%E4%BC%BC-union-all%EF%BC%8C%E4%B8%8A%E4%B8%8B%E6%8B%BC%E6%8E%A5"><span class="toc-text">concat()：类似 union all，上下拼接</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%87%A0%E4%B8%AA%E5%B8%B8%E7%94%A8%E5%B0%8F%E5%87%BD%E6%95%B0"><span class="toc-text">九、几个常用小函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93"><span class="toc-text">小结</span></a></li></ol>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%85%88%E5%AD%A6%E4%BC%9A%E2%80%9D%E9%80%A0%E2%80%9D%E6%95%B0%E6%8D%AE%EF%BC%9ASeries-%E5%92%8C-DataFrame"><span class="toc-text">一、先学会”造”数据：Series 和 DataFrame</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Series%EF%BC%9A%E4%B8%80%E5%88%97%E6%95%B0%E6%8D%AE"><span class="toc-text">Series：一列数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DataFrame%EF%BC%9A%E4%B8%80%E5%BC%A0%E8%A1%A8"><span class="toc-text">DataFrame：一张表</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%9F%A5%E8%AF%A2%E5%8F%96%E5%80%BC%EF%BC%9Aloc-%E7%9A%84%E5%87%A0%E7%A7%8D%E5%A7%BF%E5%8A%BF"><span class="toc-text">二、查询取值：loc[] 的几种姿势</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%9D%A1%E4%BB%B6%E7%AD%9B%E9%80%89%EF%BC%9A-%E4%B8%89%E4%B8%AA%E7%AC%A6%E5%8F%B7"><span class="toc-text">三、条件筛选：&amp; | ~ 三个符号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%A2%9E%E5%88%A0%E6%94%B9%EF%BC%9A%E6%95%B0%E6%8D%AE%E6%93%8D%E4%BD%9C%E4%B8%89%E4%BB%B6%E5%A5%97"><span class="toc-text">四、增删改：数据操作三件套</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A0%E9%99%A4-drop"><span class="toc-text">删除 drop</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E5%88%97"><span class="toc-text">添加列</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE"><span class="toc-text">修改数据</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%95%B0%E6%8D%AE%E6%B8%85%E6%B4%97%EF%BC%9A%E8%84%8F%E6%95%B0%E6%8D%AE%E7%9A%84%E5%9B%9B%E7%A7%8D%E5%A4%84%E7%90%86"><span class="toc-text">五、数据清洗：脏数据的四种处理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%88%A0%E9%99%A4%E7%A9%BA%E5%80%BC-dropna"><span class="toc-text">1. 删除空值 dropna()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%A1%AB%E5%85%85%E7%A9%BA%E5%80%BC-fillna"><span class="toc-text">2. 填充空值 fillna()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%88%A0%E9%99%A4%E9%87%8D%E5%A4%8D%E8%A1%8C-drop-duplicates"><span class="toc-text">3. 删除重复行 drop_duplicates()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%9B%BF%E6%8D%A2%E5%80%BC-replace"><span class="toc-text">4. 替换值 replace()</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E6%95%B0%E6%8D%AE%E8%BD%AC%E6%8D%A2%EF%BC%9Aapply-%E5%92%8C-map"><span class="toc-text">六、数据转换：apply 和 map</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#apply-%EF%BC%9A%E5%AF%B9%E4%B8%80%E5%88%97%E6%89%B9%E9%87%8F%E5%A5%97%E5%87%BD%E6%95%B0"><span class="toc-text">apply()：对一列批量套函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#map-%EF%BC%9A%E6%89%B9%E9%87%8F%E6%98%A0%E5%B0%84%EF%BC%88%E5%83%8F%E6%9F%A5%E5%AD%97%E5%85%B8%EF%BC%89"><span class="toc-text">map()：批量映射（像查字典）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%88%86%E7%BB%84%E7%BB%9F%E8%AE%A1-groupby"><span class="toc-text">七、分组统计 groupby()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E8%A1%A8%E8%BF%9E%E6%8E%A5%EF%BC%9Amerge-%E5%92%8C-concat"><span class="toc-text">八、表连接：merge 和 concat</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#merge-%EF%BC%9A%E7%B1%BB%E4%BC%BC-SQL-%E7%9A%84-join"><span class="toc-text">merge()：类似 SQL 的 join</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#concat-%EF%BC%9A%E7%B1%BB%E4%BC%BC-union-all%EF%BC%8C%E4%B8%8A%E4%B8%8B%E6%8B%BC%E6%8E%A5"><span class="toc-text">concat()：类似 union all，上下拼接</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E5%87%A0%E4%B8%AA%E5%B8%B8%E7%94%A8%E5%B0%8F%E5%87%BD%E6%95%B0"><span class="toc-text">九、几个常用小函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="toc-text">写在最后</span></a></li></ol>
             </aside>
           
         
         <div class="post-content">
-          <p>作为大数据专业的学生，Python 是绕不开的工具。今天把 Pandas 最常用的几个操作整理一下，方便日后回看。</p>
+          <p>作为大数据专业的学生，Python 是绕不开的工具。而 Pandas，是 Python 做数据分析时<strong>第一个绕不过去的坎</strong>——Excel 里点点鼠标就能干的事，到 Pandas 里全变成一行行代码，一开始真有点挫败感。</p>
+<p>后来发现，其实常用的就那么几个操作，翻来覆去地用。这篇把它们整理成一份”能随时回来抄”的备忘录。</p>
 <p>下面这套代码用的是课件里的学生数据（张三、李四、王五这几位老熟人），跟着敲一遍，比看十遍文档都管用。</p>
+<blockquote>
+<p>一句话定位：<strong>Series 是一列，DataFrame 是一张表，<code>loc[]</code> 是查数据的钥匙，<code>groupby()</code> 是分析的发动机</strong>。把这几样吃透，80% 的日常数据活儿就够用了。</p>
+</blockquote>
 <h2 id="一、先学会”造”数据：Series-和-DataFrame"><a href="#一、先学会”造”数据：Series-和-DataFrame" class="headerlink" title="一、先学会”造”数据：Series 和 DataFrame"></a>一、先学会”造”数据：Series 和 DataFrame</h2><p>Pandas 有两大核心结构：<strong>Series（一列）</strong> 和 <strong>DataFrame（一张表）</strong>。</p>
 <h3 id="Series：一列数据"><a href="#Series：一列数据" class="headerlink" title="Series：一列数据"></a>Series：一列数据</h3><p>用列表就能造一个：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas</span><br><span class="line"></span><br><span class="line">li = [<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>]</span><br><span class="line">se = pandas.Series(li)</span><br><span class="line"><span class="built_in">print</span>(se, <span class="built_in">type</span>(se))</span><br></pre></td></tr></table></figure>
@@ -307,7 +311,70 @@
 </blockquote>
 <h2 id="九、几个常用小函数"><a href="#九、几个常用小函数" class="headerlink" title="九、几个常用小函数"></a>九、几个常用小函数</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 排序：先按 score 降序，score 相同再按 sal 升序</span></span><br><span class="line">df_sort = df.sort_values(by=[<span class="string">&quot;score&quot;</span>, <span class="string">&quot;sal&quot;</span>], ascending=[<span class="literal">False</span>, <span class="literal">True</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 筛选：名字在给定列表里的行</span></span><br><span class="line">df2 = df.loc[(df.name.isin([<span class="string">&quot;李四&quot;</span>, <span class="string">&quot;赵六&quot;</span>, <span class="string">&quot;田七&quot;</span>]))]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 随机抽几行看数据</span></span><br><span class="line">df6 = df.sample(<span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重命名列</span></span><br><span class="line">df.rename(</span><br><span class="line">    columns=&#123;<span class="string">&quot;name&quot;</span>: <span class="string">&quot;姓名&quot;</span>, <span class="string">&quot;age&quot;</span>: <span class="string">&quot;年龄&quot;</span>, <span class="string">&quot;sex&quot;</span>: <span class="string">&quot;性别&quot;</span>, <span class="string">&quot;score&quot;</span>: <span class="string">&quot;分数&quot;</span>&#125;,</span><br><span class="line">    inplace=<span class="literal">True</span>,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
 
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>工具只是手段，理解数据背后的业务含义才是关键。接下来打算再深入学一下可视化，把 Matplotlib 和 Seaborn 用起来。</p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>Pandas 的操作看着多，其实就围着四件事转：<strong>造数据、查数据、洗数据、算数据</strong>。把这四类各记熟一两个方法，日常活儿基本就够用了。</p>
+<p>最后附一张速查表，忘了就回来抄：</p>
+<table>
+<thead>
+<tr>
+<th>想干啥</th>
+<th>用哪个</th>
+<th>记忆点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>造表</td>
+<td><code>pd.DataFrame()</code></td>
+<td>字典列表最像真实数据</td>
+</tr>
+<tr>
+<td>查值 &#x2F; 查行 &#x2F; 查列</td>
+<td><code>df.loc[行, 列]</code></td>
+<td><strong>行在前，列在后</strong></td>
+</tr>
+<tr>
+<td>条件筛选</td>
+<td><code>df.loc[(条件) &amp; (条件)]</code></td>
+<td>每个条件都要带括号</td>
+</tr>
+<tr>
+<td>删行删列</td>
+<td><code>df.drop(..., axis=0/1)</code></td>
+<td>axis&#x3D;0 行，axis&#x3D;1 列</td>
+</tr>
+<tr>
+<td>补空值</td>
+<td><code>fillna()</code> &#x2F; <code>dropna()</code></td>
+<td>填还是删，看业务</td>
+</tr>
+<tr>
+<td>去重</td>
+<td><code>drop_duplicates()</code></td>
+<td>keep 控制保留哪条</td>
+</tr>
+<tr>
+<td>批量转换</td>
+<td><code>apply()</code> &#x2F; <code>map()</code></td>
+<td>apply 套函数，map 查字典</td>
+</tr>
+<tr>
+<td>分组统计</td>
+<td><code>groupby()</code> + <code>agg()</code></td>
+<td>分析的主力</td>
+</tr>
+<tr>
+<td>表连接</td>
+<td><code>merge()</code> &#x2F; <code>concat()</code></td>
+<td>merge 左右拼列，concat 上下拼行</td>
+</tr>
+</tbody></table>
+<p><strong>一句话总结</strong>：工具只是手段，理解数据背后的业务含义才是关键——别为了炫技把冷冰冰的代码当成目的。</p>
+<p>三个实用建议：</p>
+<ol>
+<li><strong>先跑通造数据这步</strong>：没有数据什么都练不了，<code>DataFrame</code> 建表是第一步</li>
+<li><strong><code>loc[]</code> 要练到肌肉记忆</strong>：行在前列在后，这个顺序搞反了会一直报错</li>
+<li><strong><code>groupby</code> 是分水岭</strong>：会用 groupby，才算从”操作表格”迈进”分析数据”</li>
+</ol>
+<p>接下来打算再深入学一下可视化，把 Matplotlib 和 Seaborn 用起来。</p>
 
         </div>
       </div>
