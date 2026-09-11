@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>在自己电脑上跑千问 Qwen：llama.cpp 本地部署实操 · Shang Qian</title>
+<meta name="description" content="从显存选型到量化档位：下载 GGUF 模型、解压 llama.cpp、写一个带菜单的启动脚本、放好 CUDA DLL，最后在本机 8080 端口跑起一个 35B 的 MoE 模型。附脚本参数逐项说明和低比特量化的短板提醒。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>
+
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <header class="site-header" id="site-header">
+  <div class="header-inner container">
+    <div class="header-left">
+      <a class="brand" href="/">
+        <img class="brand-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
+        <span class="brand-name">Shang Qian</span>
+      </a>
+    </div>
+
+    <nav class="header-nav" id="header-nav">
+      
+        
+          
+          
+            <a class="nav-link" href="/">首页</a>
+          
+        
+          
+          
+            <div class="nav-item has-dropdown">
+              <button class="nav-link nav-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                <span>文章汇总</span>
+                <i class="fa-solid fa-chevron-down nav-chevron" aria-hidden="true"></i>
+              </button>
+              <ul class="nav-dropdown">
+                
+                  <li><a class="nav-dropdown-link" href="/archives/">归档</a></li>
+                
+                  <li><a class="nav-dropdown-link" href="/categories/">分类</a></li>
+                
+                  <li><a class="nav-dropdown-link" href="/tags/">标签</a></li>
+                
+              </ul>
+            </div>
+          
+        
+          
+          
+            <a class="nav-link" href="/shuoshuo/">说说</a>
+          
+        
+          
+          
+            <a class="nav-link" href="/link/">友链</a>
+          
+        
+          
+          
+            <a class="nav-link" href="/about/">关于</a>
+          
+        
+      
+      <button class="nav-search-btn" id="nav-search-btn" aria-label="搜索文章" title="搜索文章">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+        <i class="fa-solid fa-moon"></i>
+        <i class="fa-solid fa-sun"></i>
+      </button>
+      <button class="header-scroll-top-btn" id="header-scroll-top-btn" type="button" title="返回顶部" aria-label="返回顶部" aria-hidden="true">
+        <span class="header-scroll-top-progress" aria-hidden="true"></span>
+        <span class="header-scroll-top-percent" aria-hidden="true">0</span>
+        <i class="fa-solid fa-arrow-up header-scroll-top-icon" aria-hidden="true"></i>
+      </button>
+    </nav>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="菜单">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  <main class="site-body container post-body">
+    <div class="post-topbar">
+      <a class="post-back" id="post-back" href="/archives/" aria-label="返回">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>cd ..</span>
+      </a>
+      
+<div class="hero-badge">
+  <span class="hero-badge-dot"></span>
+  <span class="hero-badge-text">~/qwen-local-deployment</span>
+</div>
+
+    </div>
+    <article class="post card">
+      <header class="post-header">
+        <h1 class="post-title">在自己电脑上跑千问 Qwen：llama.cpp 本地部署实操</h1>
+        <div class="post-meta">
+          <span class="meta-item"><i class="fa-regular fa-calendar"></i><time datetime="2026-09-11T08:00:00.000Z">2026-09-11</time></span>
+          
+            <span class="meta-item"><i class="fa-regular fa-folder"></i>
+              <a href="/categories/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型</a>
+            </span>
+          
+          
+            <span class="meta-item"><i class="fa-solid fa-tag"></i>
+              <a href="/tags/Qwen/">#Qwen</a><a href="/tags/llama-cpp/">#llama.cpp</a><a href="/tags/%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/">#本地部署</a><a href="/tags/GGUF/">#GGUF</a><a href="/tags/%E9%87%8F%E5%8C%96/">#量化</a><a href="/tags/%E5%BC%80%E6%BA%90%E6%A8%A1%E5%9E%8B/">#开源模型</a>
+            </span>
+          
+        </div>
+        
+          <div class="post-cover"><img src="/img/cover_qwen-local-deployment.jpg" alt="在自己电脑上跑千问 Qwen：llama.cpp 本地部署实操"></div>
+        
+      </header>
+
+      <div class="post-content-wrap">
+        
+          
+          
+            <aside class="post-toc">
+              <div class="post-toc-title"><i class="fa-solid fa-list-ul"></i> 目录</div>
+              <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%85%88%E8%AF%B4%E6%B8%85%E6%A5%9A%EF%BC%9A%E6%88%91%E8%B7%91%E7%9A%84%E6%98%AF%E4%B8%AA%E4%BB%80%E4%B9%88%E6%A8%A1%E5%9E%8B"><span class="toc-text">一、先说清楚：我跑的是个什么模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%8C%89%E6%98%BE%E5%AD%98%E6%8C%91%E6%96%87%E4%BB%B6%EF%BC%9A%E5%88%AB%E4%B8%80%E4%B8%8A%E6%9D%A5%E5%B0%B1%E4%B8%8B%E6%9C%80%E5%A4%A7%E7%9A%84"><span class="toc-text">二、按显存挑文件：别一上来就下最大的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%8A%8A-llama-cpp-%E6%8B%89%E4%B8%8B%E6%9D%A5"><span class="toc-text">三、把 llama.cpp 拉下来</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%86%99%E4%B8%80%E4%B8%AA%E4%B8%80%E9%94%AE%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC"><span class="toc-text">四、写一个一键启动脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%AD%A3%E5%BC%8F%E9%83%A8%E7%BD%B2%EF%BC%9A%E4%BA%94%E6%AD%A5%E8%B5%B0"><span class="toc-text">五、正式部署：五步走</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%AE%83%E8%83%BD%E5%B9%B2%E4%BB%80%E4%B9%88%EF%BC%8C%E7%9F%AD%E6%9D%BF%E5%8F%88%E5%9C%A8%E5%93%AA"><span class="toc-text">六、它能干什么，短板又在哪</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="toc-text">写在最后</span></a></li></ol>
+            </aside>
+          
+        
+        <div class="post-content">
+          <p>前段时间我想在本机上跑个模型。</p>
+<p>动机挺朴素的：在线服务按 token 计费，有些活儿需要反复试错（比如反复调一段提示词），跑在自己机器上心里更有底，而且断网照样能用。</p>
+<p>我机器显存不算大，一开始以为 30B 级别的模型跟我没关系。后来才知道，用 llama.cpp 加载 GGUF 格式的量化模型，把权重压到 4bit，35B 的 MoE 模型也能在十几 G 显存上跑起来，速度还凑合。</p>
+<p>这篇把整条路记下来：怎么按显存挑模型文件、llama.cpp 怎么装、启动脚本怎么写、CUDA 配置放哪儿。截图都是我操作时随手截的，配图和文件名都对应得上。</p>
+<h2 id="一、先说清楚：我跑的是个什么模型"><a href="#一、先说清楚：我跑的是个什么模型" class="headerlink" title="一、先说清楚：我跑的是个什么模型"></a>一、先说清楚：我跑的是个什么模型</h2><p>我用的是社区微调版，模型全名是 <strong>Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive</strong>，发布在 HuggingFace 上。名字里的 <code>A3B</code> 是 MoE（混合专家）架构的意思——总参数 35B，每次推理只激活其中一小部分，所以显存占用和速度都比同规模的稠密模型友好。</p>
+<p>名字里那个 <code>Uncensored</code>，就是社区俗称的”越狱版”。它和官方 Qwen 的区别，说白了就一件事：</p>
+<table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>官方版</th>
+<th>社区 Uncensored 微调版</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>安全对齐</td>
+<td>有，敏感问题会拒答</td>
+<td>大幅削弱甚至移除</td>
+</tr>
+<tr>
+<td>拒答行为</td>
+<td>常见</td>
+<td>基本没有</td>
+</tr>
+<tr>
+<td>稳定性 &#x2F; 维护</td>
+<td>官方评测、长期更新</td>
+<td>看发布者个人，可能不再维护</td>
+</tr>
+<tr>
+<td>适合的用途</td>
+<td>生产环境、对外服务</td>
+<td>本地自用、实验</td>
+</tr>
+</tbody></table>
+<p><strong>为什么有人要这个版本？</strong> 官方模型出于安全考虑加了很多限制，有时候你只是正常提问，它也会回一句”抱歉，我无法帮助你”。这类微调版就是把这种拦路的概率降到很低，好处是实验时不容易被打断。</p>
+<p>但这件事的另一面也得说清楚：<strong>它移除了安全对齐，也就等于不再替你做判断。</strong> 什么该问、什么不该问，责任全在使用者这边。我的用法很窄——本地跑着做提示词实验、看它的推理过程；不会拿它的输出直接对外发布，更不会用它生成违法或者伤害他人的内容。本地部署的意义是”可控”，不是”没约束”，这两码事。</p>
+<p>模型页面在这里，需要的话自行核对许可证和文件列表：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://huggingface.co/HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、按显存挑文件：别一上来就下最大的"><a href="#二、按显存挑文件：别一上来就下最大的" class="headerlink" title="二、按显存挑文件：别一上来就下最大的"></a>二、按显存挑文件：别一上来就下最大的</h2><p>HuggingFace 页面上同一个模型会挂好几个文件，区别在<strong>量化精度</strong>。精度越低，文件越小、越省显存，但模型的”脑子”也会跟着松一点。</p>
+<p>这是 llama.cpp 常用的几档，先有个概念：</p>
+<table>
+<thead>
+<tr>
+<th>量化档位</th>
+<th>大致含义</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Q4_K_M</code></td>
+<td>4bit，K-quant 中等档</td>
+<td>质量和体积平衡，最通用的选择</td>
+</tr>
+<tr>
+<td><code>Q4_K_P</code></td>
+<td>4bit，较新的变体</td>
+<td>质量略好一点，大显存卡推荐</td>
+</tr>
+<tr>
+<td><code>IQ4_NL</code></td>
+<td>4bit，i-quant 系列</td>
+<td>压缩比更高，质量损失可控</td>
+</tr>
+<tr>
+<td><code>IQ2_M</code></td>
+<td>2bit，极致压缩</td>
+<td>体积最小，精度损失明显</td>
+</tr>
+</tbody></table>
+<p>选哪个，看你的显存：</p>
+<p><strong>6G &#x2F; 8G 显存</strong>——直接下 IQ2_M 那档，实在想稳一点，下 15G 左右的也可以：</p>
+<p><img src="/img/qwen-vram-01-8g.png" alt="HuggingFace 文件列表：6G&#x2F;8G 显存建议下载的量化档位"></p>
+<p><strong>16G 显存</strong>——可以往上走一档，选 Q4 系列：</p>
+<p><img src="/img/qwen-vram-02-16g.png" alt="HuggingFace 文件列表：16G 显存建议下载的量化档位"></p>
+<p><strong>更高显存（比如 24G 的 4090）</strong>——页面上最上面那个 44GB 的文件可以试试，那是压缩程度最低、质量最好的一档：</p>
+<p><img src="/img/qwen-vram-03-44g.png" alt="HuggingFace 文件列表：大显存可选的最上层大文件"></p>
+<p><strong>另外，如果想要识别图片的功能（多模态）</strong>，还要额外下一个 <code>mmproj</code> 视觉投影文件：</p>
+<p><img src="/img/qwen-vision-model.png" alt="HuggingFace 文件列表：多模态需要的 mmproj 视觉投影文件"></p>
+<blockquote>
+<p><strong>下载提示</strong>：别用浏览器内置下载，大文件容易断且没有断点续传。用专门的下载工具或者命令行更靠谱，网络条件好的话速度会快很多。</p>
+</blockquote>
+<h2 id="三、把-llama-cpp-拉下来"><a href="#三、把-llama-cpp-拉下来" class="headerlink" title="三、把 llama.cpp 拉下来"></a>三、把 llama.cpp 拉下来</h2><p>推理引擎我用的是 <strong>llama.cpp</strong>，一个 C&#x2F;C++ 写的项目，纯靠 CPU 也能跑，显卡方面 N 卡、A 卡、I 卡都支持，Mac 和 Linux 一样能用：</p>
+<p><img src="/img/qwen-llamacpp-01-hardware.png" alt="llama.cpp 项目主页：支持多种显卡与纯 CPU 运行"></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/ggml-org/llama.cpp</span><br></pre></td></tr></table></figure>
+
+<p>打开仓库，往下拉到 Release 区域，找 <strong>Windows 端的预编译包</strong>：</p>
+<p><img src="/img/qwen-llamacpp-02-windows.png" alt="GitHub Release 页面：Windows 预编译包的位置"></p>
+<p>你机器是什么显卡，就下对应版本的包（CUDA 版 &#x2F; Vulkan 版 &#x2F; CPU 版）。解压之后就是全部了，不用编译。</p>
+<h2 id="四、写一个一键启动脚本"><a href="#四、写一个一键启动脚本" class="headerlink" title="四、写一个一键启动脚本"></a>四、写一个一键启动脚本</h2><p>每次启动都敲一长串参数太累，写个 bat 脚本，双击就能选档位。</p>
+<p>在 llama.cpp 根目录下新建一个 txt，把内容粘进去，然后把后缀改成 <code>.bat</code>。<strong>保存时编码记得选 ANSI</strong>，否则脚本里的中文提示会显示成乱码：</p>
+<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line">@<span class="built_in">echo</span> off</span><br><span class="line"><span class="built_in">setlocal</span></span><br><span class="line"><span class="built_in">chcp</span> <span class="number">65001</span> &gt;<span class="built_in">nul</span></span><br><span class="line"><span class="built_in">title</span> Qwen3.<span class="number">6</span>-<span class="number">35</span>B-A3B Uncensored</span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> /d &quot;%~dp0&quot;</span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">rem ====== 要改配置，动这三行就行 ======</span></span><br><span class="line"><span class="built_in">set</span> &quot;MODEL=Qwen3.<span class="number">6</span>-<span class="number">35</span>B-A3B-Uncensored-HauhauCS-Aggressive&quot;</span><br><span class="line"><span class="built_in">set</span> &quot;MMPROJ=models\mmproj-<span class="variable">%MODEL%</span>-f16.gguf&quot;</span><br><span class="line"><span class="built_in">set</span> &quot;PORT=<span class="number">8080</span>&quot;</span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">rem 视觉模型存在才挂载，没下载就自动跳过</span></span><br><span class="line"><span class="built_in">set</span> &quot;MMARG=&quot;</span><br><span class="line"><span class="keyword">if</span> <span class="keyword">exist</span> &quot;<span class="variable">%MMPROJ%</span>&quot; <span class="built_in">set</span> MMARG=--mmproj &quot;<span class="variable">%MMPROJ%</span>&quot;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> <span class="keyword">exist</span> &quot;llama-server.exe&quot; (</span><br><span class="line">    <span class="built_in">echo</span> [错误] 当前目录找不到 llama-server.exe</span><br><span class="line">    <span class="built_in">echo</span> 请把本脚本放到 llama.cpp 解压后的根目录再运行。</span><br><span class="line">    <span class="built_in">pause</span></span><br><span class="line">    <span class="keyword">exit</span> /b <span class="number">1</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">:menu</span><br><span class="line"><span class="built_in">set</span> &quot;QUANT=&quot;</span><br><span class="line"><span class="built_in">set</span> &quot;CTX=&quot;</span><br><span class="line"><span class="built_in">set</span> &quot;NCMOE=&quot;</span><br><span class="line"><span class="built_in">cls</span></span><br><span class="line"><span class="built_in">echo</span> ==========================================</span><br><span class="line"><span class="built_in">echo</span>      Qwen3.<span class="number">6</span>-<span class="number">35</span>B-A3B Uncensored + 多模态</span><br><span class="line"><span class="built_in">echo</span> ==========================================</span><br><span class="line"><span class="built_in">echo</span>.</span><br><span class="line"><span class="built_in">echo</span> <span class="number">1</span>. Q4_K_P   大显存推荐（<span class="number">4090</span>）</span><br><span class="line"><span class="built_in">echo</span> <span class="number">2</span>. Q4_K_M   稳定版</span><br><span class="line"><span class="built_in">echo</span> <span class="number">3</span>. IQ4_NL   高压缩高质量</span><br><span class="line"><span class="built_in">echo</span> <span class="number">4</span>. IQ2_M    <span class="number">6</span>G / <span class="number">8</span>G 显卡</span><br><span class="line"><span class="built_in">echo</span> <span class="number">5</span>. IQ2_M + CPU 分担（显存不够、内存够）</span><br><span class="line"><span class="built_in">echo</span> <span class="number">0</span>. 退出</span><br><span class="line"><span class="built_in">echo</span>.</span><br><span class="line"><span class="built_in">echo</span> ==========================================</span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> &quot;choice=&quot;</span><br><span class="line"><span class="built_in">set</span> /p &quot;choice=请输入数字：&quot;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> &quot;<span class="variable">%choice%</span>&quot;==&quot;<span class="number">0</span>&quot; <span class="keyword">exit</span> /b <span class="number">0</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">rem 上下文长度直接决定 KV cache 预分配的显存，显存不够就往下调</span></span><br><span class="line"><span class="keyword">if</span> &quot;<span class="variable">%choice%</span>&quot;==&quot;<span class="number">1</span>&quot; (</span><br><span class="line">    <span class="built_in">set</span> &quot;QUANT=Q4_K_P&quot;</span><br><span class="line">    <span class="built_in">set</span> &quot;CTX=<span class="number">131072</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">if</span> &quot;<span class="variable">%choice%</span>&quot;==&quot;<span class="number">2</span>&quot; (</span><br><span class="line">    <span class="built_in">set</span> &quot;QUANT=Q4_K_M&quot;</span><br><span class="line">    <span class="built_in">set</span> &quot;CTX=<span class="number">131072</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">if</span> &quot;<span class="variable">%choice%</span>&quot;==&quot;<span class="number">3</span>&quot; (</span><br><span class="line">    <span class="built_in">set</span> &quot;QUANT=IQ4_NL&quot;</span><br><span class="line">    <span class="built_in">set</span> &quot;CTX=<span class="number">131072</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">if</span> &quot;<span class="variable">%choice%</span>&quot;==&quot;<span class="number">4</span>&quot; (</span><br><span class="line">    <span class="built_in">set</span> &quot;QUANT=IQ2_M&quot;</span><br><span class="line">    <span class="built_in">set</span> &quot;CTX=<span class="number">8192</span>&quot;</span><br><span class="line">)</span><br><span class="line"><span class="keyword">if</span> &quot;<span class="variable">%choice%</span>&quot;==&quot;<span class="number">5</span>&quot; (</span><br><span class="line">    <span class="built_in">set</span> &quot;QUANT=IQ2_M&quot;</span><br><span class="line">    <span class="built_in">set</span> &quot;CTX=<span class="number">32768</span>&quot;</span><br><span class="line">    <span class="built_in">set</span> &quot;NCMOE=--n-cpu-moe <span class="number">26</span>&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> <span class="keyword">defined</span> QUANT (</span><br><span class="line">    <span class="built_in">echo</span>.</span><br><span class="line">    <span class="built_in">echo</span> [提示] 只能输 <span class="number">0</span>-<span class="number">5</span>，请重新选。</span><br><span class="line">    timeout /t <span class="number">2</span> &gt;<span class="built_in">nul</span></span><br><span class="line">    <span class="keyword">goto</span> menu</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> &quot;GGUF=models\<span class="variable">%MODEL%</span>-<span class="variable">%QUANT%</span>.gguf&quot;</span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> <span class="keyword">exist</span> &quot;<span class="variable">%GGUF%</span>&quot; (</span><br><span class="line">    <span class="built_in">echo</span>.</span><br><span class="line">    <span class="built_in">echo</span> [错误] 没找到模型文件：</span><br><span class="line">    <span class="built_in">echo</span>    <span class="variable">%GGUF%</span></span><br><span class="line">    <span class="built_in">echo</span> 请确认该档位已下载，并放在 models 文件夹里。</span><br><span class="line">    <span class="built_in">pause</span></span><br><span class="line">    <span class="keyword">goto</span> menu</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span>.</span><br><span class="line"><span class="built_in">echo</span> 正在启动：<span class="variable">%QUANT%</span>   上下文 <span class="variable">%CTX%</span></span><br><span class="line"><span class="built_in">echo</span> 首次加载要点时间，请耐心等……</span><br><span class="line"><span class="built_in">echo</span>.</span><br><span class="line"></span><br><span class="line">llama-server.exe ^</span><br><span class="line">    -m &quot;<span class="variable">%GGUF%</span>&quot; ^</span><br><span class="line">    <span class="variable">%MMARG%</span> ^</span><br><span class="line">    -ngl <span class="number">999</span> ^</span><br><span class="line">    -fa on ^</span><br><span class="line">    -c <span class="variable">%CTX%</span> ^</span><br><span class="line">    -n <span class="number">8192</span> ^</span><br><span class="line">    <span class="variable">%NCMOE%</span> ^</span><br><span class="line">    --host <span class="number">127</span>.<span class="number">0</span>.<span class="number">0</span>.<span class="number">1</span> ^</span><br><span class="line">    --port <span class="variable">%PORT%</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span>.</span><br><span class="line"><span class="built_in">echo</span> [服务已退出] 按任意键回到菜单。</span><br><span class="line"><span class="built_in">pause</span> &gt;<span class="built_in">nul</span></span><br><span class="line"><span class="keyword">goto</span> menu</span><br></pre></td></tr></table></figure>
+
+<p>脚本里有两个细节值得单独说：<code>pause</code> 放在哪、以及哪些参数是真正需要理解的。</p>
+<p><code>pause</code> 的位置在 <code>llama-server</code> 之后、<code>goto menu</code> 之前——服务正常退出（Ctrl+C）或者崩了的时候，窗口不会一闪而过，报错信息能留住。最后回到菜单，可以换个档位再试，不用重新双击。</p>
+<p>参数逐个说明：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>-m</code></td>
+<td>指定模型文件</td>
+<td>路径要对上 <code>models\</code> 里的实际文件名</td>
+</tr>
+<tr>
+<td><code>--mmproj</code></td>
+<td>指定视觉投影文件</td>
+<td>脚本已做存在性判断，没下载就自动跳过</td>
+</tr>
+<tr>
+<td><code>-ngl 999</code></td>
+<td>模型层丢给 GPU 的数量</td>
+<td>新版默认就是 <code>auto</code>，写 999 是为了兼容旧版</td>
+</tr>
+<tr>
+<td><code>-c</code></td>
+<td><strong>上下文长度（预分配）</strong></td>
+<td><code>131072</code> &#x3D; 128K，会按这个值预留 KV cache</td>
+</tr>
+<tr>
+<td><code>-n</code></td>
+<td>单次生成上限</td>
+<td>一次最多输出多少 token</td>
+</tr>
+<tr>
+<td><code>-fa on</code></td>
+<td>开启 Flash Attention</td>
+<td>长上下文下提速</td>
+</tr>
+<tr>
+<td><code>--n-cpu-moe 26</code></td>
+<td>前 26 层专家交给 CPU</td>
+<td>只出现在第 5 档</td>
+</tr>
+<tr>
+<td><code>--host</code> &#x2F; <code>--port</code></td>
+<td>监听地址与端口</td>
+<td>两者默认值就是 <code>127.0.0.1:8080</code></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong><code>-c</code> 是这套参数里最容易踩的坑。</strong> 它写的不是”上限”，而是<strong>预分配</strong>——填 131072，llama.cpp 就会按 128K 上下文去准备 KV cache（默认 f16 精度）。这笔开销通常在几 GB 到十几 GB，16G 显存配 4bit 模型基本撑不住。所以第 4 档压到了 <code>8192</code>。如果你选 4bit 档也起不来，第一个要动的就是它，往下调到 <code>32768</code> 试试。</p>
+</blockquote>
+<p><strong>第 5 档是给”显存刚好卡住、但内存宽裕”的机器准备的</strong>，它在 IQ2_M 基础上多挂了 <code>--n-cpu-moe 26</code>，把前 26 层的专家权重交给 CPU 算。</p>
+<p>但<strong>这招是双向的</strong>：本身就一般的配置开完只会更慢，因为 CPU 推理比 GPU 慢一个数量级。只有”显存刚好卡住、内存和 CPU 都比较宽裕”才值得试。</p>
+<h2 id="五、正式部署：五步走"><a href="#五、正式部署：五步走" class="headerlink" title="五、正式部署：五步走"></a>五、正式部署：五步走</h2><p>前面三样东西（模型、llama.cpp、启动脚本）准备好之后，按顺序来：</p>
+<p><strong>（1）建 <code>models</code> 文件夹。</strong> 把 llama.cpp 压缩包解压，进根目录，新建一个文件夹命名为 <code>models</code>：</p>
+<p><img src="/img/qwen-setup-01-models-folder.png" alt="llama.cpp 根目录下新建 models 文件夹"></p>
+<p><strong>（2）把模型塞进去。</strong> 下载好的主模型和 <code>mmproj</code> 视觉文件，都放进 <code>models</code> 文件夹：</p>
+<p><img src="/img/qwen-setup-02-put-models.png" alt="models 文件夹中放入模型文件与视觉投影文件"></p>
+<p><strong>（3）补上 CUDA 运行库。</strong> 回到根目录，把对应版本的 CUDA DLLs 压缩包（12.4 或 13.3，按你的驱动和显卡版本选）解压到根目录下。<strong>这一步不做，程序就识别不到 GPU</strong>，只能纯 CPU 慢慢跑：</p>
+<p><img src="/img/qwen-setup-03-cuda-dlls.png" alt="将 CUDA DLLs 解压到 llama.cpp 根目录"></p>
+<p><strong>（4）双击 bat 启动。</strong> 输入对应的数字，回车：</p>
+<p><img src="/img/qwen-setup-04-launch.png" alt="双击 bat 脚本并选择量化档位"></p>
+<p>首次运行会慢一些，模型加载和显存分配都要时间，耐心等一下。</p>
+<p><strong>（5）浏览器打开界面。</strong> 服务地址是 <code>http://127.0.0.1:8080</code>，复制到浏览器即可：</p>
+<p><img src="/img/qwen-setup-05-open-url.png" alt="浏览器访问 127.0.0.1:8080"></p>
+<p>看到对话界面，就算跑起来了：</p>
+<p><img src="/img/qwen-setup-06-webui.png" alt="llama.cpp 自带的 WebUI 对话界面"></p>
+<p>默认端口 <code>8080</code> 是 llama.cpp 自带的 WebUI，够直接开聊。另外它同时也是个 OpenAI 兼容的 API 端点，像 Hermes、Openclaw 这类客户端可以直接把接口地址指过来，不用额外搭服务。</p>
+<h2 id="六、它能干什么，短板又在哪"><a href="#六、它能干什么，短板又在哪" class="headerlink" title="六、它能干什么，短板又在哪"></a>六、它能干什么，短板又在哪</h2><p>跑起来不等于好用。用了一段时间，说几个实际感受。</p>
+<p><strong>先说最要紧的短板：低比特量化的代价。</strong></p>
+<p>如果你选的是 <code>IQ2_M</code>（2bit 极致压缩，一开始那个十几 G 的文件），模型内部参数的精度损失是比较大的。表现就是——<strong>做复杂多步计算题容易迟钝甚至算错</strong>。比如给一串约束条件让你算内存占用、或者推导一个多阶段的执行计划，它可能在中间某一步就滑掉了。</p>
+<p>这不是模型笨，是 2bit 压得太狠。遇到这类题，别指望它一步给结果，让它<strong>分步写公式</strong>，把中间过程摊开，准确率会明显回升。</p>
+<p><strong>两个实用技巧：</strong></p>
+<p><strong>1. 在 Prompt 里要求它先想再答。</strong> 别只问”答案是什么”，加一句：</p>
+<blockquote>
+<p>“请先分析每个选项的对错原因，最后再给出正确答案。”</p>
+</blockquote>
+<p>35B 的底子是够的，让它自己”自言自语”一遍，很多时候能自我纠错。这就是常说的思维链（Chain of Thought）。</p>
+<p><strong>2. 结合本地文档做 RAG。</strong> 如果有配套的教材或手册 PDF，可以用本地嵌入模型搭一个检索。遇到它拿不准的细节，让它在文档里找依据，比凭记忆答要准得多。</p>
+<p><strong>简单总结一下取舍：</strong></p>
+<table>
+<thead>
+<tr>
+<th>你在意的</th>
+<th>该怎么做</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>显存紧张</td>
+<td>选 2bit，接受精度损失</td>
+</tr>
+<tr>
+<td>起不来 &#x2F; 报显存不足</td>
+<td>先把 <code>-c</code> 往下调，它是按值预分配的</td>
+</tr>
+<tr>
+<td>答案要准</td>
+<td>选 4bit 以上，分步提问</td>
+</tr>
+<tr>
+<td>要识别图片</td>
+<td>额外下载 <code>mmproj</code> 文件</td>
+</tr>
+<tr>
+<td>要接第三方客户端</td>
+<td>用 OpenAI 兼容的 8080 端点</td>
+</tr>
+<tr>
+<td>速度太慢</td>
+<td>先确认 CUDA DLL 放对了，再试第 5 档的 CPU 分担</td>
+</tr>
+</tbody></table>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>本地部署这件事，最反直觉的地方在于：<strong>跑起来只要一下午，跑得好要调很久。</strong></p>
+<p>第一次启动成功的时候确实挺爽——一个 35B 的模型，安安静静地在自己机器上转，不问网络要一个 token。但接下来你会发现，量化档位要试、上下文长度和显存要权衡、提问方式也影响结果。它不是装完就完事的软件，更像一台需要磨合的机器。</p>
+<p>另外，前面第一节提到的那个边界，我还是想再放一遍：<strong>这类移除了安全对齐的模型，等于把判断权交回给了使用者。</strong> 本地跑，自己负责。技术上的”能跑”和用途上的”该不该”，是两件需要分开想的事。</p>
+
+        </div>
+      </div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+            <a class="post-nav-item prev" href="/2026/09/11/conversion-funnel/">
+              <span class="nav-label"><i class="fa-solid fa-angle-left"></i> 上一篇</span>
+              <span class="nav-title">看转化入门：从&#34;有多少人访问&#34;到&#34;有多少人真买单&#34;</span>
+            </a>
+          
+          
+            <a class="post-nav-item next" href="/2026/09/11/data-analysis-tools-comparison/">
+              <span class="nav-label">下一篇 <i class="fa-solid fa-angle-right"></i></span>
+              <span class="nav-title">数据分析工具推荐与对比：BI 四大家 + RPA/爬虫怎么选</span>
+            </a>
+          
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-info">
+      <span>&copy; 2026 - 2026 尚谦</span>
+      <span class="footer-dot">·</span>
+      <span>本站已运行：<span id="site-runtime" data-start="2026-08-13T00:00:00">载入中…</span></span>
+    </div>
+    <div class="footer-links">
+      
+        <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+      
+      
+        <a href="mailto:357425252@qq.com" aria-label="邮箱"><i class="fa-solid fa-envelope"></i></a>
+      
+    </div>
+  </div>
+</footer>
+
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>
