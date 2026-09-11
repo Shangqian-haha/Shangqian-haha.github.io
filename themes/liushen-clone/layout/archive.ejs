@@ -14,7 +14,7 @@
     <div class="archive-list">
       <%
         var curYear = null;
-        site.posts.each(function (p) {
+        site.posts.sort('-date').each(function (p) {
           var y = date(p.date, 'YYYY');
           if (y !== curYear) {
             curYear = y;
