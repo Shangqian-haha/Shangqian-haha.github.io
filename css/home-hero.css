@@ -271,15 +271,25 @@
   border-color: rgba(255, 255, 255, .46);
   transform: translateY(-2px);
 }
+/* 用户要求「关于我」与「开始阅读」视觉一致。
+   原 ghost 是「次按钮」语言，比 primary 暗一档：文字 72% 白、底 3.5% 白、边 13% 白，
+   且没有外发光 —— 四项叠加肉眼看着就是「偏暗」。现全部对齐 primary。
+   想恢复主次层次，把下面这组改回去：
+     color: rgba(238, 243, 250, .72);
+     background: rgba(255, 255, 255, .035);
+     border: 1px solid rgba(255, 255, 255, .13);
+   并删掉 box-shadow；hover 同步改回 .09 / .28 那组。 */
 .mh-btn-ghost {
-  color: rgba(238, 243, 250, .72);
-  background: rgba(255, 255, 255, .035);
-  border: 1px solid rgba(255, 255, 255, .13);
+  color: #fff;
+  background: rgba(255, 255, 255, .10);
+  border: 1px solid rgba(255, 255, 255, .30);
+  box-shadow: 0 8px 30px -12px rgba(170, 200, 255, .55),
+              inset 0 1px 0 rgba(255, 255, 255, .18);
 }
 .mh-btn-ghost:hover {
   color: #fff;
-  background: rgba(255, 255, 255, .09);
-  border-color: rgba(255, 255, 255, .28);
+  background: rgba(255, 255, 255, .17);
+  border-color: rgba(255, 255, 255, .46);
   transform: translateY(-2px);
 }
 
