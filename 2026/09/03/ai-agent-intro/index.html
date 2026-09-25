@@ -13,6 +13,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
+
+
 <script>
   // 首次绘制前设置主题，避免闪烁
   (function () {
@@ -155,7 +157,7 @@
           
           
             <span class="meta-item"><i class="fa-solid fa-tag"></i>
-              <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#大模型</a><a href="/tags/AI-Agent/">#AI Agent</a><a href="/tags/LangChain/">#LangChain</a><a href="/tags/LangGraph/">#LangGraph</a><a href="/tags/AutoGen/">#AutoGen</a>
+              <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#大模型</a><a href="/tags/LangChain/">#LangChain</a><a href="/tags/AI-Agent/">#AI Agent</a><a href="/tags/LangGraph/">#LangGraph</a><a href="/tags/AutoGen/">#AutoGen</a>
             </span>
           
         </div>
@@ -177,8 +179,8 @@
         <div class="post-content">
           <p>如果说 2023 年是大模型的元年，2024 年就是 <strong>AI Agent 的元年</strong>。</p>
 <p>这一年里冒出来一堆名词：AutoGPT、LangGraph、Manus、Devin……背后都是同一个东西——<strong>让大模型从”回答问题”进化到”完成任务”</strong>。</p>
-<p>这篇笔记把上课讲的 AI Agent 概念拆开讲，零基础也能看懂。</p>
-<h2 id="一、Agent-到底是什么？"><a href="#一、Agent-到底是什么？" class="headerlink" title="一、Agent 到底是什么？"></a>一、Agent 到底是什么？</h2><p>课件上给了两个领域对 Agent 的定义，都很学术。我翻译成大白话：</p>
+<p>这篇笔记把 AI Agent 的概念拆开讲，零基础也能看懂。</p>
+<h2 id="一、Agent-到底是什么？"><a href="#一、Agent-到底是什么？" class="headerlink" title="一、Agent 到底是什么？"></a>一、Agent 到底是什么？</h2><p>业界对 Agent 的定义有两套，都很学术。我翻译成大白话：</p>
 <ul>
 <li><strong>计算机领域</strong>：一个能代表你、<strong>自动</strong>干活的软件（不需要你一直戳它）</li>
 <li><strong>AI 领域</strong>：一个能<strong>感知环境、做决策、执行动作</strong>的智能系统</li>
@@ -194,13 +196,13 @@
 </ul>
 <p>全程没让你指挥。这就是”Agent”——有自主目标，能自我调整。</p>
 </blockquote>
-<h2 id="二、大模型为什么不能直接当-Agent？"><a href="#二、大模型为什么不能直接当-Agent？" class="headerlink" title="二、大模型为什么不能直接当 Agent？"></a>二、大模型为什么不能直接当 Agent？</h2><p>理论上 GPT-4 已经很强了，但课件列了三条它做不到的事：</p>
+<h2 id="二、大模型为什么不能直接当-Agent？"><a href="#二、大模型为什么不能直接当-Agent？" class="headerlink" title="二、大模型为什么不能直接当 Agent？"></a>二、大模型为什么不能直接当 Agent？</h2><p>理论上 GPT-4 已经很强了，但它有三件事做不到：</p>
 <ul>
 <li>✕ <strong>不能像人一样规划思考</strong>（不会主动拆任务）</li>
 <li>✕ <strong>不会用工具</strong>（不能自己查日历、发邮件、跑代码）</li>
 <li>✕ <strong>没有持久记忆</strong>（聊完就忘，下次又是陌生人）</li>
 </ul>
-<p>所以课件给了个公式：</p>
+<p>所以有个公式：</p>
 <blockquote>
 <p><strong>AI Agent &#x3D; LLM + 记忆 + 工具 + 规划</strong></p>
 </blockquote>
@@ -280,7 +282,7 @@
 <p>接收任务 → LLM 理解 → Planning 拆解子任务 → 调 Tools 执行 → Memory 记录 → 观察结果 → 反思改进 → 交付</p>
 </blockquote>
 <p>这就是 Agent 的”完整工作流”。</p>
-<h2 id="五、决策闭环：感知-规划-行动-观察"><a href="#五、决策闭环：感知-规划-行动-观察" class="headerlink" title="五、决策闭环：感知-规划-行动-观察"></a>五、决策闭环：感知-规划-行动-观察</h2><p>课件上画了张图特别清楚，我用智能家居的场景展开：</p>
+<h2 id="五、决策闭环：感知-规划-行动-观察"><a href="#五、决策闭环：感知-规划-行动-观察" class="headerlink" title="五、决策闭环：感知-规划-行动-观察"></a>五、决策闭环：感知-规划-行动-观察</h2><p>有张图特别清楚，我用智能家居的场景展开：</p>
 <blockquote>
 <p>用户说：”我觉得有点冷”</p>
 <ol>
@@ -304,7 +306,7 @@
 <p>Agent 接到任务，自己拆、自己排序、自己完成。</p>
 <p>进阶玩法：<strong>Tree of Thoughts（思维树）</strong>。不是一条路走到底，而是在每一步生成多个分支，<strong>评估+搜索</strong>选最优解。适合那种”答案不唯一、需要探索”的问题（比如 24 点、迷宫）。</p>
 <h3 id="2-反思改进（Reflection）"><a href="#2-反思改进（Reflection）" class="headerlink" title="2. 反思改进（Reflection）"></a>2. 反思改进（Reflection）</h3><p>Agent 不是一错就完蛋，它能<strong>复盘自己的行为</strong>、从错误里学。</p>
-<p>课件上提到了 <strong>ReAct 框架</strong>（Reasoning + Acting）：</p>
+<p>还有个 <strong>ReAct 框架</strong>（Reasoning + Acting）：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Thought:  分析当前状态</span><br><span class="line">Action:   执行具体操作</span><br><span class="line">Observation: 观察执行结果</span><br><span class="line">→ 重复循环</span><br></pre></td></tr></table></figure>
 
 <p>每一步都先想再干，错了就调整。<strong>这就是”三思而后行”的算法版</strong>。</p>
@@ -332,7 +334,7 @@
 <blockquote>
 <p>写代码、写周报、数据分析这些<strong>结构化任务</strong>用 Plan-and-Execute 更稳。<br>调试 bug、找资料这些<strong>需要摸索的任务</strong>用 ReAct 更灵活。</p>
 </blockquote>
-<h2 id="八、五大开发框架对比"><a href="#八、五大开发框架对比" class="headerlink" title="八、五大开发框架对比"></a>八、五大开发框架对比</h2><p>课件上给了张表：</p>
+<h2 id="八、五大开发框架对比"><a href="#八、五大开发框架对比" class="headerlink" title="八、五大开发框架对比"></a>八、五大开发框架对比</h2><p>有张表对比得很清楚：</p>
 <table>
 <thead>
 <tr>
@@ -381,13 +383,13 @@
 <li>想直观地”管一群虚拟员工” → <strong>CrewAI</strong></li>
 </ul>
 <p>我目前主要用 LangChain + LangGraph，生态资料最多。</p>
-<h2 id="九、实践项目：你的第一个-Agent"><a href="#九、实践项目：你的第一个-Agent" class="headerlink" title="九、实践项目：你的第一个 Agent"></a>九、实践项目：你的第一个 Agent</h2><p>课件留了两个练习：</p>
+<h2 id="九、实践项目：你的第一个-Agent"><a href="#九、实践项目：你的第一个-Agent" class="headerlink" title="九、实践项目：你的第一个 Agent"></a>九、实践项目：你的第一个 Agent</h2><p>最后留了两个练习：</p>
 <ol>
 <li><strong>The First Agent</strong>：从零搭一个基础 Agent，跑通”理解任务 → 给答案”的流程</li>
 <li><strong>AI Agent + Tools + Memory</strong>：给 Agent 加上<strong>工具调用</strong>和<strong>记忆系统</strong>，让它能处理多步任务</li>
 </ol>
-<p>这两个项目做完，就跨过”会用 Agent”的门槛了。代码课件没贴出来，我下篇笔记自己手写一份带详细注释的版本。</p>
-<h2 id="十、为什么-Agent-是”革命”"><a href="#十、为什么-Agent-是”革命”" class="headerlink" title="十、为什么 Agent 是”革命”"></a>十、为什么 Agent 是”革命”</h2><p>老师讲课时反复强调一句话：</p>
+<p>这两个项目做完，就跨过”会用 Agent”的门槛了。代码这里先不贴，我下篇笔记自己手写一份带详细注释的版本。</p>
+<h2 id="十、为什么-Agent-是”革命”"><a href="#十、为什么-Agent-是”革命”" class="headerlink" title="十、为什么 Agent 是”革命”"></a>十、为什么 Agent 是”革命”</h2><p>老师反复强调一句话：</p>
 <blockquote>
 <p>AI Agent 让 AI 从”回答问题”进化为”完成任务”。</p>
 </blockquote>

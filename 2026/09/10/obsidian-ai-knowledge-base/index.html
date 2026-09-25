@@ -13,6 +13,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
+
+
 <script>
   // 首次绘制前设置主题，避免闪烁
   (function () {
@@ -176,7 +178,7 @@
         
         <div class="post-content">
           <p>我前阵子整理电脑，发现笔记散在几个地方。</p>
-<p>课件 PDF、浏览器收藏夹里几十个”待看”的技术贴、备忘录里偶尔冒出来的半句话、微信里转发给自己的几篇长文——东西不算多，但找的时候全靠运气。打开备忘录想找上次记的东西，大概率得翻半天。</p>
+<p>散在各处的 PDF、浏览器收藏夹里几十个”待看”的技术贴、备忘录里偶尔冒出来的半句话、微信里转发给自己的几篇长文——东西不算多，但找的时候全靠运气。打开备忘录想找上次记的东西，大概率得翻半天。</p>
 <p>最让我难受的一次，是看一份 Transformer 资料时随手记了句”位置编码（Positional Encoding）”。过了两周想用，搜遍所有地方，愣是没找到。</p>
 <p>后来想了想：不是笔记太少，是没个体系。</p>
 <p>所以这次花了点时间，用 Obsidian 配合 AI，专门给”大语言模型”这块知识搭了个库。目前的状态是：<strong>9 大主题分支、55 篇笔记、147 条知识关联</strong>。</p>
@@ -397,10 +399,10 @@
 </tr>
 </tbody></table>
 <p>我实际用下来，它真正有价值的是四件事。</p>
-<p><strong>1. 拆题</strong>——给一份课件或一篇论文，拆成”原子笔记清单”：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">下面是一份课件的文字内容。请帮我拆成若干条&quot;原子笔记&quot;。</span><br><span class="line">粒度参考：一条笔记 = 一个能在 5 分钟内读完的概念。</span><br><span class="line">输出格式：概念名 | 一句话说明 | 它和哪些已有概念相关</span><br><span class="line">不要展开写内容，只要清单。</span><br><span class="line"></span><br><span class="line">已有笔记列表：</span><br><span class="line">（把 07-学习资源 里的笔记名贴进来）</span><br></pre></td></tr></table></figure>
+<p><strong>1. 拆题</strong>——给一份资料或一篇论文，拆成”原子笔记清单”：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">下面是一份资料的文字内容。请帮我拆成若干条&quot;原子笔记&quot;。</span><br><span class="line">粒度参考：一条笔记 = 一个能在 5 分钟内读完的概念。</span><br><span class="line">输出格式：概念名 | 一句话说明 | 它和哪些已有概念相关</span><br><span class="line">不要展开写内容，只要清单。</span><br><span class="line"></span><br><span class="line">已有笔记列表：</span><br><span class="line">（把 07-学习资源 里的笔记名贴进来）</span><br></pre></td></tr></table></figure>
 
-<p>这一步的价值是<strong>把”一整块 PPT”变成”往哪放”的答案</strong>。</p>
+<p>这一步的价值是<strong>把”一整块资料”变成”往哪放”的答案</strong>。</p>
 <p><strong>2. 按模板生成初稿</strong>——把上面拆出来的概念名，一条条配着模板丢给它，生成待加工的骨架。注意是”骨架”：定义和类比必须我自己填。</p>
 <p><strong>3. 补链接</strong>——这是投入产出比最高的一步：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">这是我们知识库现有的全部笔记名：</span><br><span class="line">（贴列表）</span><br><span class="line"></span><br><span class="line">这是我新写的一篇笔记：</span><br><span class="line">（贴内容）</span><br><span class="line"></span><br><span class="line">请指出这篇笔记里哪些词应该加 [[ ]] 链接到已有笔记。</span><br><span class="line">只输出「原文片段 → 目标笔记名」的对应关系，不要改我的正文。</span><br></pre></td></tr></table></figure>

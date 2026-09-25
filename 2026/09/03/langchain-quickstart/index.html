@@ -13,6 +13,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
+
+
 <script>
   // 首次绘制前设置主题，避免闪烁
   (function () {
@@ -155,7 +157,7 @@
           
           
             <span class="meta-item"><i class="fa-solid fa-tag"></i>
-              <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#大模型</a><a href="/tags/LangChain/">#LangChain</a><a href="/tags/Python/">#Python</a><a href="/tags/LLM/">#LLM</a>
+              <a href="/tags/Python/">#Python</a><a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#大模型</a><a href="/tags/LangChain/">#LangChain</a><a href="/tags/LLM/">#LLM</a>
             </span>
           
         </div>
@@ -175,14 +177,14 @@
           
         
         <div class="post-content">
-          <p>最近上课讲到 LangChain，老师反复强调一句话：<strong>“LangChain 是给大模型应用做脚手架的”</strong>。一开始我以为又是什么花里胡哨的概念，听完课后自己动手敲了一遍代码，发现它确实把”调大模型”这件本来挺折腾的事，变得像拼乐高一样有章法。</p>
-<p>这篇笔记是我自己学习时整理的思路，不抄课件，尽量用大白话讲清楚。</p>
+          <p>老师反复强调过一句话：<strong>“LangChain 是给大模型应用做脚手架的”</strong>。一开始我以为又是什么花里胡哨的概念，自己动手敲了一遍代码，发现它确实把”调大模型”这件本来挺折腾的事，变得像拼乐高一样有章法。</p>
+<p>这篇笔记是我自己学习时整理的思路，尽量用大白话讲清楚。</p>
 <h2 id="一、LangChain-到底是个啥？"><a href="#一、LangChain-到底是个啥？" class="headerlink" title="一、LangChain 到底是个啥？"></a>一、LangChain 到底是个啥？</h2><p>你直接调 OpenAI 的 API 也能让大模型回答问题，代码也就三五行：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> openai <span class="keyword">import</span> OpenAI</span><br><span class="line">client = OpenAI()</span><br><span class="line">r = client.chat.completions.create(</span><br><span class="line">    model=<span class="string">&quot;gpt-3.5-turbo&quot;</span>,</span><br><span class="line">    messages=[&#123;<span class="string">&quot;role&quot;</span>: <span class="string">&quot;user&quot;</span>, <span class="string">&quot;content&quot;</span>: <span class="string">&quot;你好&quot;</span>&#125;]</span><br><span class="line">)</span><br><span class="line"><span class="built_in">print</span>(r.choices[<span class="number">0</span>].message.content)</span><br></pre></td></tr></table></figure>
 
 <p>但等你真的想做一个能”连续对话”、能”查自己文档”、能”用工具”的程序时，代码会迅速膨胀到你不想维护。LangChain 就是把这堆脏活累活封装成一组组件，让你像搭积木一样把功能拼起来。</p>
 <p>打个比方：<strong>直接调 API 是手擀面，LangChain 是挂面机</strong>。手擀面好吃但费劲，挂面机做的面也还行，关键是省事。</p>
-<h2 id="二、六大核心组件"><a href="#二、六大核心组件" class="headerlink" title="二、六大核心组件"></a>二、六大核心组件</h2><p>LangChain 的”乐高块”主要就这六块。课件上叫它们 M-P-I-Me-C-A，我给你翻译成人话：</p>
+<h2 id="二、六大核心组件"><a href="#二、六大核心组件" class="headerlink" title="二、六大核心组件"></a>二、六大核心组件</h2><p>LangChain 的”乐高块”主要就这六块，业内缩写是 M-P-I-Me-C-A，我给你翻译成人话：</p>
 <table>
 <thead>
 <tr>
@@ -266,7 +268,7 @@
 </ol>
 <p>这就是 RAG（检索增强生成）。<strong>大模型不需要训练，只需要给它相关的资料片段</strong>。</p>
 <p>具体怎么搭，我下一篇笔记单独写 RAG —— 那个话题够撑一整篇。</p>
-<h2 id="八、生命周期：开发、生产、部署三件套"><a href="#八、生命周期：开发、生产、部署三件套" class="headerlink" title="八、生命周期：开发、生产、部署三件套"></a>八、生命周期：开发、生产、部署三件套</h2><p>课件把 LangChain 的生态分三段：</p>
+<h2 id="八、生命周期：开发、生产、部署三件套"><a href="#八、生命周期：开发、生产、部署三件套" class="headerlink" title="八、生命周期：开发、生产、部署三件套"></a>八、生命周期：开发、生产、部署三件套</h2><p>LangChain 的生态大致分三段：</p>
 <ul>
 <li><strong>开发阶段</strong>：用 LangChain 的开源组件拼 MVP</li>
 <li><strong>生产阶段</strong>：用 LangSmith 监控每条链的输入输出、跑分、debug</li>

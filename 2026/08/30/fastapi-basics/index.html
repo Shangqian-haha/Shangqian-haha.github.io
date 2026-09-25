@@ -13,6 +13,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
+
+
 <script>
   // 首次绘制前设置主题，避免闪烁
   (function () {
@@ -175,7 +177,7 @@
           
         
         <div class="post-content">
-          <p>以前觉得”写后端接口”是件特别神秘的事，直到上手 FastAPI，才发现原来就是给 Python 函数贴个标签，然后它自己就变成能对外服务的接口了。这篇把我从课件里学到的东西整理一遍，纯大白话，保证看完能”依葫芦画瓢”跑起来。</p>
+          <p>以前觉得”写后端接口”是件特别神秘的事，直到上手 FastAPI，才发现原来就是给 Python 函数贴个标签，然后它自己就变成能对外服务的接口了。这篇把我学到的东西整理一遍，纯大白话，保证看完能”依葫芦画瓢”跑起来。</p>
 <h2 id="一、FastAPI-是啥？一句话：给-Python-装上”前台”"><a href="#一、FastAPI-是啥？一句话：给-Python-装上”前台”" class="headerlink" title="一、FastAPI 是啥？一句话：给 Python 装上”前台”"></a>一、FastAPI 是啥？一句话：给 Python 装上”前台”</h2><p>你写的 Python 函数平时只能自己跑自己用，FastAPI 做的事就是<strong>把它变成别人也能通过网址调用的服务</strong>。</p>
 <p>打个比方：你在美团点外卖，结账时选了微信支付。美团 APP 不知道你微信里有多少钱，微信也不可能把密码告诉美团——它们俩中间靠的就是**接口（API）**在传话：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">美团 APP  →  调用微信的接口  →  微信扣款  →  把结果传回来</span><br></pre></td></tr></table></figure>

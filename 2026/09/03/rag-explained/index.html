@@ -13,6 +13,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
+
+
 <script>
   // 首次绘制前设置主题，避免闪烁
   (function () {
@@ -175,7 +177,7 @@
           
         
         <div class="post-content">
-          <p>老师在课上打了个比方，我觉得特别贴切：<strong>普通大模型是闭卷考试，RAG 是开卷考试</strong>。</p>
+          <p>老师打了个比方，我觉得特别贴切：<strong>普通大模型是闭卷考试，RAG 是开卷考试</strong>。</p>
 <p>闭卷考试靠记忆，再聪明的学生也会忘；开卷考试带本参考书，遇到不会的翻一翻。RAG 就是给大模型这本”参考书”。</p>
 <p>这篇笔记把 RAG 从概念到流程拆开讲，零基础也能跟上。</p>
 <h2 id="一、为什么需要-RAG？"><a href="#一、为什么需要-RAG？" class="headerlink" title="一、为什么需要 RAG？"></a>一、为什么需要 RAG？</h2><p>大模型再强，也有三个绕不开的问题：</p>
@@ -188,7 +190,7 @@
 <blockquote>
 <p>举个工作里的例子：让大模型回答”我们公司去年的差旅报销规则”，它肯定不知道。但如果你把差旅手册喂给 RAG，它就能从手册里找到对应条款，再组织成答案给你。</p>
 </blockquote>
-<h2 id="二、RAG-vs-Fine-tuning：检索还是微调？"><a href="#二、RAG-vs-Fine-tuning：检索还是微调？" class="headerlink" title="二、RAG vs Fine-tuning：检索还是微调？"></a>二、RAG vs Fine-tuning：检索还是微调？</h2><p>课件里有个对比表我直接搬过来：</p>
+<h2 id="二、RAG-vs-Fine-tuning：检索还是微调？"><a href="#二、RAG-vs-Fine-tuning：检索还是微调？" class="headerlink" title="二、RAG vs Fine-tuning：检索还是微调？"></a>二、RAG vs Fine-tuning：检索还是微调？</h2><p>有个对比表可以直接搬过来：</p>
 <table>
 <thead>
 <tr>
@@ -323,7 +325,7 @@
 
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> chromadb</span><br><span class="line">client = chromadb.Client()  <span class="comment"># 内存模式</span></span><br><span class="line">collection = client.create_collection(<span class="string">&quot;my_docs&quot;</span>)</span><br><span class="line">collection.add(documents=[<span class="string">&quot;xxx&quot;</span>, <span class="string">&quot;yyy&quot;</span>], ids=[<span class="string">&quot;1&quot;</span>, <span class="string">&quot;2&quot;</span>])</span><br><span class="line">results = collection.query(query_texts=[<span class="string">&quot;查询&quot;</span>], n_results=<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
 
-<h2 id="八、混合检索：BM25-向量"><a href="#八、混合检索：BM25-向量" class="headerlink" title="八、混合检索：BM25 + 向量"></a>八、混合检索：BM25 + 向量</h2><p>课件上提到了”混合检索”——把<strong>传统关键词搜索（BM25）</strong> 和 <strong>向量语义搜索</strong> 结合起来。</p>
+<h2 id="八、混合检索：BM25-向量"><a href="#八、混合检索：BM25-向量" class="headerlink" title="八、混合检索：BM25 + 向量"></a>八、混合检索：BM25 + 向量</h2><p>还有一种做法叫**”混合检索”<strong>——把</strong>传统关键词搜索（BM25）** 和 <strong>向量语义搜索</strong> 结合起来。</p>
 <p>为啥？纯向量检索对”精确关键词”不敏感（比如产品编号、专业术语）。把 BM25 当作兜底，两者分数加权融合，效果更稳。</p>
 <p>这是进阶话题，初学先跳过，知道有这回事就行。</p>
 <h2 id="九、平台实战"><a href="#九、平台实战" class="headerlink" title="九、平台实战"></a>九、平台实战</h2><p>实际做项目时你不一定从零搭，国内几个平台都提供了开箱即用的 RAG：</p>

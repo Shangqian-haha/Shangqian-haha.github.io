@@ -13,6 +13,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
+
+<link rel="stylesheet" href="/css/home-hero.css?v=1790350284121">
 <script>
   // 首次绘制前设置主题，避免闪烁
   (function () {
@@ -130,32 +132,200 @@
 </div>
 
 
+  <!-- 首页流星主页层（试验版）：「尚谦一键还原」删掉下面这一行即可 -->
+  
+<section class="mh" id="home-hero">
+  <div class="mh-bg" aria-hidden="true">
+    <span class="mh-void"></span>
+
+    <!-- 棱镜光弧。层序（后 → 前）：
+           ① 光谱扇 · 柔光   : 7 条 × --mh-w-halo  + blur40 + 低透明度 → 大范围外溢辉光
+           ② 光谱扇 · 外发光 : 7 条 × --mh-w-bloom + blur16
+           ③ 光谱扇 · 本体   : 7 条 × --mh-w-body  + blur3  ← 颜色在这里最实
+           ④ 白核 · 外发光   : --mh-w-tglow（拱顶白线的 bloom）
+           ⑤ 白核 · 本体     : --mh-w-tcore（拱顶那条白线，向右淡出，让位给彩虹）
+         ①②③ 是把 7 条打包进 <g> 后**整体**加一次 filter（只 3 个 filter 实例，
+         比逐条加省一大截）；④⑤ 是单条。
+         换配色只改 home-hero.css 里 .mh 的 --mh-v..--mh-r 三件套。 -->
+    <svg class="mh-arc" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
+      <defs>
+        <!-- 色标 offset 按「路径包围盒」算，不是按屏幕宽度。
+             这批路径 x 从 -80 到 1030（宽 1110），而画面内可见的只是 user x≈69~931，
+             即 offset 0.13 ~ 0.91 —— 所以末尾色标必须落在 0.91 附近，
+             否则最后那段颜色会被推到画面外，右边缘永远看不到。 -->
+        
+        <linearGradient id="mh-sp-v" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0.000" stop-color="#ffffff"/>
+          <stop offset="0.485" stop-color="#ffffff"/>
+          <stop offset="0.585" stop-color="var(--mh-v-t)"/>
+          <stop offset="0.705" stop-color="var(--mh-v)"/>
+          <stop offset="1.000" stop-color="var(--mh-v-e)"/>
+        </linearGradient>
+        
+        <linearGradient id="mh-sp-b" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0.000" stop-color="#ffffff"/>
+          <stop offset="0.459" stop-color="#ffffff"/>
+          <stop offset="0.559" stop-color="var(--mh-b-t)"/>
+          <stop offset="0.679" stop-color="var(--mh-b)"/>
+          <stop offset="1.000" stop-color="var(--mh-b-e)"/>
+        </linearGradient>
+        
+        <linearGradient id="mh-sp-c" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0.000" stop-color="#ffffff"/>
+          <stop offset="0.433" stop-color="#ffffff"/>
+          <stop offset="0.533" stop-color="var(--mh-c-t)"/>
+          <stop offset="0.653" stop-color="var(--mh-c)"/>
+          <stop offset="1.000" stop-color="var(--mh-c-e)"/>
+        </linearGradient>
+        
+        <linearGradient id="mh-sp-g" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0.000" stop-color="#ffffff"/>
+          <stop offset="0.407" stop-color="#ffffff"/>
+          <stop offset="0.507" stop-color="var(--mh-g-t)"/>
+          <stop offset="0.627" stop-color="var(--mh-g)"/>
+          <stop offset="1.000" stop-color="var(--mh-g-e)"/>
+        </linearGradient>
+        
+        <linearGradient id="mh-sp-y" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0.000" stop-color="#ffffff"/>
+          <stop offset="0.381" stop-color="#ffffff"/>
+          <stop offset="0.481" stop-color="var(--mh-y-t)"/>
+          <stop offset="0.601" stop-color="var(--mh-y)"/>
+          <stop offset="1.000" stop-color="var(--mh-y-e)"/>
+        </linearGradient>
+        
+        <linearGradient id="mh-sp-o" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0.000" stop-color="#ffffff"/>
+          <stop offset="0.355" stop-color="#ffffff"/>
+          <stop offset="0.455" stop-color="var(--mh-o-t)"/>
+          <stop offset="0.575" stop-color="var(--mh-o)"/>
+          <stop offset="1.000" stop-color="var(--mh-o-e)"/>
+        </linearGradient>
+        
+        <linearGradient id="mh-sp-r" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0.000" stop-color="#ffffff"/>
+          <stop offset="0.329" stop-color="#ffffff"/>
+          <stop offset="0.429" stop-color="var(--mh-r-t)"/>
+          <stop offset="0.549" stop-color="var(--mh-r)"/>
+          <stop offset="1.000" stop-color="var(--mh-r-e)"/>
+        </linearGradient>
+        
+        <!-- 白核：拱顶（offset≈0.45）之前是满白，之后逐级退场把位置让给彩虹。
+             退场点要和 _on0 对上：onset 最晚的是紫(_on0)，
+             所以 _trk[2] 起就得明显减弱，否则白核会把刚显色的那几条又盖回白。
+             位置与强度分两个数组，是为了能单独试「退场更早」而不牵连「退得更快」。 -->
+        <linearGradient id="mh-trunk" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0.00" stop-color="#ffffff" stop-opacity="1"/>
+          <stop offset="0.36" stop-color="#ffffff" stop-opacity="1"/>
+          <stop offset="0.48" stop-color="#ffffff" stop-opacity="0.69"/>
+          <stop offset="0.61" stop-color="#ffffff" stop-opacity="0.23"/>
+          <stop offset="0.73" stop-color="#ffffff" stop-opacity="0"/>
+        </linearGradient>
+        <!-- 纵向给足空间，否则高斯模糊会被 filter 区域裁掉 -->
+        <!-- C 方案（性能）：把 5 个模糊滤镜的 filter region 从原始 -300%/700% 之类收到
+     -100%/300%，面积约 -57%。region 越小，离屏缓冲越小，高斯模糊的填充成本越低。
+     实测（同相位冻结比对，见 skills/css-atmosphere-hero）：300% 与原始视觉等价 ——
+     >3 灰阶差异 0%、最大差 3。⚠️ 不要再往下收到 200% 以下：200% 已有 0.33% 的像素
+     出现 >24 灰阶差异（拱顶亮带被裁），240% 是实测的安全下限。
+     恢复原值：halo -300%/700%、bloom -180%/460%、soft -120%/340%、
+     tglow -200%/500%、tcore -120%/340%。 -->
+<filter id="mh-f-halo"  x="-14%" y="-100%" width="128%" height="300%"><feGaussianBlur stdDeviation="40"/></filter>
+        <filter id="mh-f-bloom" x="-8%"  y="-100%" width="116%" height="300%"><feGaussianBlur stdDeviation="16"/></filter>
+        <filter id="mh-f-soft"  x="-6%"  y="-100%" width="112%" height="300%"><feGaussianBlur stdDeviation="4.5"/></filter>
+        <filter id="mh-f-tglow" x="-10%" y="-100%" width="120%" height="300%"><feGaussianBlur stdDeviation="22"/></filter>
+        <filter id="mh-f-tcore" x="-6%"  y="-100%" width="112%" height="300%"><feGaussianBlur stdDeviation="5"/></filter>
+      </defs>
+
+      <g class="mh-arc-group">
+        <g class="mh-fan mh-fan--halo" filter="url(#mh-f-halo)">
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 348.0, 760 380, 1030 455" stroke="url(#mh-sp-v)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 350.6, 760 402, 1030 477" stroke="url(#mh-sp-b)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 353.5, 760 426, 1030 501" stroke="url(#mh-sp-c)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 356.6, 760 452, 1030 527" stroke="url(#mh-sp-g)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 359.9, 760 479, 1030 554" stroke="url(#mh-sp-y)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 362.9, 760 504, 1030 579" stroke="url(#mh-sp-o)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 365.9, 760 529, 1030 604" stroke="url(#mh-sp-r)"/>
+          
+        </g>
+        <g class="mh-fan mh-fan--bloom" filter="url(#mh-f-bloom)">
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 348.0, 760 380, 1030 455" stroke="url(#mh-sp-v)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 350.6, 760 402, 1030 477" stroke="url(#mh-sp-b)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 353.5, 760 426, 1030 501" stroke="url(#mh-sp-c)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 356.6, 760 452, 1030 527" stroke="url(#mh-sp-g)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 359.9, 760 479, 1030 554" stroke="url(#mh-sp-y)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 362.9, 760 504, 1030 579" stroke="url(#mh-sp-o)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 365.9, 760 529, 1030 604" stroke="url(#mh-sp-r)"/>
+          
+        </g>
+        <g class="mh-fan mh-fan--body" filter="url(#mh-f-soft)">
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 348.0, 760 380, 1030 455" stroke="url(#mh-sp-v)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 350.6, 760 402, 1030 477" stroke="url(#mh-sp-b)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 353.5, 760 426, 1030 501" stroke="url(#mh-sp-c)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 356.6, 760 452, 1030 527" stroke="url(#mh-sp-g)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 359.9, 760 479, 1030 554" stroke="url(#mh-sp-y)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 362.9, 760 504, 1030 579" stroke="url(#mh-sp-o)"/>
+          
+          <path d="M -80 470 C 120 380, 250 350, 400 348 C 540 365.9, 760 529, 1030 604" stroke="url(#mh-sp-r)"/>
+          
+        </g>
+
+        <!-- 白核：拱顶那条过曝白线（走最上面那条路径，与蓝紫同轴 → 白线转蓝紫） -->
+        <path class="mh-tglow" d="M -80 470 C 120 380, 250 350, 400 348 C 540 348.0, 760 380, 1030 455" stroke="url(#mh-trunk)" filter="url(#mh-f-tglow)"/>
+        <path class="mh-tcore" d="M -80 470 C 120 380, 250 350, 400 348 C 540 348.0, 760 380, 1030 455" stroke="url(#mh-trunk)" filter="url(#mh-f-tcore)"/>
+      </g>
+    </svg>
+
+
+    <svg class="mh-grain" xmlns="http://www.w3.org/2000/svg">
+      <filter id="mh-noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/>
+      </filter>
+      <rect width="100%" height="100%" filter="url(#mh-noise)"/>
+    </svg>
+  </div>
+
+  <div class="mh-inner">
+    <h1 class="mh-title">Shang Qian&#39;s Blog</h1>
+    <p class="mh-desc">欲买桂花同载酒，终不似，少年游。</p>
+    <div class="mh-actions">
+      <a class="mh-btn mh-btn-primary" href="/posts/">开始阅读</a>
+      <a class="mh-btn mh-btn-ghost" href="/about/">关于我</a>
+    </div>
+  </div>
+
+  <div class="mh-scroll" aria-hidden="true"><span>向下滚动</span><span class="line"></span></div>
+</section>
+
+
   <main class="site-body container">
 
-    <!-- Hero -->
-    <section class="hero">
-      
+    <!-- 首页 Hero 主体（头像/标题/副标题/作者/社交）已上移到上方流星主页层，此处只留终端徽章 -->
+    
 <div class="hero-badge">
   <span class="hero-badge-dot"></span>
   <span class="hero-badge-text">~/hello-world$</span>
 </div>
 
-      <div class="hero-main">
-        <img class="hero-avatar" src="/img/avatar.jpg" alt="avatar" onerror="this.style.display='none'">
-        <div class="hero-text">
-          <h1 class="hero-title">Shang Qian's blog</h1>
-          <p class="hero-desc">欲买桂花同载酒，终不似，少年游。</p>
-        </div>
-      </div>
-      <div class="hero-meta">
-        <span class="hero-author">作者 <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener">尚谦</a></span>
-        <div class="hero-social">
-          <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener" title="GitHub"><i class="fa-brands fa-github"></i></a>
-          <a href="mailto:357425252@qq.com" title="邮箱"><i class="fa-solid fa-envelope"></i></a>
-          
-        </div>
-      </div>
-    </section>
 
     <!-- 内容区 -->
     <div class="layout-grid">
@@ -595,12 +765,12 @@
     </h3>
     <dl class="webinfo-list">
       <div><dt>文章数目</dt><dd>20</dd></div>
-      <div><dt>本站总字数</dt><dd>44,186</dd></div>
+      <div><dt>本站总字数</dt><dd>44,039</dd></div>
       <div><dt>本站访客数</dt><dd id="vercount_value_site_uv">—</dd></div>
       <div><dt>本站访问量</dt><dd id="vercount_value_site_pv">—</dd></div>
       <div>
         <dt>最后更新时间</dt>
-        <dd id="webinfo-last-build" data-build-timestamp="1789110626403">今天</dd>
+        <dd id="webinfo-last-build" data-build-timestamp="1790350284125">今天</dd>
       </div>
     </dl>
   </section>
@@ -611,13 +781,13 @@
     <h3 class="aside-card-title"><i class="fa-regular fa-folder-open"></i> 分类</h3>
     <ul class="aside-list">
       
-        <li><a href="/categories/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型<span class="count">5</span></a></li>
-      
         <li><a href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">数据分析<span class="count">9</span></a></li>
       
         <li><a href="/categories/%E7%BC%96%E7%A8%8B%E5%AE%9E%E6%88%98/">编程实战<span class="count">2</span></a></li>
       
         <li><a href="/categories/%E5%BB%BA%E7%AB%99%E6%95%99%E7%A8%8B/">建站教程<span class="count">2</span></a></li>
+      
+        <li><a href="/categories/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">大模型<span class="count">5</span></a></li>
       
         <li><a href="/categories/%E7%9F%A5%E8%AF%86%E7%AE%A1%E7%90%86/">知识管理<span class="count">1</span></a></li>
       
@@ -633,27 +803,7 @@
     <h3 class="aside-card-title"><i class="fa-solid fa-tags"></i> 标签</h3>
     <div class="aside-tags">
       
-        <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#大模型</a>
-      
-        <a href="/tags/AI-Agent/">#AI Agent</a>
-      
-        <a href="/tags/LangChain/">#LangChain</a>
-      
-        <a href="/tags/LangGraph/">#LangGraph</a>
-      
-        <a href="/tags/AutoGen/">#AutoGen</a>
-      
         <a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/">#数据分析</a>
-      
-        <a href="/tags/%E7%9C%8B%E8%BD%AC%E5%8C%96/">#看转化</a>
-      
-        <a href="/tags/%E8%BD%AC%E5%8C%96%E7%8E%87/">#转化率</a>
-      
-        <a href="/tags/%E6%BC%8F%E6%96%97%E5%9B%BE/">#漏斗图</a>
-      
-        <a href="/tags/%E7%94%A8%E6%88%B7%E6%97%85%E7%A8%8B%E5%9C%B0%E5%9B%BE/">#用户旅程地图</a>
-      
-        <a href="/tags/%E6%B5%81%E5%A4%B1%E5%88%86%E6%9E%90/">#流失分析</a>
       
         <a href="/tags/BI-%E5%B7%A5%E5%85%B7/">#BI 工具</a>
       
@@ -673,6 +823,16 @@
       
         <a href="/tags/%E5%B7%A5%E5%85%B7%E6%8E%A8%E8%8D%90/">#工具推荐</a>
       
+        <a href="/tags/%E7%9C%8B%E8%BD%AC%E5%8C%96/">#看转化</a>
+      
+        <a href="/tags/%E8%BD%AC%E5%8C%96%E7%8E%87/">#转化率</a>
+      
+        <a href="/tags/%E6%BC%8F%E6%96%97%E5%9B%BE/">#漏斗图</a>
+      
+        <a href="/tags/%E7%94%A8%E6%88%B7%E6%97%85%E7%A8%8B%E5%9C%B0%E5%9B%BE/">#用户旅程地图</a>
+      
+        <a href="/tags/%E6%B5%81%E5%A4%B1%E5%88%86%E6%9E%90/">#流失分析</a>
+      
         <a href="/tags/Python/">#Python</a>
       
         <a href="/tags/FastAPI/">#FastAPI</a>
@@ -687,17 +847,23 @@
       
         <a href="/tags/GitHub-Pages/">#GitHub Pages</a>
       
+        <a href="/tags/%E5%A4%A7%E6%A8%A1%E5%9E%8B/">#大模型</a>
+      
+        <a href="/tags/LangChain/">#LangChain</a>
+      
         <a href="/tags/LLM/">#LLM</a>
-      
-        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E5%B8%88/">#数据分析师</a>
-      
-        <a href="/tags/%E4%B8%9A%E5%8A%A1%E5%88%86%E6%9E%90/">#业务分析</a>
       
         <a href="/tags/%E6%8C%87%E6%A0%87%E4%BD%93%E7%B3%BB/">#指标体系</a>
       
         <a href="/tags/%E7%94%B5%E5%95%86/">#电商</a>
       
         <a href="/tags/KPI/">#KPI</a>
+      
+        <a href="/tags/AI-Agent/">#AI Agent</a>
+      
+        <a href="/tags/LangGraph/">#LangGraph</a>
+      
+        <a href="/tags/AutoGen/">#AutoGen</a>
       
         <a href="/tags/Obsidian/">#Obsidian</a>
       
@@ -709,23 +875,15 @@
       
         <a href="/tags/%E7%9F%A5%E8%AF%86%E7%AE%A1%E7%90%86/">#知识管理</a>
       
+        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90%E5%B8%88/">#数据分析师</a>
+      
+        <a href="/tags/%E4%B8%9A%E5%8A%A1%E5%88%86%E6%9E%90/">#业务分析</a>
+      
+        <a href="/tags/Pandas/">#Pandas</a>
+      
         <a href="/tags/%E7%94%9F%E6%B4%BB/">#生活</a>
       
         <a href="/tags/%E6%91%84%E5%BD%B1/">#摄影</a>
-      
-        <a href="/tags/%E4%BD%9C%E6%AF%94%E8%BE%83/">#作比较</a>
-      
-        <a href="/tags/%E5%8F%82%E7%85%A7%E7%B3%BB/">#参照系</a>
-      
-        <a href="/tags/%E7%9B%AE%E6%A0%87%E8%BE%BE%E6%88%90/">#目标达成</a>
-      
-        <a href="/tags/%E5%B8%82%E5%9C%BA%E5%8D%A0%E6%9C%89%E7%8E%87/">#市场占有率</a>
-      
-        <a href="/tags/Prompt/">#Prompt</a>
-      
-        <a href="/tags/%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B/">#提示工程</a>
-      
-        <a href="/tags/Pandas/">#Pandas</a>
       
         <a href="/tags/%E6%95%B0%E6%8D%AE%E8%A7%84%E5%BE%8B/">#数据规律</a>
       
@@ -736,6 +894,22 @@
         <a href="/tags/%E5%9B%A0%E6%9E%9C%E5%85%B3%E7%B3%BB/">#因果关系</a>
       
         <a href="/tags/%E6%97%B6%E9%97%B4%E5%BA%8F%E5%88%97/">#时间序列</a>
+      
+        <a href="/tags/Qwen/">#Qwen</a>
+      
+        <a href="/tags/llama-cpp/">#llama.cpp</a>
+      
+        <a href="/tags/%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/">#本地部署</a>
+      
+        <a href="/tags/GGUF/">#GGUF</a>
+      
+        <a href="/tags/%E9%87%8F%E5%8C%96/">#量化</a>
+      
+        <a href="/tags/%E5%BC%80%E6%BA%90%E6%A8%A1%E5%9E%8B/">#开源模型</a>
+      
+        <a href="/tags/Prompt/">#Prompt</a>
+      
+        <a href="/tags/%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B/">#提示工程</a>
       
         <a href="/tags/RAG/">#RAG</a>
       
@@ -749,17 +923,11 @@
       
         <a href="/tags/%E6%8E%A8%E5%B9%BF/">#推广</a>
       
-        <a href="/tags/Qwen/">#Qwen</a>
+        <a href="/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">#用户画像</a>
       
-        <a href="/tags/llama-cpp/">#llama.cpp</a>
+        <a href="/tags/%E6%A0%87%E7%AD%BE%E4%BD%93%E7%B3%BB/">#标签体系</a>
       
-        <a href="/tags/%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/">#本地部署</a>
-      
-        <a href="/tags/GGUF/">#GGUF</a>
-      
-        <a href="/tags/%E9%87%8F%E5%8C%96/">#量化</a>
-      
-        <a href="/tags/%E5%BC%80%E6%BA%90%E6%A8%A1%E5%9E%8B/">#开源模型</a>
+        <a href="/tags/RFM/">#RFM</a>
       
         <a href="/tags/Vercount/">#Vercount</a>
       
@@ -775,11 +943,13 @@
       
         <a href="/tags/%E5%90%8C%E6%AF%94/">#同比</a>
       
-        <a href="/tags/%E7%94%A8%E6%88%B7%E7%94%BB%E5%83%8F/">#用户画像</a>
+        <a href="/tags/%E4%BD%9C%E6%AF%94%E8%BE%83/">#作比较</a>
       
-        <a href="/tags/%E6%A0%87%E7%AD%BE%E4%BD%93%E7%B3%BB/">#标签体系</a>
+        <a href="/tags/%E5%8F%82%E7%85%A7%E7%B3%BB/">#参照系</a>
       
-        <a href="/tags/RFM/">#RFM</a>
+        <a href="/tags/%E7%9B%AE%E6%A0%87%E8%BE%BE%E6%88%90/">#目标达成</a>
+      
+        <a href="/tags/%E5%B8%82%E5%9C%BA%E5%8D%A0%E6%9C%89%E7%8E%87/">#市场占有率</a>
       
     </div>
   </section>

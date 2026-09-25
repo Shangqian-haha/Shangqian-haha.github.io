@@ -13,6 +13,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
+
+
 <script>
   // 首次绘制前设置主题，避免闪烁
   (function () {
@@ -177,8 +179,8 @@
         <div class="post-content">
           <p>之前看数据，我经常只盯着绝对值：这月 GMV 120 万，上月 100 万，涨了 20 万。</p>
 <p>然后呢？<strong>涨 20 万到底是好事还是坏事？</strong></p>
-<p>后来才明白，光看绝对值会骗人。这堂课讲的就是数据分析最基础、也最常用的一种方法论——<strong>看变化</strong>。</p>
-<h2 id="一、什么是「看变化」"><a href="#一、什么是「看变化」" class="headerlink" title="一、什么是「看变化」"></a>一、什么是「看变化」</h2><p>课件的定义很直白：</p>
+<p>后来才明白，光看绝对值会骗人。这篇要讲的就是数据分析最基础、也最常用的一种方法论——<strong>看变化</strong>。</p>
+<h2 id="一、什么是「看变化」"><a href="#一、什么是「看变化」" class="headerlink" title="一、什么是「看变化」"></a>一、什么是「看变化」</h2><p>先把定义说清楚，很直白：</p>
 <blockquote>
 <p><strong>看变化 &#x3D; 发现趋势</strong>。通过对比不同时间点的数据，发现趋势与异常，回答一个核心问题：数据涨了还是跌了？涨了多少？跌了多少？</p>
 </blockquote>
@@ -209,7 +211,7 @@
 </tr>
 </tbody></table>
 <p>一句话记住：<strong>看变化是数据分析的”入门武功”，往后所有高级分析都建立在它上面</strong>。</p>
-<h2 id="二、变化数-vs-变化率：绝对量-vs-相对量"><a href="#二、变化数-vs-变化率：绝对量-vs-相对量" class="headerlink" title="二、变化数 vs 变化率：绝对量 vs 相对量"></a>二、变化数 vs 变化率：绝对量 vs 相对量</h2><p>很多人其实没分清这两个概念。课件用一个最简单的例子把它们拆开：</p>
+<h2 id="二、变化数-vs-变化率：绝对量-vs-相对量"><a href="#二、变化数-vs-变化率：绝对量-vs-相对量" class="headerlink" title="二、变化数 vs 变化率：绝对量 vs 相对量"></a>二、变化数 vs 变化率：绝对量 vs 相对量</h2><p>很多人其实没分清这两个概念。用一个最简单的例子就能把它们拆开：</p>
 <blockquote>
 <p><strong>场景</strong>：某店铺 6 月销售额 100 万，7 月涨到 120 万。</p>
 </blockquote>
@@ -267,11 +269,11 @@
 <td>上期太小时波动会被放大</td>
 </tr>
 </tbody></table>
-<p><strong>关键洞察</strong>：课件里那个特别妙的对比例子——</p>
+<p><strong>关键洞察</strong>：有个特别妙的对比例子——</p>
 <blockquote>
 <p>同样是 GMV 涨 0.3 亿元：2019 年（0.5→1.0）增长率 <strong>30%</strong>；2021 年（1.3→1.5）增长率 <strong>23.1%</strong>。<br>变化数相同，但变化率不同。<strong>变化率更能反映增长的”含金量”</strong>。</p>
 </blockquote>
-<h2 id="三、环比-vs-同比：短期-vs-长期"><a href="#三、环比-vs-同比：短期-vs-长期" class="headerlink" title="三、环比 vs 同比：短期 vs 长期"></a>三、环比 vs 同比：短期 vs 长期</h2><p>这是最容易被搞混的两个概念。课件用两个对照场景把它们讲透。</p>
+<h2 id="三、环比-vs-同比：短期-vs-长期"><a href="#三、环比-vs-同比：短期-vs-长期" class="headerlink" title="三、环比 vs 同比：短期 vs 长期"></a>三、环比 vs 同比：短期 vs 长期</h2><p>这是最容易被搞混的两个概念。两个对照场景就能把它们讲透。</p>
 <h3 id="环比（Month-over-Month）"><a href="#环比（Month-over-Month）" class="headerlink" title="环比（Month-over-Month）"></a>环比（Month-over-Month）</h3><blockquote>
 <p><strong>定义</strong>：本期与上一期（通常是上个月）比较，反映<strong>短期</strong>变化趋势。<br><strong>公式</strong>：环比增长率 &#x3D;（本期 − 上期）÷ 上期 × 100%</p>
 </blockquote>
@@ -356,7 +358,7 @@
 <td>年度评估、战略决策</td>
 </tr>
 </tbody></table>
-<h2 id="四、错用环比的代价：国庆节案例"><a href="#四、错用环比的代价：国庆节案例" class="headerlink" title="四、错用环比的代价：国庆节案例"></a>四、错用环比的代价：国庆节案例</h2><p>这一段是课件里最让我警醒的部分——<strong>用错方法，结论能离谱到天上</strong>。</p>
+<h2 id="四、错用环比的代价：国庆节案例"><a href="#四、错用环比的代价：国庆节案例" class="headerlink" title="四、错用环比的代价：国庆节案例"></a>四、错用环比的代价：国庆节案例</h2><p>这一段是最让人警醒的部分——<strong>用错方法，结论能离谱到天上</strong>。</p>
 <blockquote>
 <p><strong>场景</strong>：某 App 国庆节前 7 天 vs 国庆节期间。</p>
 <table>

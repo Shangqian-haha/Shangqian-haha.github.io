@@ -13,6 +13,8 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
 <link rel="stylesheet" href="/css/style.css">
+
+
 <script>
   // 首次绘制前设置主题，避免闪烁
   (function () {
@@ -182,14 +184,14 @@
 <li>进阶版：”你是一名小红书美妆博主，目标读者是 22-28 岁女生，帮 YSL 小金条写一篇种草文案，300 字以内，口吻俏皮，多用 emoji”</li>
 </ul>
 <p>出来的内容完全两码事。这中间的差距就是<strong>提示工程（Prompt Engineering）</strong>。</p>
-<p>这篇笔记把上课讲的、加上我自己踩过的坑，整理成一份”对话手册”。</p>
+<p>这篇笔记把我学到的、加上自己踩过的坑，整理成一份”对话手册”。</p>
 <h2 id="一、什么是提示词？什么是提示工程？"><a href="#一、什么是提示词？什么是提示工程？" class="headerlink" title="一、什么是提示词？什么是提示工程？"></a>一、什么是提示词？什么是提示工程？</h2><p><strong>提示词（Prompt）</strong>：跟大模型说的每一句话。</p>
 <blockquote>
 <p>用户：”你好吗？”<br>提示词就是”你好吗？”这三个字。</p>
 </blockquote>
 <p><strong>提示工程（Prompt Engineering）</strong>：用工程化的思路<strong>系统性地编写提示词</strong>，让它在不同场景下都能稳定输出好结果。</p>
 <p>区别在于：提示词是”一句话”，提示工程是”一整套方法论”。</p>
-<h2 id="二、为什么提示词这么重要？"><a href="#二、为什么提示词这么重要？" class="headerlink" title="二、为什么提示词这么重要？"></a>二、为什么提示词这么重要？</h2><p>课件上三点：</p>
+<h2 id="二、为什么提示词这么重要？"><a href="#二、为什么提示词这么重要？" class="headerlink" title="二、为什么提示词这么重要？"></a>二、为什么提示词这么重要？</h2><p>先说三点：</p>
 <ol>
 <li>提示词<strong>直接决定</strong>输出好坏</li>
 <li>提示词是和大模型交互的<strong>主要方式</strong></li>
@@ -200,7 +202,7 @@
 <p>后来才明白：<strong>好的提示词都是改出来的</strong>。流程是：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">思路 → 尝试 → 看到不满意的输出 → 调整措辞 → 再试</span><br><span class="line">  ↑                                              ↓</span><br><span class="line">  └──────────────── 循环 N 轮 ────────────────────┘</span><br></pre></td></tr></table></figure>
 
-<p>课件上的例子特别好懂：</p>
+<p>有个例子特别好懂：</p>
 <p><strong>第一版</strong>（太宽泛）：</p>
 <blockquote>
 <p>“生成一篇关于最新科技进展的文章。”</p>
@@ -227,7 +229,7 @@
 <li><strong>给场景和人物</strong>：写小说先给背景、人物关系、前情</li>
 <li><strong>分步骤引导</strong>：把思考路径显性化，让它一步步走</li>
 </ol>
-<p>课件上一个数学题的例子特别有启发：</p>
+<p>有个数学题的例子特别有启发：</p>
 <blockquote>
 <p>题目：小明有 5 个桔子，又买了 2 袋桔子，每袋 3 个。共多少个？</p>
 <p>模型快速答：小明有 11 个桔子（❌ 算错了）</p>
@@ -270,7 +272,7 @@
 <td>“300 字内、不引用未公开数据”</td>
 </tr>
 </tbody></table>
-<p>课件上的范例：</p>
+<p>看个范例：</p>
 <blockquote>
 <p>原始：帮我生成一篇口红种草文案</p>
 <p>优化：你是一名优秀的小红书博主，生成一篇口红种草文案，<strong>字数不少于 100 字，风格要俏皮一些</strong>。</p>
@@ -284,7 +286,7 @@
 <p><strong>口诀</strong>：角色 + 场景 + 任务 + 示例 + 约束，五件套全用上，输出基本不会差。</p>
 <h2 id="六、推理模型的提示词（和普通模型不一样）"><a href="#六、推理模型的提示词（和普通模型不一样）" class="headerlink" title="六、推理模型的提示词（和普通模型不一样）"></a>六、推理模型的提示词（和普通模型不一样）</h2><p>这是个新坑：<strong>o1、DeepSeek-R1、QwQ、豆包深度思考</strong> 这些”推理模型”，<strong>用普通模型的方式问它效果反而差</strong>。</p>
 <p>为什么？因为它们自带”思考链”，你再给一堆步骤提示反而干扰。</p>
-<p>正确做法（课件原话特别好记）：</p>
+<p>正确做法（有句原话特别好记）：</p>
 <blockquote>
 <p>时刻把它当成：<strong>一个能力很牛逼但不知道你想要什么的员工</strong>。<br>只需表达：我是谁 + 我的目标 → 让它自己去推理。</p>
 </blockquote>
@@ -341,7 +343,7 @@
 <li><strong>系统层检测</strong>：在主模型前加一个”判别模型”，判断用户输入是否在攻击</li>
 <li><strong>锁死角色身份</strong>：固定身份 + 回答原则 + 用 <code>&#123;&#123;text&#125;&#125;</code> 占位符隔离用户输入</li>
 </ol>
-<h2 id="九、四类实战场景"><a href="#九、四类实战场景" class="headerlink" title="九、四类实战场景"></a>九、四类实战场景</h2><p>课件最后给了 4 个方向：</p>
+<h2 id="九、四类实战场景"><a href="#九、四类实战场景" class="headerlink" title="九、四类实战场景"></a>九、四类实战场景</h2><p>最后是 4 个方向：</p>
 <ol>
 <li><strong>小红书文案生成</strong>：用 5 层结构提示词批量生产</li>
 <li><strong>NL2SQL（自然语言转 SQL）</strong>：提升开发效率</li>
