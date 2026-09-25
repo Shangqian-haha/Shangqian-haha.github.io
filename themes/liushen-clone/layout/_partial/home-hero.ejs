@@ -1,0 +1,177 @@
+<%
+  /* ------------------------------------------------------------------
+     首页 · 棱镜光弧主页层（对齐 designali-in「web-gl-shader」参考图）
+     「尚谦一键还原」时整层删除即可（本文件 + home-hero.css + 两行 include）
+     文案优先读主题 _config.yml 的 home_hero 段，没写就用下面的默认值。
+     ------------------------------------------------------------------ */
+  var _h = theme.home_hero || {};
+  var _l1 = _h.title1 || "Shang Qian's Blog";
+  var _l2 = _h.title2 || '';                         /* 留空则标题单行 */
+  var _desc = _h.desc || '欲买桂花同载酒，终不似，少年游。';
+  var _a1 = _h.primary   || { text: '开始阅读', url: '/posts/' };
+  var _a2 = _h.secondary || { text: '关于我',   url: '/about/' };
+
+  /* ---- 棱镜扇 ------------------------------------------------------
+     参考图的构成 = 一道粗壮的过曝白光弧：
+       左半段：七条完全重叠 → 一条很亮很粗的纯白带（画面左下角斜升上来）
+       拱顶后：向右逐渐「散开」成彩虹，并整片下坠出右下角
+       右下角：橙红最大幅度下坠 → 那片最亮的暖色辉光
+
+     实现要点（改形状动 _off 与下面两条曲线；改粗细动 home-hero.css 的 --mh-w-*，
+     但 _off 也要跟着等比改，否则线宽/间距比变了会露暗缝）：
+       · 七条路径**第 1 段完全相同**（M/C 到 400,348 之前）
+         → 拱顶左侧严丝合缝叠成一条白带，不是靠渐变换色伪装的。
+       · 第 2 段的偏移量按 ~25 等距递增（0→149），与 CSS 的 --mh-w-body 配套：
+         越往右间距越大，到右边缘时间距刚好接近线宽 →
+         七条合成**一整片连续厚彩虹**，而不是七条带暗缝的细线。
+       · 第 2 段起点 = 第 1 段终点，且第一个控制点与它近同 y
+         → 接缝处切线连续，不会露出「一眼看出是拼的」折角。
+       · 颜色由 stroke 上的 linearGradient 给：前段是纯白，
+         之后才逐条错相位地显色 → 观感就是「先白线、后散色」。
+       · 坐标是按实测映射解出来的（viewBox 1000x600、元素 116% 外扩）：
+         可见 user x≈69~931、user y≈0~555。据此：
+           拱顶   → 屏幕横向 38% / 纵向 59%（= 参考图 42% / 59%）
+           左边缘 → 纵向 71%（参考图 70%）→ 所以左端是「低」的，拱是缓拱
+           右边缘 → 彩虹扇跨 74%~104%，最下一条已出画面
+         换算关系：px_x = 1.67*ux - 115 ；px_y = 1.62*uy - 67
+       · **不需要窄屏专用路径**：元素按 116%x116% 缩放后，宽窄屏可见的
+         user 坐标区间完全相同，同一组坐标给出同样的构图比例。
+         屏幕上的斜率差异（窄屏陡 3.5 倍）是视口宽高比的物理限制，改路径解决不了。 */
+  var _off  = [0, 22, 46, 72, 99, 124, 149];
+  var _keys = ['v', 'b', 'c', 'g', 'y', 'o', 'r'];   /* 上 → 下：紫 蓝 青 绿 黄 橙 红 */
+
+  /* ---- 白 / 彩 的横向比例：调比例只动这一处 ----
+     ⚠️ 量化口径（脚本 white-color-ratio.py）：逐列取最亮像素，
+        饱和度 <0.20 且亮 = 白，饱和度 ≥0.35 = 彩。所以「白」不只是白核，
+        还包括七条 fan 渐变开头那一段纯白 + 紧接着的近白过渡色（-t 饱和仅 ~0.13）。
+     ① _on0 / _onStep —— 彩色线的显色起点。_on0 是**最上面那条（紫）**的起点，
+        每条递减 _onStep（红最早显、紫最晚）→ 才有「拱顶先白、越往右下颜色越齐」。
+        ⚠️ 下限：红(i=6) 的 onset = _on0 - 6*_onStep 不能低于 0.14，
+        0.14 就是可见区左边缘（路径包围盒 offset 0.13~0.91），再低就看不见白线了。
+     ② _trk / _trkOp —— 白核（过曝白线）的退场点与退场段残余不透明度
+        [起点, 全白止, 半强, 弱, 归零]。
+        **这才是「彩色何时看得见」的主因**：白在 screen 混合下把饱和色压回白，
+        所以想让彩色更早出现，主要往前挪 _trk，而不是 _on0。
+        _trkOp 是配套的五个不透明度 —— 只挪位置不压强度，退场段会用「半亮的白」
+        把刚显色的彩虹又盖回白（实测 _trkOp 中段从 .62 压到 .38，
+        白占比直接掉约 8 个点）。
+     ⚠️ 这是**阈值型**观感：_trk 整体挪 0.02 就能让白/彩分界移动 ~10 个百分点（实测）。
+     改完必须量化复核，别凭感觉（脚本见 css-atmosphere-hero 技能第七节）。
+     【当前档位 = 白 6 : 彩 4】目标白色段 = 画面 offset 0.13~0.60 那一段。
+     ⚠️ 敏感度是**分段的**，同一批参数在不同区间完全不同：
+        _trk 后半段在 .28~.50 时，+0.02 只动约 1 个百分点（很钝）；
+        退到 .42~.76 那片，+0.02 能动约 10 个点（极灵）。
+     所以「小步试」要看当前落在哪一段，别指望一个固定换算。 */
+  var _on0 = 0.485, _onStep = 0.026;
+  var _trk = [0.00, 0.36, 0.48, 0.61, 0.73];
+  var _trkOp = [1, 1, .69, .23, 0];
+
+  function _d(o) {
+    return 'M -80 470 C 120 380, 250 350, 400 348'
+         + ' C 540 ' + (348 + o * 0.12).toFixed(1)
+         + ', 760 '  + (380 + o)
+         + ', 1030 ' + (455 + o);
+  }
+%>
+<section class="mh" id="home-hero">
+  <div class="mh-bg" aria-hidden="true">
+    <span class="mh-void"></span>
+
+    <!-- 棱镜光弧。层序（后 → 前）：
+           ① 光谱扇 · 柔光   : 7 条 × --mh-w-halo  + blur40 + 低透明度 → 大范围外溢辉光
+           ② 光谱扇 · 外发光 : 7 条 × --mh-w-bloom + blur16
+           ③ 光谱扇 · 本体   : 7 条 × --mh-w-body  + blur3  ← 颜色在这里最实
+           ④ 白核 · 外发光   : --mh-w-tglow（拱顶白线的 bloom）
+           ⑤ 白核 · 本体     : --mh-w-tcore（拱顶那条白线，向右淡出，让位给彩虹）
+         ①②③ 是把 7 条打包进 <g> 后**整体**加一次 filter（只 3 个 filter 实例，
+         比逐条加省一大截）；④⑤ 是单条。
+         换配色只改 home-hero.css 里 .mh 的 --mh-v..--mh-r 三件套。 -->
+    <svg class="mh-arc" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
+      <defs>
+        <!-- 色标 offset 按「路径包围盒」算，不是按屏幕宽度。
+             这批路径 x 从 -80 到 1030（宽 1110），而画面内可见的只是 user x≈69~931，
+             即 offset 0.13 ~ 0.91 —— 所以末尾色标必须落在 0.91 附近，
+             否则最后那段颜色会被推到画面外，右边缘永远看不到。 -->
+        <% _keys.forEach(function (k, i) {
+             /* 显色时刻**错相位**，而且方向很关键：
+                橙红最早显（拱顶右侧刚散开就露色），蓝紫最晚显（一直到画面右端才露）。
+                这才是参考图「拱顶先是一团白、越往右下颜色越齐」的成因。
+                ⚠️ 别弄反：i=0 是**最上面**那条（紫），它的 onset 必须最大。 */
+             var _on = _on0 - i * _onStep; %>
+        <linearGradient id="mh-sp-<%= k %>" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0.000" stop-color="#ffffff"/>
+          <stop offset="<%= _on.toFixed(3) %>" stop-color="#ffffff"/>
+          <stop offset="<%= (_on + 0.10).toFixed(3) %>" stop-color="var(--mh-<%= k %>-t)"/>
+          <stop offset="<%= (_on + 0.22).toFixed(3) %>" stop-color="var(--mh-<%= k %>)"/>
+          <stop offset="1.000" stop-color="var(--mh-<%= k %>-e)"/>
+        </linearGradient>
+        <% }); %>
+        <!-- 白核：拱顶（offset≈0.45）之前是满白，之后逐级退场把位置让给彩虹。
+             退场点要和 _on0 对上：onset 最晚的是紫(_on0)，
+             所以 _trk[2] 起就得明显减弱，否则白核会把刚显色的那几条又盖回白。
+             位置与强度分两个数组，是为了能单独试「退场更早」而不牵连「退得更快」。 -->
+        <linearGradient id="mh-trunk" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="<%= _trk[0].toFixed(2) %>" stop-color="#ffffff" stop-opacity="<%= _trkOp[0] %>"/>
+          <stop offset="<%= _trk[1].toFixed(2) %>" stop-color="#ffffff" stop-opacity="<%= _trkOp[1] %>"/>
+          <stop offset="<%= _trk[2].toFixed(2) %>" stop-color="#ffffff" stop-opacity="<%= _trkOp[2] %>"/>
+          <stop offset="<%= _trk[3].toFixed(2) %>" stop-color="#ffffff" stop-opacity="<%= _trkOp[3] %>"/>
+          <stop offset="<%= _trk[4].toFixed(2) %>" stop-color="#ffffff" stop-opacity="<%= _trkOp[4] %>"/>
+        </linearGradient>
+        <!-- 纵向给足空间，否则高斯模糊会被 filter 区域裁掉 -->
+        <!-- C 方案（性能）：把 5 个模糊滤镜的 filter region 从原始 -300%/700% 之类收到
+     -100%/300%，面积约 -57%。region 越小，离屏缓冲越小，高斯模糊的填充成本越低。
+     实测（同相位冻结比对，见 skills/css-atmosphere-hero）：300% 与原始视觉等价 ——
+     >3 灰阶差异 0%、最大差 3。⚠️ 不要再往下收到 200% 以下：200% 已有 0.33% 的像素
+     出现 >24 灰阶差异（拱顶亮带被裁），240% 是实测的安全下限。
+     恢复原值：halo -300%/700%、bloom -180%/460%、soft -120%/340%、
+     tglow -200%/500%、tcore -120%/340%。 -->
+<filter id="mh-f-halo"  x="-14%" y="-100%" width="128%" height="300%"><feGaussianBlur stdDeviation="40"/></filter>
+        <filter id="mh-f-bloom" x="-8%"  y="-100%" width="116%" height="300%"><feGaussianBlur stdDeviation="16"/></filter>
+        <filter id="mh-f-soft"  x="-6%"  y="-100%" width="112%" height="300%"><feGaussianBlur stdDeviation="4.5"/></filter>
+        <filter id="mh-f-tglow" x="-10%" y="-100%" width="120%" height="300%"><feGaussianBlur stdDeviation="22"/></filter>
+        <filter id="mh-f-tcore" x="-6%"  y="-100%" width="112%" height="300%"><feGaussianBlur stdDeviation="5"/></filter>
+      </defs>
+
+      <g class="mh-arc-group">
+        <g class="mh-fan mh-fan--halo" filter="url(#mh-f-halo)">
+          <% _keys.forEach(function (k, i) { %>
+          <path d="<%= _d(_off[i]) %>" stroke="url(#mh-sp-<%= k %>)"/>
+          <% }); %>
+        </g>
+        <g class="mh-fan mh-fan--bloom" filter="url(#mh-f-bloom)">
+          <% _keys.forEach(function (k, i) { %>
+          <path d="<%= _d(_off[i]) %>" stroke="url(#mh-sp-<%= k %>)"/>
+          <% }); %>
+        </g>
+        <g class="mh-fan mh-fan--body" filter="url(#mh-f-soft)">
+          <% _keys.forEach(function (k, i) { %>
+          <path d="<%= _d(_off[i]) %>" stroke="url(#mh-sp-<%= k %>)"/>
+          <% }); %>
+        </g>
+
+        <!-- 白核：拱顶那条过曝白线（走最上面那条路径，与蓝紫同轴 → 白线转蓝紫） -->
+        <path class="mh-tglow" d="<%= _d(_off[0]) %>" stroke="url(#mh-trunk)" filter="url(#mh-f-tglow)"/>
+        <path class="mh-tcore" d="<%= _d(_off[0]) %>" stroke="url(#mh-trunk)" filter="url(#mh-f-tcore)"/>
+      </g>
+    </svg>
+
+
+    <svg class="mh-grain" xmlns="http://www.w3.org/2000/svg">
+      <filter id="mh-noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/>
+      </filter>
+      <rect width="100%" height="100%" filter="url(#mh-noise)"/>
+    </svg>
+  </div>
+
+  <div class="mh-inner">
+    <h1 class="mh-title"><%= _l1 %><% if (_l2) { %><br><%= _l2 %><% } %></h1>
+    <p class="mh-desc"><%= _desc %></p>
+    <div class="mh-actions">
+      <a class="mh-btn mh-btn-primary" href="<%= url_for(_a1.url) %>"><%= _a1.text %></a>
+      <a class="mh-btn mh-btn-ghost" href="<%= url_for(_a2.url) %>"><%= _a2.text %></a>
+    </div>
+  </div>
+
+  <div class="mh-scroll" aria-hidden="true"><span>向下滚动</span><span class="line"></span></div>
+</section>

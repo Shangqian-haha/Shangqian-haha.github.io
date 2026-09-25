@@ -1,0 +1,349 @@
+/* ==========================================================================
+   首页 · 棱镜光弧主页层
+   --------------------------------------------------------------------------
+   【还原方式】「尚谦一键还原」只需做三件事：
+     1. 删掉本文件
+     2. 删掉 themes/liushen-clone/layout/_partial/home-hero.ejs
+     3. 去掉 index.ejs 里的一行 include、head.ejs 里的一行 link
+   本层不修改任何既有样式，全部选择器都在 .mh 命名空间下。
+
+   【视觉来源】designali-in 的 web-gl-shader 参考图，构成是：
+     一道**粗壮的过曝白光弧**从左下角斜升上来 → 拱顶（画面横向 38%）→
+     向右散开成彩虹并整片下坠 → 橙红扫出右下角，辉光大量外溢。
+     再叠一圈极淡的细边框玻璃卡片。
+
+   【换配色】改下面 .mh 里的 --mh-v..--mh-r，每条三件套：
+     -t 近端过渡色（白→本色之间的那个色） / 本体 / -e 远端色。
+     想换成博客自己的青蓝↔暖橙（去彩虹、只留双色）：把 v/b/c 三组换成青蓝系、
+     o/r 两组换成暖橙系，g/y 两组删掉或也改成青蓝；ejs 里的 _keys 同步删。
+
+   【动效参数】别把周期拉长、振幅调小。
+   教训：更早的一版为了「克制」把振幅调到帧间平均差只有 1.19/255 —— 肉眼直接判定为
+   「静止」，而代码完全正确、逐行读 CSS 找不出问题。**动感是量的问题，不是有无的问题。**
+   调参后务必用 ~/.workbuddy/skills/css-atmosphere-hero/scripts/ 里的两个脚本验：
+     node verify-motion.js <url> --n=6 --gap=1.2 --out=<目录>
+     python frame-diff.py <目录> --n=6
+   判据：相邻帧平均差 <1.5 静止 / 2.5~6 正常 / >8 过躁。
+   ========================================================================== */
+
+.mh {
+  /* ---------- 可调色板 ---------- */
+  --mh-bg-1:    #08090c;                       /* 顶部底色 */
+  --mh-bg-2:    #0b0c11;                       /* 底部底色 */
+  --mh-white:   #f4f6fa;                       /* 备用白（标题已改用 --accent-grad 渐变） */
+  --mh-ink:     #98a1b0;                       /* 副文字 */
+  --mh-frame:   rgba(255, 255, 255, .075);     /* 玻璃框描边（框已取消，此值留作恢复用） */
+
+  /* 光谱七色（上 → 下）。左端一律是白（写在 SVG 渐变里），
+     这里只描述「散开之后」的颜色。三件套 = 过渡色 / 本体 / 远端色。 */
+  --mh-v:   #5b5cff;  --mh-v-t:  #dfe2ff;  --mh-v-e:  #7c4cff;   /* 靛蓝 */
+  --mh-b:   #2f9bff;  --mh-b-t:  #d6ecff;  --mh-b-e:  #4fc2ff;   /* 蓝 */
+  --mh-c:   #22d3ee;  --mh-c-t:  #d5f8ff;  --mh-c-e:  #34e3c8;   /* 青 */
+  --mh-g:   #23e05c;  --mh-g-t:  #d9ffdf;  --mh-g-e:  #86ea30;   /* 绿 */
+  --mh-y:   #ffe23a;  --mh-y-t:  #fff9d2;  --mh-y-e:  #ffc61f;   /* 黄 */
+  --mh-o:   #ff9a1f;  --mh-o-t:  #ffe7c9;  --mh-o-e:  #ff7a1f;   /* 橙 */
+  --mh-r:   #ff3d1c;  --mh-r-t:  #ffdbd1;  --mh-r-e:  #ff2d10;   /* 红 */
+
+  /* ---------- 光带粗细：唯一入口 ----------
+     这五个值必须**等比同改**：线宽和七条线的间距是配套的（间距见 ejs 的 _off）。
+     只缩线宽不缩间距 → 相邻色带之间露暗缝；只缩间距不缩线宽 → 相邻色带粘连。
+     当前 = 上一版（80/46/30/112/54）的 0.90 倍。窄屏在 @media 里覆盖成 0.78 倍。 */
+  --mh-w-halo:  72;
+  --mh-w-bloom: 41;
+  --mh-w-body:  27;
+  --mh-w-tglow: 101;
+  --mh-w-tcore: 49;
+
+  /* ---------- 标题上移：唯一入口 ----------
+     光弧的白热拱顶固定在纵向 ~59% 处，标题的降部（g / y 的尾巴）会压到那条白带上，
+     被过曝辉光洗掉。调这个值把**标题单独**往上抬，副标题和按钮留在原地。
+     位移量就是这里写的像素数，宽窄屏一起生效（要给窄屏另一个值就在 @media 里覆盖）。
+     实际作用点见 .mh-title 的 position/top（那里解释了为什么不能用 transform）。 */
+  --mh-lift: 70px;
+
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  min-height: calc(100vh - var(--header-h));
+  min-height: calc(100svh - var(--header-h));
+  padding: 72px 22px 168px;
+  overflow: hidden;
+  isolation: isolate;                          /* 让颗粒的混合模式不外溢 */
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+/* ---------- 背景层（自下而上：底色 -> 光弧 -> 颗粒） ---------- */
+.mh-bg { position: absolute; inset: 0; }
+
+/* 近黑底 + 光弧打在暗场上的回光。
+   左下暖白（呼应白热段）、右下橙红（呼应散开后最亮的那条）、中右蓝青。
+   这几团回光是「下半屏明显比上半屏亮」的唯一来源，别删。 */
+.mh-void {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(58% 34% at 18% 84%, rgba(255, 248, 240, .17), transparent 68%),
+    radial-gradient(52% 32% at 84% 94%, rgba(255, 120, 45, .17), transparent 70%),
+    radial-gradient(44% 24% at 88% 68%, rgba(96, 152, 255, .14), transparent 72%),
+    radial-gradient(50% 26% at 62% 86%, rgba(60, 226, 156, .11), transparent 74%),
+    linear-gradient(180deg, var(--mh-bg-1) 0%, #090a0e 46%, var(--mh-bg-2) 100%);
+}
+
+/* ---------- 光弧：外扩 + 两层浮动 ----------
+   ⚠️ width/height 必须显式写死。只给 left/top 的话，SVG 根元素会按 viewBox 的
+   固有宽高比（1000:600）反推高度 —— 窄屏下算出 480x288，整条弧被挤到画面顶部
+   （桌面因宽高比接近才看不出来）。显式 116%/116% 才是「填满并外扩」。
+
+   浮动拆两层：外层「慢漂移」+ 内层「呼吸/摆荡」。两个周期互质（17s / 7s），
+   任何时刻至少有一层在明显变化 —— 单层 ease-in-out alternate 两端速度趋零，
+   实测帧差在 1.0~2.5 之间乱跳，观感就是「动一下就停一下」。 */
+.mh-arc {
+  position: absolute; left: -8%; top: -8%;
+  width: 116%; height: 116%;
+  animation: mh-arc-drift 20s ease-in-out infinite alternate;
+}
+@keyframes mh-arc-drift {
+  from { transform: translate3d(-1.1%, 0.9%, 0); }
+  to   { transform: translate3d(1.2%, -1.1%, 0); }
+}
+
+.mh-arc-group { animation: mh-arc-float 7s ease-in-out infinite alternate; }
+/* C 方案（性能）：去掉 rotate / scale，只保留平移。
+   这两者会改变光栅化几何，使 .mh-fan 里那 5 条 feGaussianBlur 的结果每帧失效、
+   无法跨帧复用；只留平移可减少几何重算。
+   ⚠️ 已知副作用：原来的 scale 以 viewBox 原点（0 0，不是元素中心）为锚点，
+   等价于「把光弧推向右下」，去掉之后光弧会整体偏向左上 —— 这是 C 方案视觉差异的主要来源。
+   想恢复原样：把 from/to 里的 rotate(-.45deg) scale(1.008) / rotate(.55deg) scale(1.046)
+   加回即可（C 之前的完整备份放在工作区 .workbuddy 下 backup-pre-C 开头的目录里）。 */
+@keyframes mh-arc-float {
+  from { transform: translate3d(-1.6%, 1.7%, 0); }
+  to   { transform: translate3d(1.8%, -2.0%, 0); }
+}
+
+/* ---------- 光谱扇 ----------
+   注意：stroke **必须**由 SVG 属性给（stroke="url(#mh-sp-x)"），
+   这里千万不要再设 stroke，否则会覆盖渐变、七条全变同一个纯色。 */
+.mh-fan path { fill: none; stroke-linecap: round; }
+
+/* 屏幕混合：光按加法叠加。默认混合下后画的元素会直接盖掉前一条 → 相邻色带是硬边；
+   screen 让重叠处相加变亮、色带之间自然过渡，也才是棱镜色散该有的样子。
+   .mh 上的 isolation:isolate 保证它不会混到页面其他部分。 */
+.mh-fan { mix-blend-mode: screen; }
+
+/* ① 最外层柔光：宽 + 大模糊 + 低透明度 → 彩虹的边缘整片化进暗场。
+     七条会互相叠加，所以透明度压得比单条时低，否则汇聚段糊成一团白。 */
+.mh-fan--halo { opacity: .34; }
+.mh-fan--halo path { stroke-width: var(--mh-w-halo); }
+@keyframes mh-halo {
+  0%, 100% { opacity: .12; }
+  50%      { opacity: .34; }
+}
+.mh-fan--halo { animation: mh-halo 6s ease-in-out infinite; }
+
+/* ② 外发光 */
+.mh-fan--bloom { opacity: .55; }
+.mh-fan--bloom path { stroke-width: var(--mh-w-bloom); }
+@keyframes mh-bloom {
+  0%, 100% { opacity: .40; }
+  50%      { opacity: .78; }
+}
+.mh-fan--bloom { animation: mh-bloom 5.5s ease-in-out infinite; }
+
+/* ③ 本体：颜色最实的一层，也是「散开」看得最清楚的一层 */
+.mh-fan--body { opacity: .92; }
+.mh-fan--body path { stroke-width: var(--mh-w-body); }
+
+/* ---------- 白核：拱顶那条过曝白线 ----------
+   它走的是 o=0 那条路径（与紫/蓝同轴），所以白线向右淡出时正好转成蓝紫，
+   不会在中间露出一段「无主的白」。 */
+.mh-tglow {
+  fill: none; stroke-linecap: round;
+  mix-blend-mode: screen;
+  stroke-width: var(--mh-w-tglow);
+  opacity: .55;
+  animation: mh-tglow 6.5s ease-in-out infinite;
+}
+@keyframes mh-tglow {
+  0%, 100% { opacity: .34; }
+  50%      { opacity: .72; }
+}
+.mh-tcore {
+  fill: none; stroke-linecap: round;
+  mix-blend-mode: screen;
+  stroke-width: var(--mh-w-tcore);
+  animation: mh-tcore 4s ease-in-out infinite;
+}
+@keyframes mh-tcore {
+  0%, 100% { opacity: .66; }
+  50%      { opacity: 1; }
+}
+
+/* 相位错开：否则三层呼吸完全同步，观感像整体在「闪」而不是「流」。
+   负延迟是为了让页面一加载就落在各自中间相位，不用等一个周期。 */
+.mh-fan--bloom { animation-delay: -2.3s; }
+.mh-fan--halo  { animation-delay: -4.4s; }
+.mh-tcore      { animation-delay: -1.6s; }
+
+/* ---------- 细边框玻璃卡片：已按用户要求取消 ----------
+   这里原本是一圈极淡白描边的圆角方框，套在标题周围。用户要求「取消、和背景
+   融为一体」，故元素（ejs 里的 span）与规则一并移除。
+   要恢复：把本注释换回原来的 .mh-frame 规则块，并在 ejs 背景层加回
+   <span class="mh-frame"></span>（描边色见 .mh 里的 --mh-frame）。 */
+
+/* ---------- 颗粒质感 ---------- */
+.mh-grain {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  opacity: .09; mix-blend-mode: overlay; pointer-events: none;
+}
+
+/* ---------- 内容 ---------- */
+.mh-inner {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 880px;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center;
+}
+
+/* 参考图是超大号粗白字、行距压得很紧（约 1.05）。 */
+.mh-title {
+  /* margin-bottom 的负值与下面「降部补偿」的 padding-bottom 等量配对，两者要一起改。 */
+  margin: 0 0 -.17em;
+  /* 只上移标题本身（副标题、按钮留在原地）。
+     ⚠️ 这里**必须**用 relative + top，不能用 transform：
+     下面「入场」一节给 .mh-inner > * 挂了 mh-in 动画（forwards），
+     动画留下的 transform:none 会直接盖掉元素自己写的 transform（动画优先级更高），
+     写了也不生效。relative + top 是布局偏移，跟动画互不干扰。
+     位移量就等于 --mh-lift 的像素数。 */
+  position: relative;
+  top: calc(-1 * var(--mh-lift));
+  font-size: clamp(2.3rem, 7.2vw, 5.4rem);
+  font-weight: 800; line-height: 1.06; letter-spacing: -.03em;
+  /* ---------- 降部补偿：这个 padding-bottom 不能删 ----------
+     症状：两个 g 的尾巴被一条水平线切平。
+     原因：`-webkit-text-fill-color: transparent` + `background-clip: text` 时，
+          文字的颜色**完全由元素背景提供**（字形自己不填色），而背景只画在
+          padding box 之内。这里的 line-height 1.06 → 行盒只有 0.918em 高，
+          比字体自然行高（Segoe UI ≈ 1.33em）矮，基线以下的字形（g 的尾巴）
+          就伸到了 padding box 外面 —— 那里没有背景可呈现，于是降部「消失」。
+          **不是** overflow 裁切，**也不是** filter 的锅。
+     实测（1440×900，字号 86.4px）：字形墨迹底部在盒内第 102.3px 处，盒高 91.58px，
+          溢出 10.7px；像素量化显示降部只剩 10.0px（完整应为 20.5px），差值吻合。
+          逐个属性做对照：只去掉 drop-shadow 毫无变化，只把 line-height 改成 1.6
+          即恢复完整 —— 证明唯一变量是行盒高度。
+     修法：把盒向下补高（padding），再用等量负 margin 抵消占位，
+          于是标题的视觉位置、与副标题/按钮的间距全都不变。
+          副作用只有背景框变高约 1.7%，135° 渐变的映射在 1.7% 量级上平移，看不出来。
+     用 em 而不是 px：窄屏 font-size 会缩到 2.3rem，补偿量要跟着缩。 */
+  padding-bottom: .17em;
+  /* 用导航栏品牌名同一套渐变（style.css 的 --accent-grad = #76cbeb -> #f7a137），
+     全站一致；若渐变裁剪不生效文字会整个消失，所以两个 prefix 都写上。 */
+  background: var(--accent-grad);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  filter: drop-shadow(0 6px 40px rgba(118, 203, 235, .22));
+}
+
+.mh-desc {
+  margin: 22px 0 0; max-width: 520px;
+  color: var(--mh-ink); letter-spacing: .03em;
+  font-size: clamp(.94rem, 1.6vw, 1.06rem); line-height: 1.75;
+}
+
+.mh-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 36px; }
+
+/* 玻璃胶囊（参考图那个按钮的语言）：半透明白底 + 细白边 + 背景模糊 */
+.mh-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 152px; padding: 12px 26px;
+  border-radius: 999px; font-size: .95rem; font-weight: 600;
+  text-decoration: none; cursor: pointer;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  transition: transform .18s ease, box-shadow .18s ease,
+              background .18s ease, border-color .18s ease;
+}
+.mh-btn-primary {
+  color: #fff;
+  background: rgba(255, 255, 255, .10);
+  border: 1px solid rgba(255, 255, 255, .30);
+  box-shadow: 0 8px 30px -12px rgba(170, 200, 255, .55),
+              inset 0 1px 0 rgba(255, 255, 255, .18);
+}
+.mh-btn-primary:hover {
+  background: rgba(255, 255, 255, .17);
+  border-color: rgba(255, 255, 255, .46);
+  transform: translateY(-2px);
+}
+.mh-btn-ghost {
+  color: rgba(238, 243, 250, .72);
+  background: rgba(255, 255, 255, .035);
+  border: 1px solid rgba(255, 255, 255, .13);
+}
+.mh-btn-ghost:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, .09);
+  border-color: rgba(255, 255, 255, .28);
+  transform: translateY(-2px);
+}
+
+/* ---------- 向下滚动提示 ---------- */
+.mh-scroll {
+  position: absolute; left: 50%; bottom: 26px; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: rgba(210, 222, 238, .42);
+  font-size: .72rem; letter-spacing: .12em;
+  transform: translateX(-50%);
+  animation: mh-hint 2.4s ease-in-out infinite;
+}
+.mh-scroll .line {
+  display: block; width: 1px; height: 26px;
+  background: linear-gradient(180deg, rgba(210, 226, 248, .55), transparent);
+}
+@keyframes mh-hint {
+  0%, 100% { opacity: .55; transform: translate(-50%, 0); }
+  50%      { opacity: 1;   transform: translate(-50%, 5px); }
+}
+
+/* ---------- 入场 ---------- */
+.mh-inner > * {
+  opacity: 0; transform: translateY(14px);
+  animation: mh-in .9s cubic-bezier(.22, .8, .3, 1) forwards;
+}
+.mh-inner > *:nth-child(1) { animation-delay: .12s; }
+.mh-inner > *:nth-child(2) { animation-delay: .26s; }
+.mh-inner > *:nth-child(3) { animation-delay: .40s; }
+@keyframes mh-in { to { opacity: 1; transform: none; } }
+
+/* ---------- 移动端 ---------- */
+@media (max-width: 640px) {
+  /* 底部内边距给得大，是为了把内容整体顶到上半屏 —— 光弧的拱顶固定在纵向
+     59% 附近，内容不往上让位就会被那条白热带糊住。
+     （宽屏靠 240px 的 padding-bottom 达到同样效果，只是比例没这么极端。） */
+  /* 竖向 px 比例与宽屏相同（元素都是 116% 视口高），但横向被压 ~3.5 倍 ——
+     同样像素厚的带子在窄屏上视觉重得多，所以整体收一档到宽屏值的 0.78。 */
+  .mh {
+    padding: 56px 18px 300px;
+    --mh-w-halo:  56;
+    --mh-w-bloom: 32;
+    --mh-w-body:  21;
+    --mh-w-tglow: 78;
+    --mh-w-tcore: 38;
+  }
+  .mh-grain { opacity: .07; }
+  /* min-width:0 是关键：flex 项目默认 min-width:auto，会被内容的 min-content 顶宽而溢出 */
+  .mh-inner {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .mh-actions { width: 100%; flex-direction: column; gap: 12px; }
+  .mh-btn { width: 100%; min-width: 0; box-sizing: border-box; }
+}
+
+/* ---------- 无障碍：关闭动效 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .mh-arc, .mh-arc-group, .mh-fan--halo, .mh-fan--bloom,
+  .mh-tglow, .mh-tcore, .mh-scroll { animation: none; }
+  .mh-fan--halo { opacity: .22; }
+  .mh-fan--bloom { opacity: .62; }
+  .mh-tglow { opacity: .58; }
+  .mh-tcore { opacity: .95; }
+  .mh-inner > * { opacity: 1; transform: none; animation: none; }
+}

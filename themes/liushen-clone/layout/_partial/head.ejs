@@ -17,6 +17,11 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
 <link rel="stylesheet" href="<%= url_for('/css/style.css') %>">
+<% /* ⚠️ 必须带版本查询串。hexo server 对静态资源不发 Cache-Control / ETag /
+      Last-Modified，Chrome 会对这条 CSS 做启发式缓存 —— 改完刷新也看不到，
+      只有硬刷新才生效。（踩过：首页标题上移调了四五次都没生效，就是这个原因。）
+      v 用 Date.now()：开发时保证每次渲染都是新 URL。 */ %>
+<% if (is_home()) { %><link rel="stylesheet" href="<%= url_for('/css/home-hero.css') %>?v=<%= Date.now() %>"><% } %>
 <script>
   // 首次绘制前设置主题，避免闪烁
   (function () {

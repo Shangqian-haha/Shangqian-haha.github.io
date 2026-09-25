@@ -1,5 +1,12 @@
 - author: 尚谦
   avatar: /img/avatar.jpg
+  date: 2026-09-11
+  content: 把全部文章按同一套标准重构了一遍，顺手把写作风格也定下来了，还修好一个 bug。
+  tags:
+    - 折腾
+    - 写作
+- author: 尚谦
+  avatar: /img/avatar.jpg
   date: 2026-09-08
   content: 忙活半天，重构了一遍博客，顺眼多了 :)
   tags:
