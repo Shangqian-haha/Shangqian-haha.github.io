@@ -249,7 +249,13 @@
 
 .mh-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 36px; }
 
-/* 玻璃胶囊（参考图那个按钮的语言）：半透明白底 + 细白边 + 背景模糊 */
+/* 玻璃胶囊（参考图那个按钮的语言）：深色半透底 + 细白边 + 背景模糊
+   ⚠️ 底色必须**足够深**：光弧最亮处是接近纯白的过曝，
+      原先 rgba(255,255,255,.10) 的白底压不住它 ——
+      白字落在白底上，对比度≈0，主按钮在拱顶位置基本读不出来。
+      改成深底（rgba(10,14,20,.42)）后，白字在光弧任意位置都清晰，
+      且因为仍有 backdrop-blur + 高光内阴影，玻璃质感不变。
+      黑底白字在过曝处反而更像"参考图里浮在光上的按钮"。 */
 .mh-btn {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 152px; padding: 12px 26px;
@@ -261,14 +267,14 @@
 }
 .mh-btn-primary {
   color: #fff;
-  background: rgba(255, 255, 255, .10);
-  border: 1px solid rgba(255, 255, 255, .30);
-  box-shadow: 0 8px 30px -12px rgba(170, 200, 255, .55),
-              inset 0 1px 0 rgba(255, 255, 255, .18);
+  background: rgba(10, 14, 20, .44);
+  border: 1px solid rgba(255, 255, 255, .46);
+  box-shadow: 0 8px 30px -12px rgba(0, 0, 0, .6),
+              inset 0 1px 0 rgba(255, 255, 255, .22);
 }
 .mh-btn-primary:hover {
-  background: rgba(255, 255, 255, .17);
-  border-color: rgba(255, 255, 255, .46);
+  background: rgba(10, 14, 20, .58);
+  border-color: rgba(255, 255, 255, .66);
   transform: translateY(-2px);
 }
 /* 用户要求「关于我」与「开始阅读」视觉一致。
@@ -281,15 +287,15 @@
    并删掉 box-shadow；hover 同步改回 .09 / .28 那组。 */
 .mh-btn-ghost {
   color: #fff;
-  background: rgba(255, 255, 255, .10);
-  border: 1px solid rgba(255, 255, 255, .30);
-  box-shadow: 0 8px 30px -12px rgba(170, 200, 255, .55),
-              inset 0 1px 0 rgba(255, 255, 255, .18);
+  background: rgba(10, 14, 20, .44);
+  border: 1px solid rgba(255, 255, 255, .46);
+  box-shadow: 0 8px 30px -12px rgba(0, 0, 0, .6),
+              inset 0 1px 0 rgba(255, 255, 255, .22);
 }
 .mh-btn-ghost:hover {
   color: #fff;
-  background: rgba(255, 255, 255, .17);
-  border-color: rgba(255, 255, 255, .46);
+  background: rgba(10, 14, 20, .58);
+  border-color: rgba(255, 255, 255, .66);
   transform: translateY(-2px);
 }
 
