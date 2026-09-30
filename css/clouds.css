@@ -492,6 +492,53 @@
   transition: transform .25s ease-in-out;
 }
 
+/* ---------- 第 5 页（i=4 · 景德镇）单独一档：竖图适配（2026-09-30）----------
+   原图 photo-jingdezhen.jpg 是 1280×1920 竖构图，塞进 960×540 横框后
+   object-fit:cover 只取到中间一条横带（上下两端全被裁掉），猫与木墙的
+   竖向构图全毁。这里把这张卡的框**宽高对调**（横 16:9 → 竖 2:3，
+   与原图同比例，cover 不再裁切）：
+
+     · 宽 = min( 高度上限 × 2/3 , 80vw )、高 = 宽 × 1.5 —— 宽高都显式
+       算出，任何视口下比例都不会被拉变形；
+       高度上限取 min(1088px, 76vh)：76vh 保证「卡片 + 向下探出 60px 的
+       标签盒」在视口里放得下（1088px 是原横框的宽，留作上限）；
+       80vw 是窄屏兜底（≤1280 时 item 是 90% 宽，80vw < 90%×100vw，
+       竖卡永远不会溢出容器）。
+       ⚠️ 别把这里的 80vw 改回 100%：item 是 fit-content（宽度由图片
+       决定），图片宽再用 100% 就成了「容器宽 ← 图片宽 ← 容器宽」的
+       循环依赖，Chrome 会把整条链解析成 0（实测 2026-09-30）。
+     · item 改成 fit-content 并保持 auto margin 居中：横版时图片撑满
+       84% 容器、盒的 right:0 看起来「贴着图片右缘」其实是贴着容器右缘；
+       竖版只有约 430px 宽，若 item 仍是 84%，标签盒会飘到图片右缘
+       外面 700px 开外。item 收缩到图片等宽后，「盒右缘 = 图片右缘 +
+       向下探出 60px」的形态自动成立。
+
+   其余三张（i=3 / 5 / 6）是 1920×1080 横图，不受影响。 */
+.cl-sec[data-i="4"] .cl-photo {
+  --ph-w: min(calc(min(1088px, 76vh) * 2 / 3), 80vw);
+  width: var(--ph-w);
+  height: calc(var(--ph-w) * 1.5);
+}
+.cl-sec[data-i="4"] .cl-photo-item {
+  width: fit-content;
+}
+/* 竖卡只有 ~407px 宽，360px 的标签盒会占掉 88% 宽、像铺在图片底部；
+   收到 320px 让它回到「压住右下角」的形态。
+   2026-09-30 三改（用户红框指定位置）：盒从「贴着图片右缘内侧」改为
+   **向右探出**——right:-240px，压住图片右缘约 80px、其余 ~240px 探到
+   卡片右侧的极夜底色上（底部向下探出 60px 的形态不变）。
+   ⚠️ 必须包在 min-width:1281px 里：≤1280 断点原本就是「盒铺满图片、
+   透明底」的窄屏形态，若 right:-240 在那一段还生效，会和断点的
+   left:0 叠加把布局搅乱。 */
+@media (min-width: 1281px) {
+  .cl-sec[data-i="4"] .cl-featured {
+    width: 320px;
+    min-height: 190px;
+    padding: 40px 26px;
+    right: -240px;
+  }
+}
+
 /* ---------- split-line 逐行遮罩揭示（参考站动效）----------
    行内结构：.split-line > 文字 + .split-line-mask。
    · 无 JS（渐进增强）：遮罩默认已滑开（105%），文字直接可读；
@@ -670,20 +717,22 @@ html.cl-gate-on .cl-gate {
        （闸门外面本来就是极光星空；且按要求不再显示任何提示文字）；
      · 渐变 id 改 cl-pig-rainbow；彩虹左端渐隐的 mask 由 #0a0916 换 #000
        （mask 只认 alpha 通道，颜色值无所谓）；
-     · 上下浮动 20px → 14px（原版按整屏比例给的，这里收一点更精致）。
+     · 上下浮动 20px → 10px（原版按整屏比例给的，这里收一点更精致）；
+     · 尺寸再做收小（2026-09-30 用户「猪可以再小点」）：280px → 170px，
+       浮动幅度 14px → 10px 同步收，避免小尺寸下显得晃得过头。
 
    换肤：把 svg 上的 nyan 换成 devil / alien / baguette —— 原版四套皮肤，
    猪身与彩虹同时换色（变量见下面 .cl-gate-pig.* 四组）。 */
 .cl-gate-pig {
   --pig-speed: .4s;
-  width: min(280px, 62vw);
+  width: min(170px, 42vw);
   height: auto;
   -webkit-mask-image: linear-gradient(to left, #000 62%, transparent 88%);
   mask-image: linear-gradient(to left, #000 62%, transparent 88%);
   animation: cl-pig-jagger var(--pig-speed) ease-in-out infinite alternate;
 }
 @keyframes cl-pig-jagger {
-  to { transform: translateY(14px); }
+  to { transform: translateY(10px); }
 }
 
 /* 彩虹拖尾：6 段 rect 共用一条 6 色纵向渐变，起跳时刻逐段错开 → 波浪流动 */
@@ -811,10 +860,17 @@ html.cl-gate-on .cl-gate {
    （latin 子集 12KB，@font-face 在文件顶部，许可见同目录 LICENSE.txt）。
    ⚠️ 三条「别动」：不要加 letter-spacing（自带等距字距，加了会破坏像素
       栅格，字会忽宽忽窄）；不要加 font-weight 加粗（只有一个字重，合成
-      加粗会让像素边缘发虚）；不要加 text-shadow（同理糊边）。 */
+      加粗会让像素边缘发虚）；不要加 text-shadow（同理糊边）。
+   字号（2026-09-30 用户「LOADING 的字体也缩小一点」）：16px → 12px。
+   Press Start 2P 每个字形是 8×8 像素格，字号 = 1 个字符宽度，所以
+   · 16px = 每格 2px（最锐利，永远落在整数物理像素上）
+   · 12px = 每格 1.5px（dpr≥2 的屏上正好 3 物理像素/格，同样锐利；
+     dpr=1 的屏上是半像素，边缘有轻微抗锯齿软边，仍保持方块像素观感）
+   要更锐利就改回 8 的倍数（8 / 16px）；要更小就走 12px 这条线，
+   别再往 10 / 11px 调（每格 1.25 / 1.375px，糊得更明显）。 */
 .cl-gate-loading {
   font-family: 'Press Start 2P', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 16px;      /* 8 的整数倍：每格正好 2 物理像素（dpr=2 时 4px） */
+  font-size: 12px;
   line-height: 1;
   text-transform: uppercase;
   color: rgba(230, 246, 255, .95);
