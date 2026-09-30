@@ -32,6 +32,22 @@
        url('../fonts/miama/Miama-Regular.woff') format('woff');
 }
 
+/* ---------- 字体：Press Start 2P（自托管，SIL OFL 1.1，可商用）----------
+   8-bit 像素字体，作者 CodeMan38 / Press Start 2P Project Authors。
+   闸门里 LOADING... 的像素感就来自它。原版 demo 是从 Google Fonts 引的，
+   这里改成**自托管**（只取 latin 子集，12KB，走同域 /fonts/）——
+   国内访问 Google Fonts 不稳定，外部字体请求还会拖慢首屏。
+   全文见 /fonts/press-start-2p/LICENSE.txt。
+   ⚠️ 这是 8×8 像素网格字体：font-size 用 8 的整数倍（16px）时每格正好
+      落在整数物理像素上，边缘最锐；改了字号可能糊。 */
+@font-face {
+  font-family: 'Press Start 2P';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/press-start-2p/press-start-2p-latin-400.woff2') format('woff2');
+}
+
 .cl {
   /* ---- 色板（极地：极夜黑 → 夜雾蓝 → 冰蓝；极光绿/冰蓝/极光紫）---- */
   --cl-bg-0: #040711;      /* 极夜近黑（画面顶部） */
@@ -591,12 +607,21 @@
 }
 
 /* ---------- 入场闸门 ----------
-   默认 display:none（渐进增强）；js-on 后显示。
+   默认 display:none（渐进增强）；js-on / cl-gate-on 后显示。
    进入 = 整块向上滑出（translateY(-101%)），露出 3D 场景。 */
 .cl-gate {
   display: none;
 }
-.cl.js-on .cl-gate {
+/* ⚠️ 两个触发源，缺一不可（2026-09-30）：
+   · html.cl-gate-on —— head 里的内联探针在**首帧之前**挂上，让闸门第一
+     时间出现；否则要等 body 末尾的 clouds.js（three.js 之后）加 .js-on，
+     中间那几百毫秒~1s 正文会按文档流先画出来，视觉上就是「正文先露脸、
+     闸门后才盖上来」。clouds.js 接管时会摘掉它，只留 .js-on 一个来源。
+   · .cl.js-on —— clouds.js 的模式开关；无 JS / 无 WebGL 时两者都不存在，
+     页面保持文档流兜底，可用。 */
+html.cl-gate-on { overflow: hidden; }   /* 闸门期不让正文冒出滚动条 */
+.cl.js-on .cl-gate,
+html.cl-gate-on .cl-gate {
   position: fixed;
   inset: 0;
   z-index: 9;
@@ -632,37 +657,173 @@
   background: linear-gradient(90deg, var(--cl-aurora-1), var(--cl-aurora-2) 52%, var(--cl-aurora-3));
   transition: width .3s ease;
 }
-.cl-gate-hint {
-  font-size: 11px;
-  letter-spacing: .3em;
-  color: var(--cl-ink-3);
+/* ---------- 入场闸门：像素小猪（Nyan Pig）加载动画 ----------
+   2026-09-30 按用户要求替换原来的 bouncing-bars 跳动条。
+   来源：微信公众号「前端嘛」《彩虹屁猪猪 Loading 动画（源代码）》——
+   像素风纯 SVG rect 拼块 + 各部位独立 CSS 动画（彩虹拖尾波浪、鼻子抽动、
+   尾巴摆动、四脚漂浮、周期眨眼），零外部资源（不引字体、不引图片）。
+
+   适配改动（原版是整屏 CodePen demo，这里是塞进闸门的小元素）：
+     · 原版全局选择器 svg{...} 收成 .cl-gate-pig，避免污染全站 SVG；
+     · 所有 @keyframes 加 cl-pig- 前缀，避免与主题已有动画重名；
+     · 去掉原版的星空背景层 / Press Start 2P 字体 / "Loading..." 文字
+       （闸门外面本来就是极光星空；且按要求不再显示任何提示文字）；
+     · 渐变 id 改 cl-pig-rainbow；彩虹左端渐隐的 mask 由 #0a0916 换 #000
+       （mask 只认 alpha 通道，颜色值无所谓）；
+     · 上下浮动 20px → 14px（原版按整屏比例给的，这里收一点更精致）。
+
+   换肤：把 svg 上的 nyan 换成 devil / alien / baguette —— 原版四套皮肤，
+   猪身与彩虹同时换色（变量见下面 .cl-gate-pig.* 四组）。 */
+.cl-gate-pig {
+  --pig-speed: .4s;
+  width: min(280px, 62vw);
+  height: auto;
+  -webkit-mask-image: linear-gradient(to left, #000 62%, transparent 88%);
+  mask-image: linear-gradient(to left, #000 62%, transparent 88%);
+  animation: cl-pig-jagger var(--pig-speed) ease-in-out infinite alternate;
+}
+@keyframes cl-pig-jagger {
+  to { transform: translateY(14px); }
+}
+
+/* 彩虹拖尾：6 段 rect 共用一条 6 色纵向渐变，起跳时刻逐段错开 → 波浪流动 */
+.cl-gate-pig .rainbow rect {
+  width: 5px;
+  height: 6px;
+  stroke: transparent;
+  fill: url(#cl-pig-rainbow);
+}
+.cl-gate-pig .rainbow rect:nth-child(1) { transform: translate(25px, 8.4px);    animation: cl-pig-rainbow-1 var(--pig-speed) ease-in-out .0667s infinite alternate; }
+.cl-gate-pig .rainbow rect:nth-child(2) { transform: translate(20.2px, 8.3px);  animation: cl-pig-rainbow-2 var(--pig-speed) ease-in-out .1333s infinite alternate; }
+.cl-gate-pig .rainbow rect:nth-child(3) { transform: translate(15.4px, 8.2px);  animation: cl-pig-rainbow-3 var(--pig-speed) ease-in-out .2s    infinite alternate; }
+.cl-gate-pig .rainbow rect:nth-child(4) { transform: translate(10.6px, 8.1px);  animation: cl-pig-rainbow-4 var(--pig-speed) ease-in-out .2667s infinite alternate; }
+.cl-gate-pig .rainbow rect:nth-child(5) { transform: translate(5.8px, 8px);     animation: cl-pig-rainbow-5 var(--pig-speed) ease-in-out .3333s infinite alternate; }
+.cl-gate-pig .rainbow rect:nth-child(6) { transform: translate(1px, 7.9px);     animation: cl-pig-rainbow-6 var(--pig-speed) ease-in-out .4s    infinite alternate; }
+@keyframes cl-pig-rainbow-1 { to { transform: translate(25px, 9.0667px); } }
+@keyframes cl-pig-rainbow-2 { to { transform: translate(20.2px, 9.6333px); } }
+@keyframes cl-pig-rainbow-3 { to { transform: translate(15.4px, 10.2px); } }
+@keyframes cl-pig-rainbow-4 { to { transform: translate(10.6px, 10.7667px); } }
+@keyframes cl-pig-rainbow-5 { to { transform: translate(5.8px, 11.3333px); } }
+@keyframes cl-pig-rainbow-6 { to { transform: translate(1px, 11.9px); } }
+
+/* 四套皮肤（原版同款）：猪身 + 彩虹拖尾同时换色 */
+.cl-gate-pig.nyan {
+  --body1: #f19183; --body2: #fcd8d7; --stains: #fac4b8; --eyes: #0c0b0b;
+  --ears: #f19183; --snout1: #f79197; --snout2: #f66b79; --snout-holes: #e73b36;
+}
+.cl-gate-pig.devil {
+  --body1: #410a07; --body2: #bb1626; --stains: #790813; --eyes: #f0d459;
+  --ears: #2b1d05; --snout1: #db2839; --snout2: #ae1f2d; --snout-holes: #900f0b;
+}
+.cl-gate-pig.alien {
+  --body1: #116423; --body2: #15a031; --stains: #0f8b27; --eyes: #ffffff;
+  --ears: #3dbc56; --snout1: #3dbc56; --snout2: #319e47; --snout-holes: #196e2a;
+}
+.cl-gate-pig.baguette {
+  --body1: #f89f39; --body2: #fdb85a; --stains: #fedda7; --eyes: #0c0b0b;
+  --ears: #dc790f; --snout1: #ffdea1; --snout2: #fedea2; --snout-holes: #f98d0e;
+}
+.cl-gate-pig.nyan     .rainbow-color1 { stop-color: #e12523; }
+.cl-gate-pig.nyan     .rainbow-color2 { stop-color: #dc8d30; }
+.cl-gate-pig.nyan     .rainbow-color3 { stop-color: #deeb44; }
+.cl-gate-pig.nyan     .rainbow-color4 { stop-color: #01eb3e; }
+.cl-gate-pig.nyan     .rainbow-color5 { stop-color: #138fe9; }
+.cl-gate-pig.nyan     .rainbow-color6 { stop-color: #7127ee; }
+.cl-gate-pig.devil    .rainbow-color1 { stop-color: #d71440; }
+.cl-gate-pig.devil    .rainbow-color2 { stop-color: #ff6c40; }
+.cl-gate-pig.devil    .rainbow-color3 { stop-color: #ffce21; }
+.cl-gate-pig.devil    .rainbow-color4 { stop-color: #ffce21; }
+.cl-gate-pig.devil    .rainbow-color5 { stop-color: #ff6c40; }
+.cl-gate-pig.devil    .rainbow-color6 { stop-color: #d71440; }
+.cl-gate-pig.alien    .rainbow-color1 { stop-color: #12a921; }
+.cl-gate-pig.alien    .rainbow-color2 { stop-color: #0fce22; }
+.cl-gate-pig.alien    .rainbow-color3 { stop-color: #0fef25; }
+.cl-gate-pig.alien    .rainbow-color4 { stop-color: #0fef25; }
+.cl-gate-pig.alien    .rainbow-color5 { stop-color: #0fce22; }
+.cl-gate-pig.alien    .rainbow-color6 { stop-color: #12a921; }
+.cl-gate-pig.baguette .rainbow-color1 { stop-color: #2465de; }
+.cl-gate-pig.baguette .rainbow-color2 { stop-color: #2465de; }
+.cl-gate-pig.baguette .rainbow-color3 { stop-color: #ffffff; }
+.cl-gate-pig.baguette .rainbow-color4 { stop-color: #ffffff; }
+.cl-gate-pig.baguette .rainbow-color5 { stop-color: #f1200d; }
+.cl-gate-pig.baguette .rainbow-color6 { stop-color: #f1200d; }
+
+/* 猪身各部位 */
+.cl-gate-pig .pig { transform: translate(-29px); }
+.cl-gate-pig .pig .body1,
+.cl-gate-pig .tail rect,
+.cl-gate-pig .foot rect { fill: var(--body1); }
+.cl-gate-pig .pig .body2 { fill: var(--body2); }
+.cl-gate-pig .stains { fill: var(--stains); }
+
+/* 猪鼻：2s 一轮，抽两下鼻子（左右各 0.5 个用户单位） */
+.cl-gate-pig .snout {
+  stroke: transparent;
+  transform: translate(52px);
+  animation: cl-pig-sniff 2s ease-in-out infinite;
+}
+.cl-gate-pig .snout .snout1 { fill: var(--snout1); }
+.cl-gate-pig .snout .snout2 { fill: var(--snout2); }
+.cl-gate-pig .snout .snout-holes { fill: var(--snout-holes); }
+@keyframes cl-pig-sniff {
+  5%, 15%, 25%  { transform: translate(52px); }
+  10%, 20%      { transform: translate(52.5px); }
+}
+
+/* 卷尾巴摆动 */
+.cl-gate-pig .tail {
+  transform: translate(52.25px);
+  transform-origin: center;
+}
+.cl-gate-pig .tail rect:nth-child(2) {
+  transform: translate(3.25px, 10.5px);
+  animation: cl-pig-tail var(--pig-speed) ease-in-out infinite alternate;
+}
+@keyframes cl-pig-tail {
+  to { transform: translate(3.25px, 10px); }
+}
+
+/* 四只脚划水 */
+.cl-gate-pig .foot {
+  transform: translate(52px);
+  animation: cl-pig-foot var(--pig-speed) ease-in-out infinite alternate;
+}
+@keyframes cl-pig-foot {
+  to { transform: translate(52.5px); }
+}
+
+.cl-gate-pig .ears rect { fill: var(--ears); }
+
+/* 眨眼：step-start 让透明度「瞬跳」，2s 一次 */
+.cl-gate-pig .eyes { transform: translate(52px); }
+.cl-gate-pig .eyes rect {
+  fill: var(--eyes);
+  animation: cl-pig-blink 2s step-start infinite;
+}
+@keyframes cl-pig-blink {
+  5%  { opacity: 1; }
+  10% { opacity: 0; }
+}
+
+/* LOADING... 闪烁文字（原版 .loader-text + @keyframes loader-text-blink）：
+   夹在小猪与进度条中间，0.4s 交替闪烁。
+   字体用原版同款 **Press Start 2P** 像素字，自托管在 /fonts/press-start-2p/
+   （latin 子集 12KB，@font-face 在文件顶部，许可见同目录 LICENSE.txt）。
+   ⚠️ 三条「别动」：不要加 letter-spacing（自带等距字距，加了会破坏像素
+      栅格，字会忽宽忽窄）；不要加 font-weight 加粗（只有一个字重，合成
+      加粗会让像素边缘发虚）；不要加 text-shadow（同理糊边）。 */
+.cl-gate-loading {
+  font-family: 'Press Start 2P', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 16px;      /* 8 的整数倍：每格正好 2 物理像素（dpr=2 时 4px） */
+  line-height: 1;
   text-transform: uppercase;
+  color: rgba(230, 246, 255, .95);
+  user-select: none;
+  animation: cl-pig-loading-blink .4s ease-in-out infinite alternate;
 }
-/* ④融合版 bouncing-bars（1x），2026-09-30 按用户 demo 加入：
-   尺寸形态取 ①（条宽6、gap4、容器48px、高20/28/36/28/20、中点原点保留
-   「上下抻长」），周期 .7s 与颜色 #41d1a7 取 ④。整块挂在进度条上方居中。 */
-.cl-gate-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 48px;
-}
-.cl-gate-bars span {
-  width: 6px;
-  background: #41d1a7;
-  border-radius: 3px;
-  /* 显式写出默认值：上下抻长靠的就是中点原点，不要改成 bottom */
-  transform-origin: center center;
-  animation: cl-bounce-bar .7s ease-in-out infinite alternate;
-}
-.cl-gate-bars span:nth-child(1) { animation-delay: 0s;   height: 20px; }
-.cl-gate-bars span:nth-child(2) { animation-delay: .09s; height: 28px; }
-.cl-gate-bars span:nth-child(3) { animation-delay: .18s; height: 36px; }
-.cl-gate-bars span:nth-child(4) { animation-delay: .26s; height: 28px; }
-.cl-gate-bars span:nth-child(5) { animation-delay: .35s; height: 20px; }
-@keyframes cl-bounce-bar {
-  0%   { transform: scaleY(.4); }
-  100% { transform: scaleY(1.4); }
+@keyframes cl-pig-loading-blink {
+  from { opacity: .12; }
+  to   { opacity: 1; }
 }
 
 /* ---------- 虚拟滚动锁 ---------- */
@@ -683,7 +844,11 @@ body.cl-lock { overflow: hidden; }
 /* ---------- 动效降级 ---------- */
 @media (prefers-reduced-motion: reduce) {
   .cl-guide-arrow { animation: none; }
-  .cl-gate-bars span { animation: none; }
+  /* 小猪整套动画（含彩虹波浪、抽鼻、眨眼）在减弱动效下全部停住 */
+  .cl-gate-pig,
+  .cl-gate-pig * { animation: none !important; }
+  /* LOADING... 同理停闪，但保持常亮可读 */
+  .cl-gate-loading { animation: none; opacity: 1; }
   .cl.js-on .cl-gate { transition: opacity .6s ease; }
 }
 

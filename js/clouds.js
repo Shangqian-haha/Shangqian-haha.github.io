@@ -70,7 +70,15 @@
   /* ================================================================
      0. WebGL 能力检测 —— 失败就不加 js-on，页面退化为文档流兜底
      ================================================================ */
-  if (!window.THREE) return;
+  /* head.ejs 的内联探针可能已先给 <html> 挂了 .cl-gate-on（让闸门抢在
+     首帧出现）。本脚本任何一条「不接管」的退出路径都必须把它摘掉，
+     否则访客会面对一个永远不动的闸门（6s 兜底见 head.ejs）。 */
+  function bootFail() {
+    document.documentElement.classList.remove('cl-gate-on');
+    if (document.body) document.body.classList.remove('cl-lock');
+  }
+
+  if (!window.THREE) { bootFail(); return; }
   var glOK = false;
   try {
     var _t = document.createElement('canvas');
@@ -78,12 +86,17 @@
   } catch (e) { glOK = false; }
   if (!glOK) {
     if (canvas.parentNode) canvas.style.display = 'none';
+    bootFail();
     return;
   }
 
-  /* js-on：从这一刻起进入「固定叠层 + 虚拟滚动」模式，闸门出现 */
+  /* js-on：从这一刻起进入「固定叠层 + 虚拟滚动」模式，闸门出现
+     ⚠️ 闸门此时已由 .cl-gate-on 显示着，这里摘掉那个预挂类，避免
+        两个来源同时生效（样式相同，视觉无跳变）。 */
   root.classList.add('js-on');
   document.body.classList.add('cl-lock');
+  window.__clBooted = true;
+  document.documentElement.classList.remove('cl-gate-on');
 
   /* ================================================================
      1. 三维场景
@@ -661,13 +674,30 @@
      ================================================================ */
   var loadDone = false, entered = false;
   var enterTxt = (gate && gate.getAttribute('data-enter')) || '点击任意处进入';
+  var audioTxt = (gate && gate.getAttribute('data-audio')) || '正在缓冲音乐';
+  var loadTxt = (gateHint && gateHint.textContent) || '正在生成极光';
 
-  function markLoad(f) {
+  /* ⚠️ 2026-09-30：闸门内的提示文字已按要求取消（clouds.ejs 删掉了
+     #cl-gate-hint 元素），于是 gateHint 恒为 null —— setHint() 全程空转，
+     不会再渲染任何文字。下面这套三句文案的切换逻辑**保留**着，
+     想恢复文字只要在 clouds.ejs 的进度条下面加回
+     <span class="cl-gate-hint" id="cl-gate-hint"></span> 并补回 CSS 即可。 */
+  var hintNow = loadTxt;
+  function setHint(txt) {
+    if (!gateHint || hintNow === txt) return;
+    hintNow = txt;
+    gateHint.textContent = txt;
+  }
+
+  /* sceneReady：极光场景是否已就绪（进度条前段走完）。 */
+  function markLoad(f, sceneReady) {
     if (gateFill) gateFill.style.width = (f * 100).toFixed(1) + '%';
     if (f >= 1 && !loadDone) {
       loadDone = true;
-      if (gateHint) gateHint.textContent = enterTxt;
+      setHint(enterTxt);
       window.setTimeout(function () { if (!entered) enter(); }, 2300);
+    } else if (f < 1) {
+      setHint(sceneReady ? audioTxt : loadTxt);
     }
   }
 
@@ -687,13 +717,48 @@
   }
   if (gate) gate.addEventListener('click', enter);
 
-  /* 没有外部资源要加载 —— 进度条走一段「生成极光」的短动画，
-     同时第一帧的着色器编译是真实开销。 */
+  /* 加载进度 = 场景生成 + **背景音乐缓冲**（2026-09-30 修）
+     ------------------------------------------------------------
+     问题：此前进度条只是一段与真实加载无关的 1.3s 计时动画，走完就提示
+     「点击任意处进入」；而背景音乐（mp3，约 5.5MB）此时往往还没下完 ——
+     访客点进去，歌是哑的，过几秒才响。
+     现在把音频缓冲也算进进度：音频没就绪，进度条就不过 100%（权重 0.75），
+     提示语也从「正在生成极光」切到「正在缓冲音乐」。
+     音频状态由 js/music.js 通过 window.__pfAudio 汇报（本文件先执行、
+     只读取，不需要事件顺序上的配合）。
+     ⚠️ 三种「拿不到音频状态」的情况一律按已就绪处理，绝不把访客卡在闸门：
+        · 无 __pfAudio（占位模式 / music.js 没跑起来）
+        · ap.failed（音频加载出错）
+        · 等待超过 AUDIO_MAX_MS（网络极慢；此时放行，起播交给 music.js
+          的淡入，至少页面可用） */
   var loadT0 = Date.now();
+  var SCENE_MS = 1300;
+  var AUDIO_MAX_MS = 20000;
   function loadTick() {
     if (loadDone) return;
-    var k = Math.min(1, (Date.now() - loadT0) / 1300);
-    markLoad(k < 1 ? Math.pow(k, 0.55) * 0.985 : 1);
+    var sk = Math.min(1, (Date.now() - loadT0) / SCENE_MS);
+    sk = sk < 1 ? Math.pow(sk, 0.55) : 1;
+
+    var ap = window.__pfAudio;
+    var ak, ready;
+    if (!ap || ap.failed) {
+      ak = 1; ready = true;
+    } else if (ap.ready || (ap.t0 && Date.now() - ap.t0 > AUDIO_MAX_MS)) {
+      ak = 1; ready = true;
+    } else {
+      /* ratio 可能恒为 0：hexo server 对静态文件不发 Content-Length
+         （chunked），duration 拿不到 → end/d 算不出。此时退化为时间
+         渐近估计（指数逼近 0.9），进度条平滑爬升而不是卡在 25%；
+         真实 ratio 一旦有值就取大者。 */
+      var ae = 0.9 * (1 - Math.exp(-(Date.now() - loadT0) / 6000));
+      ak = Math.max(Math.min(0.985, ap.ratio || 0), ae);
+      ready = sk >= 1 ? false : true;   /* 场景还在跑时按"生成中"提示 */
+    }
+
+    var k = sk * 0.25 + ak * 0.75;
+    if (ready && sk >= 1) k = 1;
+    else if (k > 0.985) k = 0.985;
+    markLoad(k, sk >= 1);
   }
 
   /* ---------- resize ---------- */
