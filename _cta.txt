@@ -1,0 +1,4 @@
+11:  var _a1 = _h.primary   || { text: '个人主页', url: '/profile/' };
+12:  var _a2 = _h.secondary || { text: '关于我',   url: '/about/' };
+171:      <a class="mh-btn mh-btn-primary" href="<%= url_for(_a1.url) %>"><%= _a1.text %></a>
+172:      <a class="mh-btn mh-btn-ghost" href="<%= url_for(_a2.url) %>"><%= _a2.text %></a>

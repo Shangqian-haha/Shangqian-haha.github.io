@@ -1,0 +1,55 @@
+# ==============================================
+# hexo-theme-liushen-clone
+# 参考 blog.liushen.fun 风格复刻的简洁卡片式主题
+# ==============================================
+
+# 头像（相对站点根，位于 source/img 下）
+avatar: /img/avatar.jpg
+
+# 副标题 / 个性签名
+subtitle: 记录生活与技术的点滴
+description: 一个简洁、优雅的个人技术博客，记录编程、学习与生活点滴。
+
+# 强调色：淡蓝 -> 橙（参考站品牌渐变）
+accent: "#76CBEC"
+accent2: "#F7A137"
+
+# 顶部导航菜单
+# 普通项：名称: 链接
+# 下拉项：名称: 下面再缩进写子项（名称: 链接），悬停显示下拉框
+menu:
+  首页: /
+  文章汇总:
+    归档: /archives/
+    分类: /categories/
+    标签: /tags/
+  说说: /shuoshuo/
+  友链: /link/
+  关于:
+    关于本站: /about/
+    # 2026-09-28 按要求：原「个人主页: /profile/」已从这里取消
+    # （雨夜伦敦页仍在 /profile/ 可访问，只是不再从导航进入）；
+    # 原「云海之上: /clouds/」改名为「个人主页」—— 极地极光页即个人主页。
+    个人主页: /clouds/
+
+# 社交链接（Hero 区与侧栏使用）
+social:
+  github: https://github.com/Shangqian-haha
+  email: mailto:357425252@qq.com
+  qq: ""
+
+# Hero 区终端徽章文字
+hero_badge: "~/hello-world$"
+
+# 列表页（首页/分类/标签）文章卡片是否展示封面
+# false = 卡片纯文字，点进文章详情页顶部才显示封面图
+index_cover: false
+
+# 文章详情是否展示目录（TOC）
+post_toc: true
+
+# 页脚
+footer:
+  since: 2026
+  icp: ""
+  beian: ""

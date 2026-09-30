@@ -1,0 +1,41 @@
+themes/liushen-clone/layout/_partial/profile.ejs:31:  var _music   = _d.music   || {};
+themes/liushen-clone/layout/_partial/profile.ejs:158:    <% if (_music.enabled !== false) { %>
+themes/liushen-clone/layout/_partial/profile.ejs:159:    <div class="pf-music" id="pf-music"
+themes/liushen-clone/layout/_partial/profile.ejs:160:         data-src="<%= _music.src || '' %>"
+themes/liushen-clone/layout/_partial/profile.ejs:161:         data-type="<%= _music.type || 'audio/mpeg' %>"
+themes/liushen-clone/layout/_partial/profile.ejs:162:         data-volume="<%= _music.volume != null ? _music.volume : 0.20 %>"
+themes/liushen-clone/layout/_partial/profile.ejs:163:         data-loop="<%= _music.loop !== false ? '1' : '0' %>"
+themes/liushen-clone/layout/_partial/profile.ejs:164:         data-title="<%= _music.title || 'Untitled' %>">
+themes/liushen-clone/layout/_partial/profile.ejs:165:      <button class="pf-snd" id="pf-music-btn" type="button"
+themes/liushen-clone/layout/_partial/profile.ejs:166:              aria-label="播放背景音乐" aria-pressed="false" title="播放背景音乐">
+themes/liushen-clone/source/js/profile.js:521:        但播放/暂停、竖条动画、aria 状态全部真实可用。
+themes/liushen-clone/source/js/profile.js:522:        填 profile.yml 的 music.src 即可真播，此文件不用改。
+themes/liushen-clone/source/js/profile.js:525:  (function music() {
+themes/liushen-clone/source/js/profile.js:526:    var box = document.getElementById('pf-music');
+themes/liushen-clone/source/js/profile.js:529:    var btn    = document.getElementById('pf-music-btn');
+themes/liushen-clone/source/js/profile.js:532:    var type   = box.getAttribute('data-type') || 'audio/mpeg';
+themes/liushen-clone/source/js/profile.js:538:    var audio = null;
+themes/liushen-clone/source/js/profile.js:544:      audio = document.createElement('audio');
+themes/liushen-clone/source/js/profile.js:545:      audio.loop = loopOn;
+themes/liushen-clone/source/js/profile.js:546:      audio.volume = 0;              /* 淡入用 */
+themes/liushen-clone/source/js/profile.js:547:      audio.preload = 'none';
+themes/liushen-clone/source/js/profile.js:551:      audio.appendChild(s);
+themes/liushen-clone/source/js/profile.js:552:      audio.style.display = 'none';
+themes/liushen-clone/source/js/profile.js:553:      box.appendChild(audio);
+themes/liushen-clone/source/js/profile.js:555:      audio.addEventListener('ended', function () {
+themes/liushen-clone/source/js/profile.js:558:      audio.addEventListener('error', function () { setPlaying(false); });
+themes/liushen-clone/source/js/profile.js:573:    /* A 是"时间累加器"（秒），只在播放时推进 —— 暂停时竖条自然停住 */
+themes/liushen-clone/source/js/profile.js:609:      btn.setAttribute('aria-label', on ? '暂停背景音乐' : '播放背景音乐');
+themes/liushen-clone/source/js/profile.js:610:      btn.setAttribute('title', on ? '暂停背景音乐' : '播放背景音乐');
+themes/liushen-clone/source/js/profile.js:614:      if (!audio) return;
+themes/liushen-clone/source/js/profile.js:615:      var from = audio.volume;
+themes/liushen-clone/source/js/profile.js:620:        audio.volume = clamp(lerp(from, target, eased), 0, 1);
+themes/liushen-clone/source/js/profile.js:628:      var pr = audio.play();
+themes/liushen-clone/source/js/profile.js:640:      window.setTimeout(function () { audio.pause(); setPlaying(false); }, 430);
+themes/liushen-clone/source/js/profile.js:651:      if (isPlaceholder || !audio) return;
+themes/liushen-clone/source/js/profile.js:658:      if (!audio) return;
+themes/liushen-clone/source/js/profile.js:660:        audio.pause(); pendingPlay = true; playing = false;
+themes/liushen-clone/source/js/vendor/three.r112.js:863:c);a.upZ.linearRampToValueAtTime(b.z,c)}else a.setPosition(yc.x,yc.y,yc.z),a.setOrientation(zc.x,zc.y,zc.z,b.x,b.y,b.z)}});hd.prototype=Object.assign(Object.create(D.prototype),{constructor:hd,getOutput:function(){return this.gain},setNodeSource:function(a){this.hasPlaybackControl=!1;this.sourceType="audioNode";this.source=a;this.connect();return this},setMediaElementSource:function(a){this.hasPlaybackControl=!1;this.sourceType="mediaNode";this.source=this.context.createMediaElementSource(a);this.connect();
+source/_data/profile.yml:156:# ⚠️ 当前是「静音占位」：不加载音频文件，但播放/暂停、竖条动画、
+source/_data/profile.yml:164:music:
+source/_data/profile.yml:167:  type: "audio/mpeg"

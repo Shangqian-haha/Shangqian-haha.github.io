@@ -1,0 +1,7 @@
+279:.pf-music {
+285:.pf-snd {
+303:.pf-snd:hover { color: var(--pf-lamp); border-color: var(--pf-lamp-faint); }
+305:.pf-music.is-playing .pf-snd { color: var(--pf-lamp); border-color: var(--pf-lamp-soft); }
+307:.pf-snd-canvas {
+315:.pf-music.is-placeholder .pf-snd { border-style: dashed; border-color: var(--pf-text-4); }
+318:.pf-snd-canvas { transition: opacity .3s var(--pf-ease); }

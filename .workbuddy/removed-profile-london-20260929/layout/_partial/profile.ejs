@@ -1,0 +1,347 @@
+<%
+  /* ------------------------------------------------------------------
+     个人主页 · /profile/  v2
+     ------------------------------------------------------------
+     架构：单屏电影感 Hero（首屏不滚动）+ 下方四幕叙事。
+
+       首屏  ┌ 顶部毛玻璃条（brand + 音乐钮，fixed）
+             │ 双行大标题 / 副标题 / CTA
+             │ 场景切换器（当前两个）
+             └ 底部数据条
+       背景  ┌ 2 张照片层，1000ms 交叉淡入
+             │ 蒸汽 / 雾（按场景切换，纯 CSS）
+             └ 明暗遮罩（两份交叉淡入）+ 颗粒
+
+     ⚠️ 与 v1（滚轮驱动的 WebGL 伦敦雨景）的区别：
+        v1 用手写 GLSL 画整幅场景；v2 改用真实照片 + CSS 天气层。
+        原因：这次要求"多场景切换"，照片切换比维护多套 shader 更稳，
+        也更贴近参照站的做法（多图交叉淡入 + 毛玻璃 + 粒子）。
+
+     ⚠️ 类名一律 ld- 前缀。因为 profile.css 被 /clouds/ 共用，
+        改 .pf-hero-* 那批会把云海页弄坏。详见 profile-london.css 头部。
+
+     文案全部来自 source/_data/profile.yml
+     ------------------------------------------------------------------ */
+  var _d = site.data.profile || {};
+  var _hero    = _d.hero    || {};
+  var _story   = _d.story   || {};
+  var _about   = _d.about   || {};
+  var _feat    = _d.featured || {};
+  var _contact = _d.contact || {};
+  var _music   = _d.music   || {};
+  var _stats   = _d.stats   || {};
+
+  var brand    = _d.brand     || '尚谦';
+  var brandSub = _d.brand_sub || 'Shang Qian';
+
+  /* ---- 场景 ---- */
+  var scenes = _d.scenes || [];
+  if (!scenes.length) {
+    /* 兜底：yml 缺了也至少有一张，页面不至于空 */
+    scenes = [{ key: 'bridge', name: '桥上', en: 'BRIDGE',
+                image: '/img/london/bridge.jpg', pos: '50% 50%',
+                tone: 'light', wx: 'none', note: '' }];
+  }
+  var S0 = scenes[0];
+
+  /* ---- 导航 ---- */
+  /* ⚠️ 2026-09-28 按要求取消顶栏导航：.ld-nav / .ld-burger / .ld-menu
+     三个元素连同它们的 CSS、JS 一起删了，所以这里不再读 nav / nav_cta。
+     站点入口改由首屏的「读文章」「关于我」两个按钮承担。 */
+
+  /* ---- Hero ---- */
+  var heroBadge = _hero.badge || '';   /* 留空 = 不渲染徽章 */
+  var heroTitle  = _hero.title  || '下雨的城市';
+  var heroTitle2 = _hero.title2 || '走得很慢的人';
+  var heroSub    = _hero.sub    || '';
+  var ctaLabel   = _hero.cta_label  || '读文章';
+  var ctaHref    = _hero.cta_href   || '/posts/';
+  var cta2Label  = _hero.cta2_label || '关于我';
+  var cta2Href   = _hero.cta2_href  || '/about/';
+  var enterText   = _hero.enter_text   || '轻触进入';
+  var gestureText = _hero.gesture_text || 'TAP ANYWHERE TO BEGIN';
+
+  /* ---- 数据条（取真实站点数据，不写死）---- */
+  var statPosts = site.posts.length;
+  var statCats  = site.categories.length;
+  var statTags  = site.tags.length;
+  var statSince = new Date().getFullYear();
+  try {
+    var _ps = site.posts.toArray ? site.posts.toArray() : [];
+    var _min = 9999;
+    _ps.forEach(function (p) { var y = p.date.year(); if (y < _min) _min = y; });
+    if (_min < 9999) statSince = _min;
+  } catch (e) {}
+
+  var stSinceL = _stats.since_label || '自';
+  var stSinceS = _stats.since_suffix || '年起写字';
+  var stPostS  = _stats.posts_suffix || '篇';
+  var stCatS   = _stats.categories_suffix || '个分类';
+  var stTagS   = _stats.tags_suffix || '个标签';
+
+  /* ---- 叙事四幕 ---- */
+  var storyLabel = _story.label || 'MESSAGE';
+  var storyTitle = _story.title || '你好';
+  var storyParas = _story.paragraphs || [];
+
+  var aboutLabel    = _about.label    || 'ABOUT';
+  var aboutTitle    = _about.title    || '';
+  var aboutSubtitle = _about.subtitle || '';
+  var aboutItems    = _about.items    || [];
+
+  var featTitle = _feat.title || '';
+  var featDesc  = _feat.desc  || '';
+  var featItems = _feat.items || [];
+
+  var cTitle  = _contact.title  || '找我聊聊';
+  var cDesc   = _contact.desc   || '';
+  var cLinks  = _contact.links  || [];
+  var cFooter = _contact.footer || '';
+
+  /* 图标名 → 内联 SVG（不依赖 iconfont，离线可用） */
+  var _icons = {
+    moon:   'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z',
+    rain:   'M7 15a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1A4 4 0 0 1 17 15M8 18l-1 3M12 18l-1 3M16 18l-1 3',
+    coffee: 'M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9ZM16 10h2a2 2 0 0 1 0 4h-2M4 21h13',
+    book:   'M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2V5ZM8 3v18'
+  };
+%>
+<% /* data-tone / data-wx 在服务端就按第一个场景渲染好 ——
+      即使 JS 没跑，首屏也是对的（不会出现"白字压亮图"）。 */ %>
+<div class="pf ld" id="profile-root"
+     data-scene="0" data-tone="<%= S0.tone || 'light' %>" data-wx="<%= S0.wx || 'none' %>">
+
+  <!-- 关键时序：body 内联、尽早执行，让 CSS 的 .js-on 规则立刻生效 -->
+  <script>document.getElementById('profile-root').classList.add('js-on');</script>
+
+  <!-- ============ 背景舞台（fixed：三层照片 + 天气） ============ -->
+  <div class="ld-stage" aria-hidden="true">
+    <% scenes.forEach(function (s, i) { %>
+      <div class="ld-layer<%= i === 0 ? ' is-on' : '' %>" data-i="<%= i %>"
+           data-tone="<%= s.tone || 'light' %>" data-wx="<%= s.wx || 'rain' %>"
+           style="background-image:url('<%= url_for(s.image) %>');background-position:<%= s.pos || '50% 50%' %>"></div>
+    <% }); %>
+
+    <!-- 明暗遮罩：两份叠加，靠 opacity 交叉淡入（渐变本身不能 transition） -->
+    <div class="ld-scrim ld-scrim-dark"></div>
+    <div class="ld-scrim ld-scrim-light"></div>
+
+    <!-- 文字保护雾：与遮罩同一套交叉淡入机制，只是形状是"文字那一列的柔雾"。
+         没有它，副标题压在照片中间调上只有 4.0 的对比度，读不出来。 -->
+    <div class="ld-veil ld-veil-lit"></div>
+    <div class="ld-veil ld-veil-dim"></div>
+
+    <!-- 天气层：按 data-wx 只显示对应的那一个。
+         当前两个场景是 none / steam，所以雨层（.ld-wx-rain）虽然还在 DOM 里，
+         但永远不会被点亮 —— 见 profile.yml 的 scenes 段。 -->
+    <div class="ld-wx ld-wx-rain"><i class="r1"></i><i class="r2"></i></div>
+    <div class="ld-wx ld-wx-steam"><i class="s1"></i><i class="s2"></i><i class="s3"></i></div>
+    <div class="ld-wx ld-wx-mist"></div>
+
+    <div class="ld-grain"></div>
+  </div>
+
+  <% /* ⚠️ 2026-09-28 按要求取消导航：桌面胶囊导航（.ld-nav）、汉堡按钮
+        （.ld-burger）、移动端全屏菜单（.ld-menu）三者都没了，对应的 CSS 与 JS
+        也已一并删除。顶栏只剩「品牌 + 音乐钮」。站点入口改由首屏的两个按钮
+        （读文章 / 关于我）与下方四幕承担。
+        这一段写成 EJS 注释而不是 HTML 注释，免得开发说明随页面发出去。 */ %>
+  <!-- ============ 顶部条（fixed，毛玻璃） ============ -->
+  <header class="ld-top" id="ld-top">
+    <a class="ld-brand" href="<%= url_for('/') %>">
+      <span><%= brand %></span><small><%= brandSub %></small>
+    </a>
+
+    <span class="ld-spacer"></span>
+
+    <!-- 音乐控件：沿用 profile.css 的样式（圆钮 + 7 根跳动竖条） -->
+    <% if (_music.enabled !== false) { %>
+    <div class="pf-music" id="pf-music"
+         data-src="<%= _music.src || '' %>"
+         data-type="<%= _music.type || 'audio/mpeg' %>"
+         data-volume="<%= _music.volume != null ? _music.volume : 0.20 %>"
+         data-loop="<%= _music.loop !== false ? '1' : '0' %>"
+         data-title="<%= _music.title || 'Untitled' %>">
+      <button class="pf-snd" id="pf-music-btn" type="button"
+              aria-label="播放背景音乐" aria-pressed="false" title="播放背景音乐">
+        <canvas class="pf-snd-canvas" id="pf-snd-canvas" width="20" height="20" aria-hidden="true"></canvas>
+      </button>
+    </div>
+    <% } %>
+  </header>
+
+  <!-- ============ 首屏（100vh，在文档流内，随滚动走） ============ -->
+  <section class="ld-hero" id="ld-hero">
+    <div class="ld-hero-in">
+      <% /* 徽章：yml 里 badge 留空就整块不渲染（原文案「记录城市与雨的呼吸」） */ %>
+      <% if (heroBadge) { %>
+      <span class="ld-badge ld-glass pf-reveal"><%= heroBadge %></span>
+      <% } %>
+
+      <% /* pf-split：JS 按视觉行切成 .pf-line > .pf-line-in，逐行遮罩上推。
+             无 JS 时就是普通文字，天然可见。 */ %>
+      <h1 class="ld-title">
+        <span class="pf-split"><%= heroTitle %></span>
+        <% if (heroTitle2) { %><span class="pf-split"><%= heroTitle2 %></span><% } %>
+      </h1>
+
+      <% if (heroSub) { %>
+      <p class="ld-sub pf-reveal"><%= heroSub %></p>
+      <% } %>
+
+      <div class="ld-cta pf-reveal">
+        <a class="ld-btn" href="<%= ctaHref.charAt(0) === 'h' ? ctaHref : url_for(ctaHref) %>"><%= ctaLabel %></a>
+        <a class="ld-btn2" href="<%= cta2Href.charAt(0) === 'h' ? cta2Href : url_for(cta2Href) %>"><%= cta2Label %></a>
+      </div>
+
+      <div class="ld-switch pf-reveal" id="ld-switch" role="tablist" aria-label="场景切换">
+        <% scenes.forEach(function (s, i) { %>
+          <button class="ld-sw<%= i === 0 ? ' is-on' : '' %>" type="button" role="tab"
+                  data-i="<%= i %>" aria-selected="<%= i === 0 ? 'true' : 'false' %>"
+                  title="<%= s.note || s.name %>">
+            <%= s.name %><span class="ld-sw-en"><%= s.en %></span>
+          </button>
+        <% }); %>
+      </div>
+    </div>
+
+    <!-- 底部数据条（真实站点数据） -->
+    <div class="ld-stats">
+      <span><b><%= statPosts %></b> <%= stPostS %></span>
+      <i aria-hidden="true">|</i>
+      <span><b><%= statCats %></b> <%= stCatS %></span>
+      <i aria-hidden="true">|</i>
+      <span><b><%= statTags %></b> <%= stTagS %></span>
+      <i aria-hidden="true">|</i>
+      <span><%= stSinceL %> <b><%= statSince %></b> <%= stSinceS %></span>
+    </div>
+  </section>
+
+  <!-- ============ 入场遮罩（真实交互：点击解锁音频） ============ -->
+  <div class="pf-preloader" id="pf-preloader" data-gesture="<%= gestureText %>">
+    <div class="pf-pre-inner">
+      <div class="pf-pre-lines" id="pf-pre-lines" aria-hidden="true"></div>
+      <div class="pf-pre-gesture">
+        <span class="pf-pre-dot" aria-hidden="true"></span>
+        <span class="pf-pre-text" id="pf-pre-text"><%= gestureText %></span>
+      </div>
+      <button class="pf-pre-enter" id="pf-pre-enter" type="button"><%= enterText %></button>
+    </div>
+  </div>
+
+  <!-- ============ 下方四幕叙事 ============ -->
+  <main class="pf-main ld-main" id="pf-main">
+    <div class="pf-page" id="pf-page">
+
+      <!-- ---------- 自述 ---------- -->
+      <section class="pf-sec pf-story" id="sec-story" data-sec="story">
+        <div class="pf-sec-inner">
+          <div class="pf-sec-label pf-reveal"><%= storyLabel %></div>
+          <h2 class="pf-story-title">
+            <span class="pf-split pf-reveal"><%= storyTitle %></span>
+          </h2>
+          <div class="pf-story-body">
+            <% (storyParas || []).forEach(function (p) { %>
+              <p class="pf-split pf-reveal"><%- String(p).trim().split('\n').join('<br>') %></p>
+            <% }); %>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- 关于 ---------- -->
+      <section class="pf-sec pf-about" id="sec-about" data-sec="about">
+        <div class="pf-sec-inner">
+          <div class="pf-sec-label pf-reveal"><%= aboutLabel %></div>
+          <h2 class="pf-about-title">
+            <span class="pf-split pf-reveal"><%= aboutTitle %></span>
+          </h2>
+          <% if (aboutSubtitle) { %>
+          <p class="pf-about-sub pf-split pf-reveal"><%= aboutSubtitle %></p>
+          <% } %>
+          <div class="pf-about-grid">
+            <% (aboutItems || []).forEach(function (it, i) { %>
+              <article class="pf-about-card pf-reveal" style="--i:<%= i %>">
+                <span class="pf-about-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="<%= _icons[it.icon] || _icons.moon %>"/>
+                  </svg>
+                </span>
+                <h3 class="pf-about-card-title"><%= it.title %></h3>
+                <p class="pf-about-card-desc"><%= it.desc %></p>
+              </article>
+            <% }); %>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- 精选坐标 ---------- -->
+      <section class="pf-sec pf-featured" id="sec-featured" data-sec="featured">
+        <div class="pf-sec-inner">
+          <h2 class="pf-feat-title">
+            <span class="pf-split pf-reveal"><%= featTitle %></span>
+          </h2>
+          <% if (featDesc) { %>
+          <p class="pf-feat-desc pf-reveal"><%= featDesc %></p>
+          <% } %>
+        </div>
+        <div class="pf-feat-track" id="pf-feat-track">
+          <% (featItems || []).forEach(function (it, i) { %>
+            <article class="pf-feat-item" data-i="<%= i %>"
+                     style="--tone:<%= it.color || '#1E2733' %>">
+              <div class="pf-feat-hit">
+                <div class="pf-feat-shade" aria-hidden="true"></div>
+                <div class="pf-feat-text">
+                  <span class="pf-feat-tag"><%= it.tag || '' %></span>
+                  <h3 class="pf-feat-item-title"><%= it.title %></h3>
+                  <p class="pf-feat-item-desc"><%= it.desc %></p>
+                </div>
+                <span class="pf-feat-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 8 8"><polygon points="6.767 0.603 6.767 5.897 0.871 0 0 0.872 5.894 6.767 0.605 6.767 0.605 8 8 8 8 0.603 6.767 0.603"/></svg>
+                </span>
+              </div>
+            </article>
+          <% }); %>
+        </div>
+      </section>
+
+      <!-- ---------- 联系 ---------- -->
+      <section class="pf-sec pf-contact" id="sec-contact" data-sec="contact">
+        <div class="pf-sec-inner">
+          <h2 class="pf-contact-title">
+            <span class="pf-split pf-reveal"><%= cTitle %></span>
+          </h2>
+          <% if (cDesc) { %>
+          <p class="pf-contact-desc pf-reveal"><%= cDesc %></p>
+          <% } %>
+          <div class="pf-contact-list">
+            <% (cLinks || []).forEach(function (l) { %>
+              <a class="pf-contact-row pf-reveal" href="<%= l.href %>" target="_blank" rel="noopener">
+                <span class="pf-contact-label"><%= l.label %></span>
+                <span class="pf-contact-value"><%= l.value %></span>
+                <span class="pf-contact-line" aria-hidden="true"></span>
+              </a>
+            <% }); %>
+          </div>
+          <% if (cFooter) { %>
+          <div class="pf-contact-footer pf-reveal"><%- String(cFooter).trim().split('\n').join('<br>') %></div>
+          <% } %>
+          <a class="pf-back-home pf-reveal" href="<%= url_for('/') %>">← 回到首页</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ============ 自绘滚动条 ============ -->
+  <div class="pf-scrollbar" id="pf-scrollbar" aria-hidden="true">
+    <div class="pf-scrollbar-track">
+      <div class="pf-scrollbar-thumb" id="pf-scrollbar-thumb"></div>
+    </div>
+  </div>
+
+  <!-- ============ 光标跟随 ============ -->
+  <div class="pf-cursor" id="pf-cursor" aria-hidden="true"></div>
+  <div class="pf-cursor-dot" id="pf-cursor-dot" aria-hidden="true"></div>
+
+</div>

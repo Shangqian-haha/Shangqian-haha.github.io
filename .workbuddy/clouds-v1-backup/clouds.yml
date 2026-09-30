@@ -1,0 +1,104 @@
+# ==============================================
+# 云海之上 · /clouds/ 内容数据
+# 参考图：708×1262（≈9:16 竖幅）的木平台望云海
+# 口径：结构 1:1，表现绘画化（不是照片写实）
+# ---------------------------------------------------------------
+# 构图基准（像素级实测，取自参考图，比例写的是 y / 图高）：
+#   远山脊线    y=724   57.4%   谷底亮度 129（天空与云海的分界）
+#   云海顶边界  y=742   58.8%   之后迅速变亮
+#   云海最亮    y=804   63.7%   亮度 223
+#   木地板起始  y=1016  80.5%   亮度降到 66
+# 这些数字直接写进 clouds.js 的 shader，不要随手改。
+# ==============================================
+
+brand: 尚谦
+brand_sub: Shang Qian
+
+# ---- 顶部信息条 ----
+# overline 只在入场遮罩上出现一行小字
+hero:
+  overline: SEA OF CLOUDS · 06:20
+  title: 云在脚下，风在耳边
+  title2: 世界在这里变得很轻
+  desc: |
+    往下，是看不见底的白色
+  enter_text: 轻触进入
+  gesture_text: TAP ANYWHERE TO BEGIN
+
+# ---- 第二幕 · 自述 ----
+story:
+  label: ABOVE THE CLOUDS
+  title: 站得高一点
+  paragraphs:
+    - 有些答案不在原地。
+    - 你得先爬上去，才知道云下面是海，还是别的什么。
+    - |
+      我常想，人这一生里真正清醒的时刻并不多。
+      站在高处往下看，算一种。
+    - |
+      风会吹散很多东西，也会让人看清一些。
+
+# ---- 第三幕 · 关于 ----
+about:
+  label: THREE THINGS
+  title: 高处教会我的三件事
+  subtitle: 都是站着的时候想明白的
+  items:
+    - icon: mountain
+      title: 慢
+      desc: 上山没有捷径，每一步都得自己走。
+    - icon: cloud
+      title: 轻
+      desc: 有些事放不下，是因为站得太低。
+    - icon: sun
+      title: 早
+      desc: 最好的光，永远只留给早起的人。
+
+# ---- 第四幕 · 精选 ----
+featured:
+  title: 带我去过的地方
+  desc: 每一个都值得再爬一次
+  items:
+    - title: 凌晨四点的山脊
+      desc: 天还没亮，云海先亮了。那种白，照片拍不出来。
+      tag: 出发
+      color: "#8BB0DD"
+    - title: 木平台上的两把椅子
+      desc: 一把坐人，一把放包。风大的时候两把都在晃。
+      tag: 停留
+      color: "#C3B49A"
+    - title: 树桩上的那只猫
+      desc: 它比我先到。看了我一眼，继续睡。
+      tag: 相遇
+      color: "#B9987A"
+    - title: 下山的路
+      desc: 比上山快，也比上山舍不得。
+      tag: 归途
+      color: "#7E93B5"
+
+# ---- 第五幕 · 联系 ----
+contact:
+  title: 也想去看看
+  desc: 如果你也想上去，随时可以问我路怎么走
+  links:
+    - label: 邮箱
+      value: 357425252@qq.com
+      href: "mailto:357425252@qq.com"
+    - label: GitHub
+      value: github.com/Shangqian-haha
+      href: "https://github.com/Shangqian-haha"
+    - label: 博客
+      value: 回到文章
+      href: "/posts/"
+  footer: |
+    云在脚下。
+    路在身后。
+
+# ---- 音乐（占位方案） ----
+music:
+  enabled: true
+  src: ""
+  type: "audio/mpeg"
+  title: Wind Above the Clouds
+  volume: 0.32
+  loop: true

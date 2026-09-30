@@ -1,0 +1,94 @@
+<% /*
+  ============ /clouds/ 极地 · 极光冰原 · v3「Aurora」 ============
+
+  纯自研 three.js r112 场景，**零外部模型/贴图**（贴图用 canvas 现画）：
+    · 极夜雾 + 星空 + 极光幕（合并几何 + 自写 shader，帘脚青绿→帘顶紫粉）
+    · 冰脊剪影三层（多频正弦山脊 + 雪线高光）+ 冰原 + 冰面倒影 + 雪粒
+    · 虚拟滚动：滚轮/触摸/键盘 → 目标值 → 缓动；
+      滚动越快，极光越亮、雪越急（boost）
+    · 四幕滚动叙事：**纯风景，全靠相机运动叙事**
+      （仰视穹顶 → 右移侧看 → 升高俯瞰冰原 → 拉远全景）
+    · 入场闸门：进度条 → 点击任意处 → 上滑揭开
+
+  ⚠️ 渐进增强（本项目踩过「CSS 默认隐藏 → 脚本没跑整页空白」的坑）：
+    · 闸门 .cl-gate 默认 display:none，只有 .cl.js-on 下才显示
+      （js-on 由 clouds.js 第一时间加；无 JS 时页面 = 纯 CSS 极夜渐变 + 全部文字，可用）
+    · 所有文字层默认可见，JS 只负责随滚动切换，不在服务端隐藏任何一幕
+
+  备份：v1 绘画化云海 → .workbuddy/clouds-v1-backup/
+        v2 霓虹隧道奔跑者 → .workbuddy/clouds-v2-backup/
+  内容数据在 source/_data/clouds.yml。
+*/ %>
+<%
+  var _d      = site.data.clouds || {};
+  var brand   = _d.brand      || '尚谦';
+  var brandSub= _d.brand_sub  || 'SHANG QIAN';
+  var _nav    = _d.nav || [];
+  var _gate   = _d.gate || {};
+  var gateLoad  = _gate.loading || '正在生成极光';
+  var gateEnter = _gate.enter   || '点击任意处进入';
+  var guideTxt  = _d.guide || '滚动查看更多';
+  var _secs   = _d.secs || [];
+%>
+<div class="cl" id="clouds-root">
+
+  <!-- 顶部导航（此页不走站点 chrome） -->
+  <header class="cl-top">
+    <a class="cl-brand" href="/"><%= brand %><span><%= brandSub %></span></a>
+    <nav class="cl-nav" aria-label="页内导航">
+      <% _nav.forEach(function (n) { %>
+      <a href="<%= n.href %>"<%= String(n.href).indexOf('http') === 0 ? ' target="_blank" rel="noopener"' : '' %>><%= n.label %></a>
+      <% }); %>
+    </nav>
+  </header>
+
+  <!-- WebGL 画布（three r112：极光幕 / 星空 / 冰脊 / 冰原 / 倒影 / 雪） -->
+  <canvas class="cl-canvas" id="cl-canvas" aria-hidden="true"></canvas>
+
+  <!-- 滚动文字层：四幕，由 clouds.js 按 scroll 进度驱动 -->
+  <div class="cl-copy" id="cl-copy">
+    <% _secs.forEach(function (s) { %>
+    <section class="cl-sec" data-i="<%= s.i || 0 %>">
+      <% if (s.title) { %>
+      <h1 class="cl-title">
+        <% String(s.title).replace(/\r/g, '').split('\n').forEach(function (line) {
+             if (String(line).trim()) { %><span><%= line %></span><% }
+           }); %>
+      </h1>
+      <% } %>
+      <% if (s.label) { %><h3 class="cl-label"><%= s.label %></h3><% } %>
+      <% if (s.text) { %><p class="cl-text"><%= s.text %></p><% } %>
+      <% if (s.quote) { %>
+      <p class="cl-quote"><b>「<%= s.quote_from || '' %>」</b><%= s.quote %></p>
+      <% } %>
+      <% if (s.head) { %><h3 class="cl-head"><%= s.head %></h3><% } %>
+      <% if (s.sub) { %><p class="cl-sub"><%= s.sub %></p><% } %>
+      <% if (s.links && s.links.length) { %>
+      <div class="cl-links">
+        <% s.links.forEach(function (l) { %>
+        <a class="<%= l.style === 'ghost' ? 'cl-ghost' : 'cl-btn' %>" href="<%= l.href %>"><%= l.label %></a>
+        <% }); %>
+      </div>
+      <% } %>
+    </section>
+    <% }); %>
+  </div>
+
+  <!-- 滚动引导（左下竖排，进入正文后隐藏） -->
+  <div class="cl-guide" id="cl-guide">
+    <span class="cl-guide-txt"><%= guideTxt %></span>
+    <svg class="cl-guide-arrow" width="5" height="40" viewBox="0 0 5 40" aria-hidden="true">
+      <path d="M0,40V0H1V35H5Z" fill="currentColor"></path>
+    </svg>
+  </div>
+
+  <!-- 自定义滚动指示条（右侧） -->
+  <div class="cl-bar" aria-hidden="true"><i class="cl-bar-in" id="cl-bar"></i></div>
+
+  <!-- 入场闸门：默认 display:none，clouds.js 加 js-on 后才显示。
+       data-enter = 加载完后的提示语（由 clouds.yml 驱动，脚本读它） -->
+  <div class="cl-gate" id="cl-gate" data-enter="<%= gateEnter %>">
+    <div class="cl-gate-track"><i class="cl-gate-fill" id="cl-gate-fill"></i></div>
+    <span class="cl-gate-hint" id="cl-gate-hint"><%= gateLoad %></span>
+  </div>
+</div>

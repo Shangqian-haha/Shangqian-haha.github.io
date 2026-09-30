@@ -1,0 +1,46 @@
+/* ==============================================
+   打嗝猫鼠标指针（全站，含首页 / 文章页 / /profile/ 个人主页）
+   2026-09-29
+
+   素材：抖音「打嗝猫 猫meme绿幕素材分享」（作者：不耶还耶），
+   取视频第 193 帧（闭嘴睁眼）与第 190 帧（张嘴闭眼打嗝脸），
+   HSV 抠绿幕 + despill 去绿边 + 边缘羽化，缩至 48×48 PNG。
+
+   规则（用户要求）：
+   · 嘴巴闭 = 普通状态（cat-closed）
+   · 检测到鼠标左键按下 → 张嘴（cat-open），松开恢复
+   · 尺寸：初版 48×48 → 36×36（2026-09-29「再小一些」）；
+     v5（2026-09-29）在左耳处加一枚「左斜小箭头」（形状取自用户参考图
+     ——flood-fill 抠掉紫底、按亮度重新上色为米白+深灰、逆时针转 30°，
+     参考图的配色未采用）。
+     v5b（2026-09-29）修复：v5 把 48px 猫源图误当 36px 直接贴进 46 画布，
+     右/底各被裁 12px（右半边消失）；改用 36px 正确缩放版，画布定为 48×48，
+     猫贴 (11,12)。箭头右移、凹口对准左耳尖、对角留 2px 缝隙不贴合。
+   · 热点 = 箭头尖 (11,2)：光标点击点就是小箭头的指向点，符合鼠标直觉。
+
+   实现要点：
+   · `html *` + !important 压过主题里所有 cursor:pointer 组件；
+     `html.cat-click *` 特异性 (0,1,1) 更高，按下时全站切张嘴
+     （input/textarea 也切 —— 按住拖选时猫在张嘴，松手回到文本光标）。
+   · input/textarea 平时保留 text 光标：打字定位比卖萌重要。
+   · JS 在 cursor-cat.js 里用捕获阶段监听 mousedown/mouseup，
+     避免 page.js / clouds.js 的 stopPropagation 拦掉信号。
+   ============================================== */
+
+html,
+html body,
+html * {
+  cursor: url("/img/cursor/cat-closed.png") 11 2, auto !important;
+}
+
+/* 左键按住：全站张嘴（特异性高于上面的 html *） */
+html.cat-click,
+html.cat-click * {
+  cursor: url("/img/cursor/cat-open.png") 11 2, auto !important;
+}
+
+/* 输入型控件平时保留文本光标 */
+html input,
+html textarea {
+  cursor: text !important;
+}

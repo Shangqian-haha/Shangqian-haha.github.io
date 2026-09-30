@@ -1,0 +1,8 @@
+themes/liushen-clone/layout/_partial/home-hero.ejs:11:  var _a1 = _h.primary   || { text: '个人主页', url: '/profile/' };
+themes/liushen-clone/layout/_partial/home-hero.ejs:12:  var _a2 = _h.secondary || { text: '关于我',   url: '/about/' };
+source/_data/profile.yml:2:# 个人主页 · 内容数据（v2 · 单屏电影感 Hero + 双场景切换）
+source/_data/profile.yml:20:#    站点入口改由首屏的「读文章」「关于我」两个按钮，
+source/_data/profile.yml:38:  cta2_label: 关于我
+source/_data/profile.yml:39:  cta2_href: /about/
+source/_data/profile.yml:49:#        data-tone=dark 那一整套规则仍留在 profile-london.css 里备用。
+source/_data/profile.yml:98:  title: 你不知道的，关于我的几件事

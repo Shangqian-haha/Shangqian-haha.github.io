@@ -1,0 +1,7 @@
+9:     9. 音乐控件           10. 控制台彩蛋
+110:    /* 通知音乐模块可以开始播了（由用户手势触发，合规） */
+515:     9. 音乐控件 → 已抽成共用模块 js/music.js
+518:     把原来的实现**原样**搬到 themes/liushen-clone/source/js/music.js，
+519:     本文件不再包含音乐逻辑。两个页面都在 page.ejs 里加载 music.js。
+520:     ⚠️ 样式仍在 profile.css（.pf-music / .pf-snd）—— 那份 CSS 两页都会加载，
+525:     10. 控制台彩蛋

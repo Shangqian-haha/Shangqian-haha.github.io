@@ -319,11 +319,91 @@ html[data-theme="light"] .theme-toggle .fa-sun { display: inline-block; }
   padding: 1px 6px; border-radius: 5px; border: 1px solid var(--card-border);
   background: color-mix(in srgb, var(--fg) 5%, transparent);
 }
-.search-count { margin-left: auto; font-variant-numeric: tabular-nums; }
-@media (max-width: 640px) {
+.search-count { margin-left: auto; font-variant-numeric: tabular-nums; }@media (max-width: 640px) {
   .search-hint { display: none; }
   .search-dialog { top: 8vh; max-height: 80vh; }
   .search-foot { flex-wrap: wrap; gap: 8px; }
+}
+/* ---------- 搜索框上的猫（2026-09-30 加入） ----------
+   效果移植自公众号文章《一只睡觉的猫》：猫趴在搜索框右端睡觉，
+   鼠标靠近 → 睁一只眼；输入内容 → 两只眼全睁开；悬停 / 键盘选中结果项 → 尾巴翘起来。
+   原文是套在 <select> 上（依赖 appearance: base-select），这里改挂在搜索框上：
+   状态联动全部交给 :has()，一行 JS 都不加；SVG 用 invert 反相适配暗色主题。
+   猫的全部节点见 layout/_partial/search-cat.ejs（id 前缀 sdc-）。 */
+.search-head { padding-top: 34px; }                 /* 给上方的 Z z z 留出空间 */
+.search-input-wrap { position: relative; padding-right: 72px; }  /* 定位基准 + 右侧让出猫的位置 */
+.search-cat {
+  position: absolute; right: 6px; top: 50%;
+  width: 58px; transform: translateY(-54%);
+  pointer-events: none; z-index: 2;                 /* 猫不吃点击，链接照常可点 */
+}
+.search-cat-body { display: block; }
+.search-cat .sdc-svg {
+  display: block; width: 100%; height: auto;
+  /* 原图是纯黑猫 → 深色主题反相成浅色；再补一点投影让它贴在框上 */
+  filter: invert(1) brightness(.94) drop-shadow(0 5px 10px rgba(0, 0, 0, .45));
+  transition: filter .32s ease;
+}
+html[data-theme="light"] .search-cat .sdc-svg {
+  /* 浅色主题：黑猫本来就是为浅底画的，不反相，只留投影 */
+  filter: drop-shadow(0 5px 10px rgba(15, 23, 42, .18));
+}
+.search-cat-zzz {
+  position: absolute; left: 4px; bottom: 100%; margin-bottom: -4px;
+  display: flex; align-items: flex-end;
+  font-size: 10px; font-weight: 700; line-height: 1; color: var(--fg-soft);
+}
+.search-cat-zzz i {
+  display: inline-block; font-style: normal;
+  animation: searchCatSleep 3.6s ease-in-out infinite;
+}
+.search-cat-zzz i:nth-child(2) { animation-delay: 1.2s; margin-left: -3px; }
+.search-cat-zzz i:nth-child(3) { animation-delay: 2.4s; margin-left: -3px; }
+@keyframes searchCatSleep {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  50%  { opacity: .5; transform: translate(-3px, -15px) scale(1.12); }
+  100% { opacity: 0; transform: translateY(-26px) scale(1.3); }
+}
+/* 睡觉时：睁开的眼睛与长尾都收起来，露出闭着的眼睑 */
+.search-cat #sdc-eyesdown,
+.search-cat #sdc-longtail { visibility: hidden; }
+/* ① 鼠标进入弹窗：先睁一只眼，睡眠符号消散；再靠近输入框：睁开另一只（两段式唤醒） */
+.search-card:hover #sdc-lefteyelid { visibility: hidden; }
+.search-card:hover .search-cat-zzz { visibility: hidden; }
+.search-input-wrap:hover #sdc-righteyelid { visibility: hidden; }
+/* 清醒后猫身亮一点（深色主题下 brightness(.94) → 1） */
+.search-card:hover .search-cat .sdc-svg { filter: invert(1) drop-shadow(0 5px 10px rgba(0, 0, 0, .45)); }
+/* 尾巴轻轻摆（短尾/长尾谁在场谁摆） */
+.search-cat #sdc-tail,
+.search-cat #sdc-longtail {
+  transform-box: fill-box;
+  transform-origin: 0% 40%;
+  animation: searchCatTail 3.8s ease-in-out infinite;
+}
+@keyframes searchCatTail {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-4.5deg); }
+}
+/* ② 输入了内容：两只眼全睁开，彻底醒过来 */
+.search-dialog:has(.search-input:not(:placeholder-shown)) #sdc-lefteyelid,
+.search-dialog:has(.search-input:not(:placeholder-shown)) #sdc-righteyelid { visibility: hidden; }
+.search-dialog:has(.search-input:not(:placeholder-shown)) #sdc-eyesdown { visibility: visible; }
+.search-dialog:has(.search-input:not(:placeholder-shown)) .search-cat-zzz { visibility: hidden; }
+/* ③ 悬停 / 键盘选中结果项：尾巴翘起来 */
+.search-dialog:has(.search-result-item:hover) #sdc-tail,
+.search-dialog:has(.search-result-item.active) #sdc-tail { visibility: hidden; }
+.search-dialog:has(.search-result-item:hover) #sdc-longtail,
+.search-dialog:has(.search-result-item.active) #sdc-longtail { visibility: visible; }
+@media (max-width: 640px) {
+  .search-head { padding-top: 28px; }
+  .search-input-wrap { padding-right: 56px; }
+  .search-cat { width: 46px; }
+  .search-cat-zzz { font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .search-cat-zzz i,
+  .search-cat #sdc-tail,
+  .search-cat #sdc-longtail { animation: none; }
 }
 .menu-toggle {
   display: none; align-items: center; justify-content: center;

@@ -1,0 +1,3 @@
+themes/liushen-clone/source/css/clouds.css:75:   ⚠️ 2026-09-28：原来这里的 .cl-nav 四个导航已按要求删除。
+themes/liushen-clone/source/css/clouds.css:363:  /* .cl-nav 已删除（2026-09-28 取消此页导航），这里只剩品牌副标的收敛 */
+source/_data/clouds.yml:16:#    这一段 nav 连同 clouds.ejs 里的 .cl-nav、clouds.css 里的 .cl-nav 规则

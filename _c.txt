@@ -1,0 +1,10 @@
+75:.cl-top {
+85:.cl-top a { pointer-events: auto; }
+86:.cl-brand {
+96:.cl-brand span {
+102:.cl-nav { display: flex; gap: clamp(16px, 2.4vw, 34px); }
+103:.cl-nav a {
+110:.cl-nav a:hover { color: var(--cl-ice); }
+346:  .cl-nav { gap: 14px; }
+347:  .cl-nav a { font-size: 11.5px; letter-spacing: .08em; }
+348:  .cl-brand span { display: none; }

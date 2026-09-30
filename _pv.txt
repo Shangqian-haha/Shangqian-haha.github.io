@@ -1,0 +1,28 @@
+49:  --pf-lamp:      #E8A85C;            /* 主灯 */
+50:  --pf-lamp-soft: #C98B47;
+51:  --pf-lamp-glow: rgba(232, 168, 92, .22);
+52:  --pf-lamp-faint:rgba(232, 168, 92, .09);
+263:  background: var(--pf-lamp);
+271:.pf-nav-item.is-active { color: var(--pf-lamp); }
+303:.pf-snd:hover { color: var(--pf-lamp); border-color: var(--pf-lamp-faint); }
+305:.pf-music.is-playing .pf-snd { color: var(--pf-lamp); border-color: var(--pf-lamp-soft); }
+360:.pf-pre-lines span.is-done { color: var(--pf-lamp-soft); opacity: .7; }
+375:  background: var(--pf-lamp);
+399:  background: var(--pf-lamp);
+400:  border-color: var(--pf-lamp);
+434:  color: var(--pf-lamp-soft);
+522:  background: linear-gradient(to bottom, transparent, var(--pf-lamp));
+595:  border-color: var(--pf-lamp-faint);
+606:  background: linear-gradient(to right, transparent, var(--pf-lamp-glow), transparent);
+617:  color: var(--pf-lamp-soft);
+685:.pf-feat-item:hover .pf-feat-hit { border-color: var(--pf-lamp-faint); }
+691:  background: radial-gradient(70% 90% at 80% 20%, var(--pf-lamp-faint), transparent 66%);
+741:.pf-feat-item:hover .pf-feat-arrow { color: var(--pf-lamp); transform: translate(4px, -4px); }
+785:.pf-contact-row:hover .pf-contact-label { color: var(--pf-lamp-soft); }
+801:  background: var(--pf-lamp);
+826:.pf-back-home:hover { color: var(--pf-lamp); }
+939:  background: linear-gradient(to bottom, var(--pf-lamp-soft), var(--pf-lamp));
+957:  border: 1px solid var(--pf-lamp-glow);
+958:  background: radial-gradient(circle, var(--pf-lamp-glow), transparent 70%);
+967:  background: var(--pf-lamp);
+975:  background: radial-gradient(circle, var(--pf-lamp-faint), transparent 72%);

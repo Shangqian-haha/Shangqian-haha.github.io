@@ -1,0 +1,89 @@
+<% /*
+  ============ /clouds/ 云海之上 · v2「霓虹隧道奔跑者」 ============
+
+  复刻 index.anheyu.com（Lusion.co 风格）的视觉，代码全部自研：
+    · three.js r112 全屏画布：深蓝雾 + 反光地面 + 粉/蓝/白霓虹光带隧道
+      + 线框奔跑小人（female.glb，自带 Run/Jump/Slide 动画）+ 粒子尾迹
+    · 虚拟滚动：滚轮/触摸 → 目标值 → 缓动；光带速度随滚动爆发
+    · 四幕滚动叙事：hero 标题 → MESSAGE → 第三幕 → 结尾
+    · 入场闸门：加载进度条 → 点击任意处 → 上滑揭开
+
+  ⚠️ 渐进增强（本项目踩过「CSS 默认隐藏 → 脚本没跑整页空白」的坑）：
+    · 闸门 .cl-gate 默认 display:none，只有 .cl.js-on 下才显示
+      （js-on 由 clouds.js 第一时间加；无 JS 时页面 = 纯 CSS 渐变 + 全部文字，可用）
+    · 所有文字层默认可见，JS 只负责随滚动切换，不在服务端隐藏任何一幕
+
+  内容数据在 source/_data/clouds.yml。
+*/ %>
+<%
+  var _d      = site.data.clouds || {};
+  var brand   = _d.brand      || '尚谦';
+  var brandSub= _d.brand_sub  || 'SHANG QIAN';
+  var _nav    = _d.nav || [];
+  var _gate   = _d.gate || {};
+  var gateLoad  = _gate.loading || '正在装载云层';
+  var gateEnter = _gate.enter   || '点击任意处进入';
+  var guideTxt  = _d.guide || '滚动查看更多';
+  var _secs   = _d.secs || [];
+%>
+<div class="cl" id="clouds-root">
+
+  <!-- 顶部导航（此页不走站点 chrome） -->
+  <header class="cl-top">
+    <a class="cl-brand" href="/"><%= brand %><span><%= brandSub %></span></a>
+    <nav class="cl-nav" aria-label="页内导航">
+      <% _nav.forEach(function (n) { %>
+      <a href="<%= n.href %>"<%= String(n.href).indexOf('http') === 0 ? ' target="_blank" rel="noopener"' : '' %>><%= n.label %></a>
+      <% }); %>
+    </nav>
+  </header>
+
+  <!-- WebGL 画布（three r112：雾 / 光带 / 跑者 / 尾迹 / 地面） -->
+  <canvas class="cl-canvas" id="cl-canvas" aria-hidden="true"></canvas>
+
+  <!-- 滚动文字层：四幕，由 clouds.js 按 scroll 进度驱动 -->
+  <div class="cl-copy" id="cl-copy">
+    <% _secs.forEach(function (s) { %>
+    <section class="cl-sec" data-i="<%= s.i || 0 %>">
+      <% if (s.title) { %>
+      <h1 class="cl-title">
+        <% String(s.title).replace(/\r/g, '').split('\n').forEach(function (line) {
+             if (String(line).trim()) { %><span><%= line %></span><% }
+           }); %>
+      </h1>
+      <% } %>
+      <% if (s.label) { %><h3 class="cl-label"><%= s.label %></h3><% } %>
+      <% if (s.text) { %><p class="cl-text"><%= s.text %></p><% } %>
+      <% if (s.quote) { %>
+      <p class="cl-quote"><b>「<%= s.quote_from || '' %>」</b><%= s.quote %></p>
+      <% } %>
+      <% if (s.head) { %><h3 class="cl-head"><%= s.head %></h3><% } %>
+      <% if (s.sub) { %><p class="cl-sub"><%= s.sub %></p><% } %>
+      <% if (s.links && s.links.length) { %>
+      <div class="cl-links">
+        <% s.links.forEach(function (l) { %>
+        <a class="<%= l.style === 'ghost' ? 'cl-ghost' : 'cl-btn' %>" href="<%= l.href %>"><%= l.label %></a>
+        <% }); %>
+      </div>
+      <% } %>
+    </section>
+    <% }); %>
+  </div>
+
+  <!-- 滚动引导（左下竖排，进入正文后隐藏） -->
+  <div class="cl-guide" id="cl-guide">
+    <span class="cl-guide-txt"><%= guideTxt %></span>
+    <svg class="cl-guide-arrow" width="5" height="40" viewBox="0 0 5 40" aria-hidden="true">
+      <path d="M0,40V0H1V35H5Z" fill="currentColor"></path>
+    </svg>
+  </div>
+
+  <!-- 自定义滚动指示条（右侧） -->
+  <div class="cl-bar" aria-hidden="true"><i class="cl-bar-in" id="cl-bar"></i></div>
+
+  <!-- 入场闸门：默认 display:none，clouds.js 加 js-on 后才显示 -->
+  <div class="cl-gate" id="cl-gate">
+    <div class="cl-gate-track"><i class="cl-gate-fill" id="cl-gate-fill"></i></div>
+    <span class="cl-gate-hint" id="cl-gate-hint"><%= gateLoad %></span>
+  </div>
+</div>

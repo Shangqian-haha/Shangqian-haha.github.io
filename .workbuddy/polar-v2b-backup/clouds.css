@@ -1,0 +1,337 @@
+/* ==================================================================
+   极地 · 极光冰原 · /clouds/ v3「Aurora」样式
+   ------------------------------------------------------------------
+   北极极夜 + 极光幕 + 冰原的纯风景场景，DOM 层代码自研。
+   cl- 前缀自成体系，与 .pf-* / .ld-* 零重叠。
+   （v1 绘画化云海 → .workbuddy/clouds-v1-backup/
+     v2 霓虹隧道奔跑者 → .workbuddy/clouds-v2-backup/）
+
+   ⚠️ 渐进增强（本项目头号坑：CSS 默认隐藏 → 脚本没跑整页空白）：
+     · 默认态 = 普通文档流：四幕依次排开各占一屏，纯 CSS 极夜渐变兜底，
+       无 JS 也能完整阅读（WebGL 只是增强）。
+     · .cl.js-on（clouds.js 第一时间加）才切换为 fixed 叠层 + 虚拟滚动，
+       body.cl-lock 锁掉原生滚动。
+     · 闸门同理：默认 display:none，js-on 下才出现。
+   ================================================================== */
+
+.cl {
+  /* ---- 色板（极地：极夜黑 → 夜雾蓝 → 冰蓝；极光绿/冰蓝/极光紫）---- */
+  --cl-bg-0: #040711;      /* 极夜近黑（画面顶部） */
+  --cl-bg-1: #061324;      /* 夜雾 */
+  --cl-bg-2: #0b2436;      /* 冰蓝（画面底部） */
+  --cl-aurora-1: #3ef0a8;  /* 极光绿 */
+  --cl-aurora-2: #52ccff;  /* 冰蓝 */
+  --cl-aurora-3: #a06bff;  /* 极光紫 */
+  --cl-ice: #e6f6ff;       /* 冰白 */
+  --cl-ink:  #eaf4ff;
+  --cl-ink-2: rgba(234, 244, 255, .78);
+  --cl-ink-3: rgba(234, 244, 255, .55);
+  --cl-serif: 'EB Garamond', 'Noto Serif SC', 'Songti SC', serif;
+  --cl-sans: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  position: relative;
+  min-height: 100vh;
+  background:
+    radial-gradient(140% 40% at 50% 64%, rgba(62, 240, 168, .26) 0%, rgba(62, 240, 168, 0) 60%),
+    radial-gradient(125% 36% at 50% 104%, rgba(120, 210, 255, .26) 0%, rgba(120, 210, 255, 0) 64%),
+    linear-gradient(to bottom, var(--cl-bg-0) 0%, var(--cl-bg-1) 44%, var(--cl-bg-2) 100%);
+  color: var(--cl-ink);
+  font-family: var(--cl-sans);
+  overflow-x: hidden;
+}
+
+/* ---------- WebGL 画布 ---------- */
+.cl-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* 无 JS / WebGL 失败时画布透明，露出上面的 CSS 极夜渐变兜底 */
+  background: transparent;
+}
+.cl.js-on .cl-canvas { background: var(--cl-bg-1); }
+
+/* ---------- 顶部导航 ---------- */
+.cl-top {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px clamp(20px, 3.4vw, 48px);
+  pointer-events: none;
+}
+.cl-top a { pointer-events: auto; }
+.cl-brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--cl-ink);
+  text-decoration: none;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+.cl-brand span {
+  font-size: 9.5px;
+  font-weight: 400;
+  letter-spacing: .34em;
+  color: var(--cl-ink-3);
+}
+.cl-nav { display: flex; gap: clamp(16px, 2.4vw, 34px); }
+.cl-nav a {
+  color: var(--cl-ink-2);
+  text-decoration: none;
+  font-size: 12.5px;
+  letter-spacing: .14em;
+  transition: color .25s ease;
+}
+.cl-nav a:hover { color: var(--cl-ice); }
+
+/* ---------- 滚动文字层 ----------
+   默认（无 JS）：文档流，四幕各一屏，可正常滚动阅读。
+   js-on：fixed 叠层，opacity/transform 全部由 clouds.js 驱动。 */
+.cl-copy { position: relative; z-index: 2; }
+
+.cl-sec {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 clamp(24px, 7vw, 110px);
+  pointer-events: auto;
+}
+.cl.js-on .cl-copy {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.cl.js-on .cl-sec {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  display: flex;
+  will-change: opacity, transform;
+}
+/* 各幕的水平对位（hero 居中、MESSAGE 在右、第三幕偏右、结尾居中）。
+   用 data-i 属性选择器 —— 幕数和顺序由 clouds.yml 驱动，不写死类名。 */
+.cl-sec[data-i="0"] { align-items: center; text-align: center; }
+.cl.js-on .cl-sec[data-i="1"] { justify-content: flex-end; }
+.cl.js-on .cl-sec[data-i="2"] { justify-content: flex-end; }
+.cl-sec[data-i="3"] { align-items: center; text-align: center; }
+
+/* ---------- 第一幕 · 大标题 ---------- */
+.cl-title {
+  margin: 0;
+  font-family: var(--cl-serif);
+  font-weight: 400;
+  font-size: clamp(34px, 5.6vw, 88px);
+  line-height: 1.16;
+  letter-spacing: .01em;
+  color: var(--cl-ink);
+  text-shadow: 0 2px 22px rgba(2, 10, 22, .7);
+}
+.cl-title span { display: block; }
+
+/* ---------- 第二幕 · MESSAGE ---------- */
+.cl-label {
+  margin: 0 0 18px;
+  font-family: var(--cl-serif);
+  font-size: clamp(20px, 2.1vw, 30px);
+  font-weight: 400;
+  letter-spacing: .12em;
+  color: var(--cl-ink);
+}
+.cl-text {
+  margin: 0;
+  max-width: 34em;
+  font-size: clamp(14px, 1.25vw, 17px);
+  line-height: 1.9;
+  color: var(--cl-ink-2);
+}
+.cl-quote {
+  margin: 26px 0 0;
+  font-size: clamp(14px, 1.2vw, 16.5px);
+  line-height: 1.85;
+  color: var(--cl-ink-2);
+}
+.cl-quote b {
+  font-weight: 600;
+  color: var(--cl-ink);
+  margin-right: 10px;
+}
+
+/* ---------- 第三 / 四幕 ---------- */
+.cl-head {
+  margin: 0;
+  font-size: clamp(22px, 2.5vw, 36px);
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: var(--cl-ink);
+  text-shadow: 0 1px 16px rgba(2, 10, 22, .6);
+}
+.cl-sub {
+  margin: 16px 0 0;
+  max-width: 30em;
+  font-size: clamp(13.5px, 1.15vw, 16px);
+  line-height: 1.9;
+  color: var(--cl-ink-2);
+}
+.cl-links {
+  margin-top: 34px;
+  display: flex;
+  gap: 14px;
+}
+.cl-btn, .cl-ghost {
+  display: inline-block;
+  padding: 12px 26px;
+  border-radius: 999px;
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-decoration: none;
+  transition: transform .25s ease, background .25s ease, color .25s ease,
+              border-color .25s ease, box-shadow .25s ease;
+}
+.cl-btn {
+  background: var(--cl-ice);
+  color: #04121f;
+}
+.cl-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(120, 210, 255, .32);
+}
+.cl-ghost {
+  border: 1px solid rgba(230, 246, 255, .38);
+  color: var(--cl-ink);
+}
+.cl-ghost:hover {
+  border-color: var(--cl-aurora-2);
+  color: var(--cl-ice);
+  transform: translateY(-2px);
+}
+
+/* ---------- 滚动引导（左下竖排） ---------- */
+.cl-guide {
+  position: fixed;
+  left: clamp(18px, 2.6vw, 40px);
+  bottom: 30px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  color: var(--cl-ink-2);
+  transition: opacity .6s ease;
+}
+.cl-guide-txt {
+  writing-mode: vertical-rl;
+  font-size: 11px;
+  letter-spacing: .3em;
+  color: var(--cl-ink-3);
+}
+.cl-guide-arrow { animation: cl-guide-drop 2.2s ease-in-out infinite; }
+@keyframes cl-guide-drop {
+  0%, 100% { transform: translateY(0); opacity: .55; }
+  55%      { transform: translateY(10px); opacity: 1; }
+}
+.cl.gone-guide .cl-guide { opacity: 0; pointer-events: none; }
+
+/* ---------- 自定义滚动指示条（右侧） ---------- */
+.cl-bar {
+  position: fixed;
+  right: 14px;
+  top: 12vh;
+  bottom: 12vh;
+  width: 2px;
+  z-index: 5;
+  background: rgba(230, 246, 255, .12);
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+.cl.js-on .cl-bar { opacity: 1; }
+.cl-bar-in {
+  display: block;
+  width: 100%;
+  height: 18%;
+  border-radius: 2px;
+  background: var(--cl-ice);
+  transform: translateY(0);
+  will-change: transform;
+}
+
+/* ---------- 入场闸门 ----------
+   默认 display:none（渐进增强）；js-on 后显示。
+   进入 = 整块向上滑出（translateY(-101%)），露出 3D 场景。 */
+.cl-gate {
+  display: none;
+}
+.cl.js-on .cl-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  background:
+    radial-gradient(140% 40% at 50% 64%, rgba(62, 240, 168, .16) 0%, rgba(62, 240, 168, 0) 60%),
+    var(--cl-bg-0);
+  cursor: pointer;
+  transition: transform 1s cubic-bezier(.7, 0, .25, 1), opacity .9s ease;
+  will-change: transform, opacity;
+}
+.cl.js-on .cl-gate.is-done {
+  transform: translateY(-101%);
+  opacity: .2;
+  pointer-events: none;
+}
+.cl-gate-track {
+  width: min(300px, 60vw);
+  height: 3px;
+  background: rgba(230, 246, 255, .14);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.cl-gate-fill {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--cl-aurora-1), var(--cl-aurora-2) 52%, var(--cl-aurora-3));
+  transition: width .3s ease;
+}
+.cl-gate-hint {
+  font-size: 11px;
+  letter-spacing: .3em;
+  color: var(--cl-ink-3);
+  text-transform: uppercase;
+}
+
+/* ---------- 虚拟滚动锁 ---------- */
+body.cl-lock { overflow: hidden; }
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 860px) {
+  .cl-nav { gap: 14px; }
+  .cl-nav a { font-size: 11.5px; letter-spacing: .08em; }
+  .cl-brand span { display: none; }
+  .cl.js-on .cl-sec[data-i="1"],
+  .cl.js-on .cl-sec[data-i="2"] { justify-content: center; }
+  .cl-sec[data-i="1"], .cl-sec[data-i="2"] { text-align: center; align-items: center; }
+  .cl-links { justify-content: center; }
+  .cl-bar { right: 8px; }
+}
+
+/* ---------- 动效降级 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .cl-guide-arrow { animation: none; }
+  .cl.js-on .cl-gate { transition: opacity .6s ease; }
+}

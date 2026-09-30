@@ -1,0 +1,355 @@
+/* ============================================================
+   云海之上 · /clouds/
+   参考图：708×1262（≈9:16 竖幅）木平台望云海
+   口径：结构 1:1 复刻，表现绘画化
+
+   ⚠️ 本文件**故意只重置变量与少量覆盖面**，结构与动画规则全部复用
+      profile.css（页面同时加载 profile.css + clouds.css）。
+      原因：profile 那套（逐行上推 / 入场观察器 / 遮罩 / 光标 / 滚动条）
+      已经被验证过，重写一遍只会引入新 bug。
+
+   变量取值全部来自参考图的像素级实测：
+     天空顶(0-15%)          rgb( 85,119,176)  #5577B0
+     天空卷云带(15-33%)      rgb(135,164,208)  #87A4D0
+     天空下+远山(33-57%)     rgb(139,176,221)  #8BB0DD
+     远山脊线(57.0-58.0%)    rgb( 97,134,176)  #6186B0
+     云海亮部(59-76%)        rgb(179,192,209)  #B3C0D1
+     云海暗部(76-80.5%)      rgb(134,138,148)  #868A94
+     木地板(80.5-100%)       rgb( 83, 72, 65)  #534841
+   ============================================================ */
+
+/* ============================================================
+   0. 页面外壳：底色从"雨夜黑"换成"天花板的蓝"
+   ============================================================ */
+
+body.cl-body { overflow-x: clip; background: #5577B0; }
+body.cl-body .site-header,
+body.cl-body .site-footer,
+body.cl-body .back-top,
+body.cl-body .scroll-progress,
+body.cl-body .hero-badge,
+body.cl-body .site-body { display: none !important; }
+
+/* ============================================================
+   1. 变量重置
+   ------------------------------------------------------------
+   这套变量原本是给"雨夜"定义的（深蓝底 + 暖黄灯 + 浅灰字）。
+   云海是**白天**，所以：
+     · 背景系换成天空蓝（从 #5577B0 到近白）
+     · 强调色从"灯暖黄"换成"晨光的淡金"
+     · 文字从"浅灰"换成"深靛"（白底上要读得清）
+   ============================================================ */
+
+.pf.cl {
+  /* ---- 天空层（名字保留 night-* 以免动到结构规则，语义换成"由深到浅"） ---- */
+  --pf-night-0: #3C5A8E;   /* 最深：远山脊线、页面边缘 */
+  --pf-night-1: #5577B0;   /* 主底：天空顶 */
+  --pf-night-2: #87A4D0;   /* 抬升面：天空卷云带 */
+  --pf-night-3: #B3C0D1;   /* 卡片：云海亮部 */
+
+  /* ---- 云与雾 ---- */
+  --pf-mist-1: rgba(255, 255, 255, .62);
+  --pf-mist-2: rgba(255, 255, 255, .40);
+  --pf-mist-3: rgba(255, 255, 255, .22);
+
+  /* ---- 强调色（唯一暖色来源，克制使用） ----
+     ⚠️ 白底上的暖色若沿用雨夜的 #E8A85C 会"土"，改用偏粉的晨光金。 */
+  --pf-lamp:      #E8A05A;
+  --pf-lamp-soft: #C77E3C;
+  --pf-lamp-glow: rgba(232, 160, 90, .30);
+  --pf-lamp-faint:rgba(232, 160, 90, .14);
+
+  /* ---- 文字：白底 → 深靛。亮度落差保证正文对比度 ≥ 7:1 ---- */
+  --pf-text-1: #17253C;
+  --pf-text-2: #31445F;
+  --pf-text-3: #4E6280;
+  --pf-text-4: #7A8CA6;
+
+  /* ---- 线：深靛低透明，压在云上才看得见 ---- */
+  --pf-line-1: rgba(23, 37, 60, .22);
+  --pf-line-2: rgba(23, 37, 60, .11);
+
+  background: #5577B0;
+  color: var(--pf-text-1);
+}
+
+/* ============================================================
+   2. 画布与氛围层
+   ============================================================ */
+
+.cl-atmos { mix-blend-mode: normal; }
+
+/* 云雾飘带：白色低透明的大团径向渐变，缓慢横移 —— 让"云在动"这件事
+   在 WebGL 之外还有一层可见的、几乎不吃性能的强化。
+   ⚠️ 透明度必须压住：这三团是**铺满全屏**的白色，每提高 0.1 就相当于
+      给整幅画加 5~8 点亮度。第一版给到 .40 导致天空发灰白、
+      与参考图的中蓝差距明显。现在压到 .22~.30。 */
+.cl-haze {
+  position: absolute;
+  inset: -30% -20%;
+  background:
+    radial-gradient(46% 30% at 18% 62%, rgba(255, 255, 255, .26), transparent 70%),
+    radial-gradient(52% 26% at 62% 70%, rgba(255, 255, 255, .19), transparent 72%),
+    radial-gradient(40% 22% at 86% 56%, rgba(255, 255, 255, .13), transparent 74%),
+    radial-gradient(60% 34% at 38% 86%, rgba(255, 255, 255, .22), transparent 72%);
+  filter: blur(30px);
+  animation: cl-haze-drift 46s ease-in-out infinite alternate;
+  /* ⚠️ 这两团是"空气里的白雾"，不该盖在木地板上。
+     用 mask 把画面底部 82% 以下淡出（82% 正好是参考图的木平台起始线）。 */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 74%, rgba(0,0,0,.35) 82%, transparent 92%);
+  mask-image: linear-gradient(to bottom, #000 0 74%, rgba(0,0,0,.35) 82%, transparent 92%);
+}
+
+@keyframes cl-haze-drift {
+  from { transform: translate3d(-3%, 1%, 0) scale(1.02); }
+  to   { transform: translate3d(4%, -1.5%, 0) scale(1.10); }
+}
+
+/* 晨光：右上角一团偏暖的散射，模拟日出方向。 */
+.cl-light {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(36% 28% at 74% 32%, rgba(255, 238, 212, .30), transparent 68%),
+    radial-gradient(66% 42% at 68% 42%, rgba(255, 246, 234, .15), transparent 76%);
+  filter: blur(10px);
+  animation: cl-light-breathe 18s ease-in-out infinite alternate;
+}
+
+@keyframes cl-light-breathe {
+  from { opacity: .78; transform: scale(1); }
+  to   { opacity: 1;   transform: scale(1.06); }
+}
+
+/* 暗角在白天要收敛很多 —— 雨夜版几乎是半屏压黑，用在云海上会像脏斑 */
+.cl-vignette {
+  background:
+    radial-gradient(138% 104% at 50% 46%, transparent 58%, rgba(30, 48, 78, .10) 86%, rgba(22, 36, 60, .22) 100%),
+    linear-gradient(to bottom, rgba(34, 54, 88, .10), transparent 14%, transparent 78%, rgba(28, 44, 72, .14));
+}
+
+.cl-grain { opacity: .055; mix-blend-mode: multiply; }
+
+/* ============================================================
+   3. 顶部信息条
+   ------------------------------------------------------------
+   压在天空上，天空是浅蓝 → 文字用深靛；
+   毛玻璃底色改成"白雾"，否则深色玻璃会在蓝天上留下一块脏色。
+   ============================================================ */
+
+.cl-topbar { color: var(--pf-text-1); }
+
+.pf.cl .pf-brand-name { color: var(--pf-text-1); text-shadow: 0 1px 0 rgba(255, 255, 255, .20); }
+.pf.cl .pf-brand-sub  { color: var(--pf-text-3); }
+
+.pf.cl .pf-nav-item { color: var(--pf-text-3); }
+.pf.cl .pf-nav-item:hover { color: var(--pf-text-1); }
+.pf.cl .pf-nav-item.is-active { color: var(--pf-lamp-soft); }
+
+.pf.cl .pf-snd {
+  border-color: rgba(23, 37, 60, .24);
+  background: rgba(255, 255, 255, .34);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  color: var(--pf-text-3);
+}
+.pf.cl .pf-snd:hover { color: var(--pf-lamp-soft); border-color: rgba(199, 126, 60, .38); }
+.pf.cl .pf-music.is-playing .pf-snd { color: var(--pf-lamp-soft); border-color: rgba(199, 126, 60, .5); }
+.pf.cl .pf-music.is-placeholder .pf-snd { border-color: rgba(23, 37, 60, .28); }
+
+/* ============================================================
+   4. 入场遮罩
+   ------------------------------------------------------------
+   雨夜版遮罩是纯黑；这里改成"还没亮起来的天空"——
+   从深蓝渐变到云白，暗示"天正在亮"。
+   ============================================================ */
+
+.cl-preloader {
+  background:
+    radial-gradient(120% 80% at 50% 108%, rgba(232, 240, 252, .22), transparent 62%),
+    linear-gradient(to bottom, #22375C 0%, #35507F 42%, #4C6EA3 100%);
+}
+
+.pf.cl .pf-pre-lines { color: rgba(226, 236, 250, .38); }
+.pf.cl .pf-pre-lines span.is-done { color: rgba(255, 244, 226, .82); }
+.pf.cl .pf-pre-gesture { color: rgba(226, 236, 250, .56); }
+.cl-pre-dot { background: #FFE9C8; }
+
+.pf.cl .pf-pre-enter {
+  border-color: rgba(255, 255, 255, .30);
+  color: rgba(240, 246, 255, .88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.pf.cl .pf-pre-enter:hover {
+  color: #22375C;
+  background: #FFE9C8;
+  border-color: #FFE9C8;
+}
+
+/* 遮罩上的小字：给"06:20"一个位置，像相机的日期戳 */
+.cl-pre-overline {
+  font-family: var(--pf-mono);
+  font-size: 9.5px;
+  letter-spacing: .42em;
+  color: rgba(226, 236, 250, .34);
+}
+
+/* ============================================================
+   5. 文字在云上的可读性
+   ------------------------------------------------------------
+   ⚠️ 这是本页最关键的一处适配。
+      文字直接压在白色云海 / 浅蓝天空上，深靛色虽然对比够，
+      但笔画细的衬线字在"云的高频纹理"上会碎。
+      解法：给字加一层极轻的白色描边式投影（不是黑影！黑影在云上很脏），
+      相当于给文字垫了一层薄雾。
+   ============================================================ */
+
+.pf.cl .pf-hero-title,
+.pf.cl .pf-story-title,
+.pf.cl .pf-about-title,
+.pf.cl .pf-feat-title,
+.pf.cl .pf-contact-title {
+  color: var(--pf-text-1);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, .34), 0 0 22px rgba(255, 255, 255, .30);
+}
+
+.pf.cl .pf-hero-desc,
+.pf.cl .pf-about-sub,
+.pf.cl .pf-feat-desc,
+.pf.cl .pf-contact-desc {
+  color: var(--pf-text-3);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, .30);
+}
+
+.pf.cl .pf-sec-label { color: var(--pf-text-4); text-shadow: 0 1px 1px rgba(255, 255, 255, .26); }
+
+.pf.cl .pf-story-body p {
+  color: var(--pf-text-2);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, .30);
+}
+.pf.cl .pf-story-body p:first-child { color: var(--pf-text-1); }
+
+/* 滚动提示 */
+.pf.cl .pf-scroll-cue-text { color: var(--pf-text-4); text-shadow: 0 1px 1px rgba(255, 255, 255, .3); }
+.pf.cl .pf-scroll-cue-line { background: linear-gradient(to bottom, var(--pf-line-1), transparent); }
+.pf.cl .pf-scroll-cue-line i { background: linear-gradient(to bottom, transparent, var(--pf-lamp-soft)); }
+
+/* ---- 英雄区：构图对位参考图 ----
+   参考图里云海地平线在 57.4%，木平台从 80.5% 起。
+   首屏文字不能压在地平线上（会把"云海一览无余"挡掉），
+   所以整体上移到天空带的中上部（约 30%~46% 高度），
+   下半屏完全留给云海 —— 这也是参考图本身"空"的部分。 */
+.cl-hero {
+  justify-content: flex-start;
+  padding-top: 26vh;
+}
+.cl-hero-inner { max-width: 880px; }
+.cl-hero-title {
+  font-size: clamp(28px, 4.4vw, 58px);
+  letter-spacing: .09em;
+  line-height: 1.42;
+}
+.cl-hero-desc { color: var(--pf-text-3); }
+
+/* ============================================================
+   6. 各幕的可读性底衬
+   ------------------------------------------------------------
+   云海是高频纹理，长段落压在上面必然难读。
+   做法不是给每幕铺一张不透明的卡（那会毁掉"通栏"感），
+   而是从文字一侧拉一层**极淡的白色雾**，像云被文字推开了一点。
+   ============================================================ */
+
+.cl-story .pf-sec-inner,
+.cl-about .pf-sec-inner,
+.cl-featured .pf-sec-inner,
+.cl-contact .pf-sec-inner {
+  position: relative;
+}
+
+.cl-story .pf-sec-inner::before,
+.cl-about .pf-sec-inner::before,
+.cl-featured .pf-sec-inner::before,
+.cl-contact .pf-sec-inner::before {
+  content: '';
+  position: absolute;
+  inset: -6vh -5vw;
+  z-index: -1;
+  border-radius: 40px;
+  background: radial-gradient(66% 62% at 26% 46%, rgba(255, 255, 255, .56), transparent 72%);
+  filter: blur(22px);
+  pointer-events: none;
+}
+
+/* 卡片 / 列表这些"实体件"在白天要反过来 —— 雨夜是"半透明白浮在黑上"，
+   云海上应该是"半透明白浮在白上"，靠描边和阴影立起来。 */
+.pf.cl .pf-about-card {
+  border-color: rgba(23, 37, 60, .12);
+  background: linear-gradient(160deg, rgba(255, 255, 255, .74), rgba(240, 246, 255, .46));
+  backdrop-filter: blur(10px) saturate(1.06);
+  -webkit-backdrop-filter: blur(10px) saturate(1.06);
+  box-shadow: 0 14px 34px -22px rgba(24, 42, 72, .50);
+}
+.pf.cl .pf-about-card:hover {
+  border-color: rgba(199, 126, 60, .32);
+  background: linear-gradient(160deg, rgba(255, 255, 255, .86), rgba(244, 249, 255, .58));
+}
+.pf.cl .pf-about-card-title { color: var(--pf-text-1); }
+.pf.cl .pf-about-card-desc  { color: var(--pf-text-3); }
+.pf.cl .pf-about-icon { color: var(--pf-lamp-soft); opacity: .92; }
+
+.pf.cl .pf-feat-hit {
+  border-color: rgba(23, 37, 60, .12);
+  box-shadow: 0 18px 40px -26px rgba(24, 42, 72, .55);
+}
+.pf.cl .pf-feat-item-title { color: var(--pf-text-1); }
+.pf.cl .pf-feat-item-desc  { color: rgba(255, 255, 255, .88); }
+.pf.cl .pf-feat-tag {
+  border-color: rgba(255, 255, 255, .42);
+  color: rgba(255, 255, 255, .86);
+  background: rgba(20, 34, 56, .18);
+}
+.pf.cl .pf-feat-arrow { color: rgba(255, 255, 255, .72); }
+.pf.cl .pf-feat-item:hover .pf-feat-arrow { color: #FFFFFF; }
+
+.pf.cl .pf-contact-row { border-bottom-color: rgba(23, 37, 60, .16); }
+.pf.cl .pf-contact-label { color: var(--pf-text-4); }
+.pf.cl .pf-contact-value { color: var(--pf-text-2); text-shadow: 0 1px 1px rgba(255, 255, 255, .3); }
+.pf.cl .pf-contact-row:hover .pf-contact-value { color: var(--pf-text-1); }
+.pf.cl .pf-contact-line { background: var(--pf-lamp-soft); }
+.pf.cl .pf-contact-footer { color: var(--pf-text-3); text-shadow: 0 1px 1px rgba(255, 255, 255, .3); }
+.pf.cl .pf-back-home { color: var(--pf-text-4); }
+
+/* ============================================================
+   7. 滚动条与光标
+   ============================================================ */
+
+.pf.cl .pf-scrollbar-track { background: rgba(23, 37, 60, .16); }
+.pf.cl .pf-scrollbar-thumb { background: linear-gradient(to bottom, #FFD9A6, var(--pf-lamp)); }
+.pf.cl .pf-cursor {
+  border-color: rgba(199, 126, 60, .40);
+  background: radial-gradient(circle, rgba(255, 255, 255, .42), transparent 70%);
+}
+.pf.cl .pf-cursor-dot { background: #A9631F; }
+
+/* ============================================================
+   8. 响应式
+   ============================================================ */
+
+@media (max-width: 860px) {
+  .cl-hero { padding-top: 22vh; }
+  .cl-story .pf-sec-inner::before,
+  .cl-about .pf-sec-inner::before,
+  .cl-featured .pf-sec-inner::before,
+  .cl-contact .pf-sec-inner::before { inset: -5vh -6vw; }
+}
+
+@media (max-width: 560px) {
+  .cl-hero-title { letter-spacing: .06em; }
+  .pf.cl .pf-feat-item-desc { color: rgba(255, 255, 255, .92); }
+}
+
+/* 尊重系统的减少动态偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .cl-haze, .cl-light { animation: none !important; }
+}

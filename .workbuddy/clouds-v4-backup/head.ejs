@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="no-js">
+<head>
+<meta charset="utf-8">
+<script>
+  /* 在首次绘制前把 no-js 换成 js —— 让 CSS 能区分"脚本可用 / 不可用"。
+     必须内联且尽早，否则会出现"先按 no-js 渲染、再跳变"的闪烁。 */
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/, 'js');
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+<%
+  var _title = config.title;
+  if (is_post()) _title = page.title + ' · ' + config.title;
+  else if (!is_home() && page.title) _title = page.title + ' · ' + config.title;
+%>
+<title><%= _title %></title>
+<meta name="description" content="<%= page.description || theme.description || config.description || '' %>">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="<%= url_for(theme.avatar || '/img/avatar.jpg') %>">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="<%= url_for('/css/style.css') %>">
+<% /* ⚠️ 必须带版本查询串。hexo server 对静态资源不发 Cache-Control / ETag /
+      Last-Modified，Chrome 会对这条 CSS 做启发式缓存 —— 改完刷新也看不到，
+      只有硬刷新才生效。（踩过：首页标题上移调了四五次都没生效，就是这个原因。）
+      v 用 Date.now()：开发时保证每次渲染都是新 URL。 */ %>
+<% if (is_home()) { %><link rel="stylesheet" href="<%= url_for('/css/home-hero.css') %>?v=<%= Date.now() %>"><% } %>
+<% /* 全屏叙事页（雨夜伦敦 / 极地极光）：共用 profile.css 的字体与 .pf-body 基底。
+       clouds.css 在 profile.css **之后**加载，它自带 --cl-* 命名空间色板，
+       不做变量重置（那是 v1 时代的做法，v2 起已废弃）。 */ %>
+<% if (page.type === 'profile' || page.type === 'clouds') { %>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5.0.0/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/eb-garamond@5.0.0/index.css">
+<link rel="stylesheet" href="<%= url_for('/css/profile.css') %>?v=<%= Date.now() %>">
+<% /* ⚠️ 只给 /profile/ 加载 v2 的单屏 Hero 样式。
+      必须**在 profile.css 之后** —— 它要用 profile.css 的变量与 .pf-split。
+      类名全是 ld- 前缀，与 .pf-* 零冲突，所以不影响 /clouds/。 */ %>
+<% if (page.type === 'profile') { %>
+<link rel="stylesheet" href="<%= url_for('/css/profile-london.css') %>?v=<%= Date.now() %>">
+<% } %>
+<% if (page.type === 'clouds') { %>
+<link rel="stylesheet" href="<%= url_for('/css/clouds.css') %>?v=<%= Date.now() %>">
+<% } %>
+<% } %><% /* ← 闭合外层 if (profile || clouds) —— 漏掉它会让整个 <head> 被吞进条件块，报 "Unexpected token catch" */ %>
+<% /* 打嗝猫鼠标指针：全站生效（含 /profile/ 与 /clouds/）。
+      CSS 定普通态/按住左键的两张 PNG；JS 负责按下时给 <html> 挂 cat-click。 */ %>
+<link rel="stylesheet" href="<%= url_for('/css/cursor-cat.css') %>?v=<%= Date.now() %>">
+<script defer src="<%= url_for('/js/cursor-cat.js') %>?v=<%= Date.now() %>"></script>
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>

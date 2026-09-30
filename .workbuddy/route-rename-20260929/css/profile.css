@@ -1,0 +1,1073 @@
+/* ============================================================
+   共用基底 + 音乐控件样式（文件名沿用 profile；页面在 /profile/）
+   ⚠️ 2026-09-29：原「/profile/ 雨中伦敦 · Westminster Bridge」页已按要求删除，
+      本文件特意**没有**跟着删 —— 它还在承担两件活：
+        1. 全屏页的字体与 .pf-body 基底（/profile/ 极光页加载它，见 head.ejs）；
+        2. 音乐控件 .pf-music / .pf-snd 的样式（配套 js/music.js）。
+      页内专属规则（.pf-split / .pf-scene 等）已无页面引用，保留以便随时恢复该页，
+      整页资产备份在 .workbuddy/removed-profile-london-20260929/。
+   场景（原页）：雨中伦敦 · Westminster Bridge（Westminster Bridge, London）
+   配色取自参考图的**像素级实测**（阴雨天、冷蓝灰、湿桥面）
+   命名空间：.pf —— 自带全部变量，不读 html[data-theme]，
+   因此站点的明暗切换不影响本页
+
+   ⚠️ 实测色值（参考图 1144×668）：
+     天空顶     rgb(112,126,154)  br 125   ← B-R = 42，阴雨天的核心色特征
+     天空下沿   rgb(101,114,140)  br 113
+     建筑远     rgb( 86, 98,120)  br  97
+     建筑近     rgb( 57, 67, 83)  br  66
+     桥面远     rgb( 62, 73, 90)  br  71
+     桥面最暗   rgb( 31, 37, 48)  br  36   ← 全局最暗（车道区）
+     桥面近     rgb( 69, 82,105)  br  81   ← 湿反光回升
+   ============================================================ */
+
+/* ============================================================
+   0. 屏蔽站点外壳
+   个人主页是一套独立的视觉语言：站点自带的顶栏 / 页脚 / 回到顶部 /
+   进度条 / 侧栏全部隐藏，只留本页自己的 topbar 与滚动条。
+   ============================================================ */
+
+body.pf-body .site-header,
+body.pf-body .site-footer,
+body.pf-body .back-top,
+body.pf-body .scroll-progress,
+body.pf-body .hero-badge,
+body.pf-body .site-body { display: none !important; }
+
+/* 站点容器对 body 的滚动约束解除 */
+body.pf-body { overflow-x: clip; }
+
+.pf {
+  /* ---- 阴天层（名字保留 night-* 以免动到结构规则，语义换成"阴雨灰蓝"） ----
+     ⚠️ 别再沿用纯黑！参考图没有一个像素低于 br 31，
+        原来的 #070A0F（br 9）在阴天场景里是"黑洞"，会把画面压死。 */
+  --pf-night-0: #10151C;   /* 最深：桥面最暗处、暗角 */
+  --pf-night-1: #1B2028;   /* 主底 */
+  --pf-night-2: #262D38;   /* 抬升面 */
+  --pf-night-3: #343D4A;   /* 卡片 */
+
+  /* ---- 雨雾层（冷蓝灰，不是纯灰） ---- */
+  --pf-mist-1: rgba(150, 168, 190, .22);
+  --pf-mist-2: rgba(150, 168, 190, .12);
+  --pf-mist-3: rgba(150, 168, 190, .06);
+
+  /* ---- 暖光层：只有大本钟表盘与车灯是暖的，极克制 ---- */
+  --pf-lamp:      #E8A85C;            /* 主灯 */
+  --pf-lamp-soft: #C98B47;
+  --pf-lamp-glow: rgba(232, 168, 92, .22);
+  --pf-lamp-faint:rgba(232, 168, 92, .09);
+
+  /* ---- 文字（阴天底偏亮灰蓝，保证对比度） ---- */
+  --pf-text-1: #E4E8EE;
+  --pf-text-2: #A8B2BF;
+  --pf-text-3: #6B7685;
+  --pf-text-4: #454E5B;
+
+  /* ---- 线 ---- */
+  --pf-line-1: rgba(168, 178, 191, .16);
+  --pf-line-2: rgba(168, 178, 191, .08);
+
+  /* ---- 字体 ---- */
+  --pf-serif: "EB Garamond", "Noto Serif SC", "Songti SC", "SimSun", Georgia, serif;
+  --pf-sans:  "EB Garamond", "Noto Serif SC", -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  --pf-mono:  "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+
+  /* ---- 节奏 ---- */
+  --pf-ease: cubic-bezier(.22, .61, .36, 1);
+  --pf-ease-out: cubic-bezier(.16, 1, .3, 1);
+
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+  background: var(--pf-night-1);
+  color: var(--pf-text-1);
+  font-family: var(--pf-sans);
+  overflow-x: clip;
+  isolation: isolate;
+
+  /* 覆盖站点容器约束，实现真·通栏 */
+  left: 50%;
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+.pf *, .pf *::before, .pf *::after { box-sizing: border-box; }
+
+/* ============================================================
+   1. WebGL 画布 + 氛围叠加层（固定，铺满视口）
+   ============================================================ */
+
+.pf-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.pf-atmos {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* 雨丝：两层斜向细线。
+   ⚠️ 三个要点（都踩过）：
+     · 线性 background 天然有"等距"感 → 两层尺寸取互质（130/190 与 90/140），周期错开
+     · 方向：gradient 用 `to bottom` 系（不是 `to bottom right`）。
+       `to bottom right` 在 rotate 之后容易读成"从右下往左上"＝雨在倒着飞。
+       `to bottom` + 正的 translateY 位移 = 明确的"向下落"。
+     · 周期：原来 1.15s 走完 190px，雨丝像在抽搐。
+       放慢到 2.8s，并让位移正好等于一个 tile 高度（190px）→ 无缝循环、不跳帧。
+     · WebGL 那层才是真正的雨，这里是氛围强化与兜底。 */
+.pf-rain {
+  position: absolute;
+  inset: -20% -10%;
+  background-image:
+    linear-gradient(to bottom, transparent 0 46.5%, rgba(196, 214, 233, .13) 49% 50%, transparent 52.5% 100%),
+    linear-gradient(to bottom, transparent 0 47%, rgba(196, 214, 233, .07) 49.5% 50%, transparent 52.5% 100%);
+  background-size: 130px 190px, 90px 140px;
+  background-position: 0 0, 47px 33px;
+  transform: rotate(9deg);
+  /* ⚠️ 参考图里的雨"密而细" —— 空中几乎没有明显雨丝，
+     主要靠桥面涟漪和湿反光传达"在下雨"。所以压到 .20。 */
+  opacity: .20;
+  animation: pf-rain-fall 2.8s linear infinite;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 78%, transparent);
+          mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 78%, transparent);
+}
+
+/* 位移量必须等于各自 tile 高度（190 / 140），否则循环处会"跳"一下 —— 
+   那正是"抽搐"的来源之一。斜向位移用 x 分量制造 9deg 的斜度。 */
+@keyframes pf-rain-fall {
+  from { background-position: 0 0, 47px 33px; }
+  to   { background-position: -30px 190px, 24px 173px; }
+}
+
+/* 雾：两团大范围径向渐变缓慢漂移
+   ⚠️ 这是**铺满全屏**的提亮层，每提高 0.1 透明度 ≈ 给整幅画加 5~8 点亮度。
+      原来 .20/.16/.18 是为"雨夜"配的（夜景需要提亮才看得见），
+      但伦敦是**阴天**，天空本身已经 br 125，再加雾就发白。
+      压到 .12/.09/.11，并且用 mask 让画面顶部（天空）不吃雾。
+   ⚠️⚠️ 2026-09-28 再收敛到 .075/.055/.13：
+      首屏文案已移除（见 profile.ejs 的 hero 段），这层原本"为文字提亮"
+      的理由不成立了。
+      ⚠️ 但实测发现：三个渐变里**只有第三个（50% 88%，画面中下部）
+         影响 band3~5**，另外两个在 band0~2（天空/建筑）区。
+         把三者一起减到 .075/.055/.065 会让 band3/4 掉到 -6.9/-4.9，
+         而天空反而变准了 —— 所以【只减上面两个，第三个基本保留】。
+         这就是"分 band 对位"的价值：不看分带就永远调不对。 */
+.pf-mist {
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(58% 42% at 22% 34%, rgba(150, 168, 190, .075), transparent 68%),
+    radial-gradient(52% 38% at 78% 62%, rgba(126, 148, 176, .055), transparent 70%),
+    radial-gradient(70% 50% at 50% 88%, rgba(100, 122, 150, .13), transparent 72%);
+  filter: blur(38px);
+  animation: pf-mist-drift 34s ease-in-out infinite alternate;
+}
+
+/* 暗角：把注意力压向中心。
+   ⚠️⚠️ 这里是"色调对位"失败的**头号元凶** ——
+      原来顶部 0.5 黑、四角 0.88 黑（为雨夜配的），
+      导致首屏 band0（顶部天空）实测只有 br 63，而参考图是 br 122（最亮）。
+      **阴天的四角并不黑**：参考图最暗的角落也有 br 70 以上。
+      现在整体压到 1/4 左右，并且去掉顶部那条 0.5 黑。
+   ⚠️⚠️ 2026-09-28：首屏文案移除后试过再减（0.05/0.16/0.14/0.26），
+      结果 band3/band4 从 +1.5/+5.0 掉到 -6.9/-5.0 —— 收过头了。
+      减雾（.pf-mist）就够了；暗角回退到接近原值，
+      因为"把注意力压向中心"是这页的版式需要，且参考图的角落也确实是暗的。 */
+.pf-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(128% 94% at 50% 44%, transparent 48%, rgba(16, 21, 28, .17) 81%, rgba(16, 21, 28, .31) 100%),
+    linear-gradient(to bottom, rgba(16, 21, 28, .08), transparent 15%, transparent 83%, rgba(16, 21, 28, .19));
+}
+
+@keyframes pf-mist-drift {
+  from { transform: translate3d(-2%, -1%, 0) scale(1); }
+  to   { transform: translate3d(3%, 2%, 0) scale(1.08); }
+}
+
+/* 颗粒：SVG 噪声，极淡，给画面"胶片感"，也掩盖渐变色带 */
+.pf-grain {
+  position: absolute;
+  inset: 0;
+  opacity: .05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   2. 顶部信息条
+   ============================================================ */
+
+.pf-topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 20px clamp(20px, 4vw, 56px);
+  transition: transform .5s var(--pf-ease), opacity .5s var(--pf-ease);
+}
+
+/* 入场前整体隐藏 —— 收敛在文件后半段的 .js-on 规则里统一处理 */
+
+.pf-brand { display: flex; align-items: baseline; gap: 9px; flex-shrink: 0; }
+
+.pf-brand-name {
+  font-family: var(--pf-serif);
+  font-size: 17px;
+  letter-spacing: .14em;
+  color: var(--pf-text-1);
+}
+
+.pf-brand-sub {
+  font-family: var(--pf-mono);
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--pf-text-4);
+}
+
+.pf-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.pf-nav-item {
+  position: relative;
+  padding: 7px 14px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13.5px;
+  letter-spacing: .08em;
+  color: var(--pf-text-3);
+  transition: color .34s var(--pf-ease);
+}
+
+.pf-nav-item::after {
+  content: "";
+  position: absolute;
+  left: 14px; right: 14px; bottom: 3px;
+  height: 1px;
+  background: var(--pf-lamp);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .42s var(--pf-ease);
+}
+
+.pf-nav-item:hover { color: var(--pf-text-1); }
+.pf-nav-item:hover::after { transform: scaleX(1); }
+.pf-nav-item.is-active { color: var(--pf-lamp); }
+.pf-nav-item.is-active::after { transform: scaleX(1); }
+
+/* ---- 音乐控件（参考 #snd-btn：只有一个圆钮 + canvas 跳动的竖条） ----
+   ⚠️ 不做音量滑块。原设计的滑块放在胶囊右端，视觉上被拉得很长、
+   且"控件"感太重，与整页的克制气质冲突。
+   音量改为在 profile.yml 里配置，前台只保留"播放 / 暂停"一个动作。 */
+
+.pf-music {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.pf-snd {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px; height: 40px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid var(--pf-line-1);
+  border-radius: 50%;
+  background: rgba(11, 17, 25, .5);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--pf-text-3);
+  cursor: pointer;
+  transition: color .34s var(--pf-ease), border-color .34s var(--pf-ease),
+              background .34s var(--pf-ease);
+}
+
+.pf-snd:hover { color: var(--pf-lamp); border-color: var(--pf-lamp-faint); }
+/* 播放中：圆钮描边点亮 + 竖条变暖色（颜色由 canvas 内的 fillStyle 控制） */
+.pf-music.is-playing .pf-snd { color: var(--pf-lamp); border-color: var(--pf-lamp-soft); }
+
+.pf-snd-canvas {
+  /* 20×20 的绘制区，CSS 放到 22px 更清晰（内部按 dpr 放大） */
+  width: 20px; height: 20px;
+  display: block;
+  pointer-events: none;
+}
+
+/* 静音占位模式：虚线描边提示"还没接音频" */
+.pf-music.is-placeholder .pf-snd { border-style: dashed; border-color: var(--pf-text-4); }
+
+/* 未播放时竖条压平（由 JS 控制高度），这里只保证过渡顺滑 */
+.pf-snd-canvas { transition: opacity .3s var(--pf-ease); }
+
+/* ============================================================
+   3. 入场遮罩
+   ============================================================ */
+
+.pf-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: var(--pf-night-0);
+  cursor: pointer;
+  transition: opacity 1.1s var(--pf-ease), visibility 1.1s;
+}
+
+/* 遮罩的显示/隐藏统一由文件末尾的 .js-on / .pf-ready 组合控制，
+   这里只定义静态外观。无 JS 时由 html.no-js 规则直接 display:none。 */
+
+.pf-pre-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  text-align: center;
+}
+
+/* 字符乱码行：4 行等宽字符，逐行解码 */
+.pf-pre-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-family: var(--pf-mono);
+  font-size: 11px;
+  letter-spacing: .3em;
+  color: var(--pf-text-4);
+  user-select: none;
+  min-height: 76px;
+}
+
+.pf-pre-lines span { display: block; }
+.pf-pre-lines span.is-done { color: var(--pf-lamp-soft); opacity: .7; }
+
+.pf-pre-gesture {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--pf-mono);
+  font-size: 10px;
+  letter-spacing: .34em;
+  color: var(--pf-text-3);
+}
+
+.pf-pre-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--pf-lamp);
+  animation: pf-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes pf-breathe {
+  0%, 100% { opacity: .3; transform: scale(.85); }
+  50%      { opacity: 1;  transform: scale(1.15); }
+}
+
+.pf-pre-enter {
+  padding: 10px 30px;
+  border: 1px solid var(--pf-line-1);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--pf-text-2);
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: .18em;
+  cursor: pointer;
+  transition: color .42s var(--pf-ease), border-color .42s var(--pf-ease), background .42s var(--pf-ease);
+}
+
+.pf-pre-enter:hover {
+  color: var(--pf-night-0);
+  background: var(--pf-lamp);
+  border-color: var(--pf-lamp);
+}
+
+/* ============================================================
+   4. 主滚动容器
+   ============================================================ */
+
+.pf-main {
+  position: relative;
+  z-index: 10;
+}
+
+.pf-page { display: block; }
+
+.pf-sec {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14vh clamp(24px, 7vw, 120px);
+}
+
+.pf-sec-inner {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.pf-sec-label {
+  font-family: var(--pf-mono);
+  font-size: 10px;
+  letter-spacing: .38em;
+  text-transform: uppercase;
+  color: var(--pf-lamp-soft);
+  opacity: .78;
+  margin-bottom: 22px;
+}
+
+/* ---- 第一幕 ---- */
+
+.pf-hero {
+  align-items: center;
+  text-align: center;
+  padding-top: 24vh;
+}
+
+.pf-hero-inner { max-width: 900px; }
+
+.pf-hero-overline {
+  font-family: var(--pf-mono);
+  font-size: 10px;
+  letter-spacing: .42em;
+  color: var(--pf-text-3);
+  margin-bottom: 34px;
+}
+
+/* 诗行：字号比原来的标题小一档 —— 诗句单行更长（"只要想起一生中后悔的事" 11 字），
+   用 84px 会撑破 820px 容器。降到 clamp(26px,4.1vw,54px) 后
+   两行都在一行内，且保留衬线的疏朗感。 */
+.pf-hero-title {
+  margin: 0 0 26px;
+  font-family: var(--pf-serif);
+  font-size: clamp(26px, 4.1vw, 54px);
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: .10em;
+  color: var(--pf-text-1);
+}
+
+/* 落款（作者 / 出处）：比正文更轻、字距更大，像书页边的注 */
+.pf-hero-desc {
+  margin: 0;
+  font-size: clamp(12px, 1.15vw, 14px);
+  line-height: 2;
+  letter-spacing: .18em;
+  color: var(--pf-text-3);
+}
+
+/* 落款前加一道短横线，视觉上把"引文"与"出处"分开 */
+.pf-hero-desc::before {
+  content: '';
+  display: block;
+  width: 26px; height: 1px;
+  margin: 0 auto 20px;
+  background: var(--pf-line-1);
+}
+
+/* 滚动提示 */
+.pf-scroll-cue {
+  position: absolute;
+  bottom: 46px; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transition: opacity 1s var(--pf-ease) .6s;
+  /* ⚠️ 2026-09-28：首屏已无文案，这个提示是画面上唯一的 UI 元素了。
+     参考图的观感是"纯画面"，所以压低到 .5 —— 看得见但不抢戏。 */
+  opacity: .5;
+}
+
+.pf-scroll-cue-text {
+  font-family: var(--pf-mono);
+  font-size: 9.5px;
+  letter-spacing: .3em;
+  color: var(--pf-text-4);
+}
+
+.pf-scroll-cue-line {
+  position: relative;
+  display: block;
+  width: 1px; height: 46px;
+  background: linear-gradient(to bottom, var(--pf-line-1), transparent);
+  overflow: hidden;
+}
+
+.pf-scroll-cue-line i {
+  position: absolute;
+  top: -46px; left: 0;
+  width: 1px; height: 46px;
+  background: linear-gradient(to bottom, transparent, var(--pf-lamp));
+  animation: pf-cue-fall 2.4s var(--pf-ease) infinite;
+}
+
+@keyframes pf-cue-fall {
+  0%   { transform: translateY(0);    opacity: 0; }
+  24%  { opacity: 1; }
+  76%  { opacity: 1; }
+  100% { transform: translateY(92px); opacity: 0; }
+}
+
+/* ---- 第二幕 ---- */
+
+.pf-story-title,
+.pf-about-title,
+.pf-feat-title,
+.pf-contact-title {
+  margin: 0 0 34px;
+  font-family: var(--pf-serif);
+  font-size: clamp(27px, 3.4vw, 44px);
+  font-weight: 400;
+  line-height: 1.36;
+  letter-spacing: .03em;
+  color: var(--pf-text-1);
+}
+
+.pf-story-body {
+  max-width: 620px;
+  margin-left: 8%;
+}
+
+.pf-story-body p {
+  margin: 0 0 22px;
+  font-size: clamp(14.5px, 1.5vw, 16.5px);
+  line-height: 2.15;
+  letter-spacing: .05em;
+  color: var(--pf-text-2);
+}
+
+/* 第一段用暖色，作为"开口" */
+.pf-story-body p:first-child {
+  font-family: var(--pf-serif);
+  font-size: clamp(17px, 2vw, 22px);
+  color: var(--pf-text-1);
+}
+
+/* ---- 第三幕 ---- */
+
+.pf-about-sub {
+  margin: -22px 0 44px;
+  font-size: 14px;
+  letter-spacing: .06em;
+  color: var(--pf-text-3);
+}
+
+.pf-about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 218px), 1fr));
+  gap: 16px;
+}
+
+.pf-about-card {
+  position: relative;
+  padding: 30px 26px 32px;
+  border: 1px solid var(--pf-line-2);
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(24, 34, 47, .52), rgba(11, 17, 25, .34));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color .5s var(--pf-ease), transform .5s var(--pf-ease), background .5s var(--pf-ease);
+}
+
+.pf-about-card:hover {
+  border-color: var(--pf-lamp-faint);
+  transform: translateY(-4px);
+  background: linear-gradient(160deg, rgba(30, 41, 55, .62), rgba(11, 17, 25, .4));
+}
+
+/* 顶部一道从上到下淡出的光，hover 时点亮 —— 像灯被拨亮 */
+.pf-about-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 22px; right: 22px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--pf-lamp-glow), transparent);
+  opacity: 0;
+  transition: opacity .55s var(--pf-ease);
+}
+
+.pf-about-card:hover::before { opacity: 1; }
+
+.pf-about-icon {
+  display: block;
+  width: 22px; height: 22px;
+  margin-bottom: 20px;
+  color: var(--pf-lamp-soft);
+  opacity: .8;
+  transition: opacity .5s var(--pf-ease), transform .5s var(--pf-ease);
+}
+
+.pf-about-icon svg { width: 100%; height: 100%; display: block; }
+.pf-about-card:hover .pf-about-icon { opacity: 1; transform: translateY(-2px); }
+
+.pf-about-card-title {
+  margin: 0 0 11px;
+  font-family: var(--pf-serif);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  color: var(--pf-text-1);
+}
+
+.pf-about-card-desc {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.95;
+  letter-spacing: .04em;
+  color: var(--pf-text-3);
+}
+
+/* ---- 第四幕 ---- */
+
+.pf-featured { padding-bottom: 16vh; }
+
+.pf-feat-desc {
+  margin: -22px 0 0;
+  font-size: 14.5px;
+  letter-spacing: .06em;
+  color: var(--pf-text-3);
+}
+
+.pf-feat-track {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 52px auto 0;
+  padding: 0 clamp(24px, 7vw, 120px);
+}
+
+.pf-feat-item {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.pf-feat-hit {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  min-height: 190px;
+  padding: 34px 38px;
+  border: 1px solid var(--pf-line-2);
+  border-radius: 18px;
+  background:
+    radial-gradient(120% 140% at 12% 10%, var(--tone) 0%, transparent 62%),
+    linear-gradient(150deg, rgba(24, 34, 47, .72), rgba(7, 10, 15, .82));
+  transition: border-color .55s var(--pf-ease);
+  cursor: default;
+}
+
+.pf-feat-item:hover .pf-feat-hit { border-color: var(--pf-lamp-faint); }
+
+/* 面上浮过的一层雾，hover 时缓缓流动 */
+.pf-feat-shade {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 90% at 80% 20%, var(--pf-lamp-faint), transparent 66%);
+  opacity: 0;
+  transition: opacity .7s var(--pf-ease);
+  pointer-events: none;
+}
+.pf-feat-item:hover .pf-feat-shade { opacity: 1; }
+
+.pf-feat-text { position: relative; z-index: 2; flex: 1; min-width: 0; }
+
+.pf-feat-tag {
+  display: inline-block;
+  margin-bottom: 13px;
+  padding: 3px 11px;
+  border: 1px solid var(--pf-line-1);
+  border-radius: 999px;
+  font-family: var(--pf-mono);
+  font-size: 9.5px;
+  letter-spacing: .2em;
+  color: var(--pf-text-3);
+}
+
+.pf-feat-item-title {
+  margin: 0 0 11px;
+  font-family: var(--pf-serif);
+  font-size: clamp(20px, 2.3vw, 27px);
+  font-weight: 400;
+  letter-spacing: .06em;
+  color: var(--pf-text-1);
+}
+
+.pf-feat-item-desc {
+  margin: 0;
+  max-width: 560px;
+  font-size: 13.5px;
+  line-height: 1.95;
+  letter-spacing: .04em;
+  color: var(--pf-text-3);
+}
+
+.pf-feat-arrow {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  width: 16px; height: 16px;
+  margin-bottom: 6px;
+  color: var(--pf-text-4);
+  transition: color .5s var(--pf-ease), transform .5s var(--pf-ease);
+}
+
+.pf-feat-arrow svg { width: 100%; height: 100%; fill: currentColor; display: block; }
+.pf-feat-item:hover .pf-feat-arrow { color: var(--pf-lamp); transform: translate(4px, -4px); }
+
+/* ---- 第五幕 ---- */
+
+.pf-contact-title { margin-bottom: 20px; }
+
+.pf-contact-desc {
+  margin: 0 0 52px;
+  font-size: 15px;
+  letter-spacing: .06em;
+  color: var(--pf-text-3);
+}
+
+.pf-contact-list {
+  display: flex;
+  flex-direction: column;
+  max-width: 660px;
+}
+
+.pf-contact-row {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+  padding: 22px 2px;
+  border-bottom: 1px solid var(--pf-line-2);
+  text-decoration: none;
+  color: inherit;
+  transition: padding-left .5s var(--pf-ease);
+}
+
+.pf-contact-row:hover { padding-left: 12px; }
+
+.pf-contact-label {
+  flex-shrink: 0;
+  width: 68px;
+  font-family: var(--pf-mono);
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--pf-text-4);
+  transition: color .5s var(--pf-ease);
+}
+
+.pf-contact-row:hover .pf-contact-label { color: var(--pf-lamp-soft); }
+
+.pf-contact-value {
+  font-family: var(--pf-serif);
+  font-size: 17px;
+  letter-spacing: .05em;
+  color: var(--pf-text-2);
+  transition: color .5s var(--pf-ease);
+}
+
+.pf-contact-row:hover .pf-contact-value { color: var(--pf-text-1); }
+
+.pf-contact-line {
+  position: absolute;
+  left: 0; bottom: -1px;
+  width: 0; height: 1px;
+  background: var(--pf-lamp);
+  transition: width .6s var(--pf-ease);
+}
+
+.pf-contact-row:hover .pf-contact-line { width: 100%; }
+
+.pf-contact-footer {
+  margin-top: 72px;
+  font-family: var(--pf-serif);
+  font-size: clamp(16px, 1.8vw, 21px);
+  line-height: 2;
+  letter-spacing: .08em;
+  color: var(--pf-text-3);
+}
+
+.pf-back-home {
+  display: inline-block;
+  margin-top: 42px;
+  font-family: var(--pf-mono);
+  font-size: 11px;
+  letter-spacing: .2em;
+  color: var(--pf-text-4);
+  text-decoration: none;
+  transition: color .45s var(--pf-ease);
+}
+.pf-back-home:hover { color: var(--pf-lamp); }
+
+/* ============================================================
+   5. 入场动画
+   文字用「行内遮罩上推」（overflow:hidden + translateY），
+   其余元素用「淡入 + 微位移」。
+   ⚠️ 默认状态一律是"可见" —— 隐藏只在 .js-on 时生效。
+   ============================================================ */
+
+.pf-reveal {
+  transition:
+    opacity .9s var(--pf-ease),
+    transform 1s var(--pf-ease-out);
+  transition-delay: calc(var(--rd, 0) * 1ms);
+}
+
+/* ------------------------------------------------------------
+   渐进增强：**默认全部可见**，由 JS 主动加上 .js-on 后才允许"先藏后显"。
+   ⚠️ 千万别反过来写（默认 opacity:0，靠 JS 加 class 显示）——
+      一旦脚本因为任何原因没跑，整页就是一片空白。
+      这个坑在 cafe 那一版踩过，这里用"默认可见"彻底规避。
+   ------------------------------------------------------------ */
+
+/* 有 JS 时：入场遮罩参与动画，内容元素待观察器唤醒 */
+.pf.js-on .pf-reveal { opacity: 0; transform: translate3d(0, 22px, 0); }
+.pf.js-on .pf-hero .pf-reveal { transform: translate3d(0, 14px, 0); }
+
+/* 被观察器唤到 → 归位 */
+.pf.js-on .pf-reveal.is-in { opacity: 1; transform: none; }
+
+/* ⚠️ 注意：挂了 .pf-split 的元素同时也带 .pf-reveal，
+   上面这条 `transform: none` 会作用在**容器**上 —— 这是对的，
+   行的位移由内部的 .pf-line-in 自己负责，两层互不干扰。
+   但有个例外：文字类元素不要同时做"淡入位移"和"逐行上推"，
+   否则两个动效打架会晕。所以下面把 .pf-split 容器的位移关掉。 */
+.pf.js-on .pf-split.pf-reveal { transform: none; }
+.pf.js-on .pf-split.pf-reveal.is-in { transform: none; }
+
+/* ---------- 逐行遮罩上推（split-line-up-effect） ----------
+   JS 把每个视觉行包成： .pf-line > .pf-line-in
+   壳 overflow:hidden 把 inner 藏在下面，激活时 inner 升回 0。
+   ⚠️ 关键：壳必须是 overflow:hidden 且行高足够 —— 否则降部（g/y/p 的下摆）
+      会被切掉一截。所以壳的 line-height 比 inner 的字体小一点点是错的，
+      这里统一用 padding-bottom 兜出降部空间。 */
+.pf.js-on .pf-split { /* 容器本身不做位移，位移在行内 */ }
+.pf.js-on .pf-split .pf-line {
+  display: block;
+  overflow: hidden;
+  /* 兜出降部：不然后悔的"悔"、落下的"落"下缘会被吃 */
+  padding-bottom: .08em;
+  margin-bottom: -.08em;
+}
+.pf.js-on .pf-split .pf-line-in {
+  display: block;
+  will-change: transform;
+  /* 初始完全藏在壳下方 */
+  transform: translate3d(0, 105%, 0);
+  /* 行间错开：用 --li 行号 × 70ms；easeOutQuint 是"上来得很稳"的关键 */
+  transition: transform 1.05s cubic-bezier(.22, 1, .36, 1);
+  transition-delay: calc(var(--li, 0) * 70ms);
+}
+/* 容器被观察器点亮 → 所有行一起（各自延迟）升上来 */
+.pf.js-on .pf-split.is-in .pf-line-in { transform: translate3d(0, 0, 0); }
+
+/* JS 已确认接管 → 遮罩生效 */
+.pf.js-on .pf-preloader { opacity: 1; visibility: visible; }
+.pf.js-on .pf-topbar { opacity: 0; transform: translateY(-10px); }
+.pf.js-on .pf-scrollbar { opacity: 0; }
+.pf.js-on .pf-cursor,
+.pf.js-on .pf-cursor-dot { opacity: 0; }
+.pf.js-on .pf-scroll-cue { opacity: 0; }
+
+/* 进入后各个都亮起来 */
+.pf.js-on.pf-ready .pf-preloader { opacity: 0; visibility: hidden; pointer-events: none; }
+.pf.js-on.pf-ready .pf-topbar { opacity: 1; transform: none; }
+.pf.js-on.pf-ready .pf-scrollbar { opacity: 1; }
+.pf.js-on.pf-ready .pf-scroll-cue { opacity: 1; }
+
+/* 无 JS 兜底：遮罩直接不显示、所有内容原样呈现 */
+html.no-js .pf-preloader { display: none !important; }
+html.no-js .pf-reveal { opacity: 1 !important; transform: none !important; }
+html.no-js .pf-topbar { opacity: 1 !important; transform: none !important; }
+html.no-js .pf-scrollbar { opacity: 1 !important; }
+html.no-js .pf-scroll-cue { opacity: 1 !important; }
+/* 逐行上推在无 JS 时根本不切行，文字是原始的一整段，天然可见；
+   万一 JS 只跑了一半（切了行但没点亮），这里兜住 */
+html.no-js .pf-line-in,
+.pf:not(.js-on) .pf-line-in { transform: none !important; }
+.pf:not(.js-on) .pf-line { overflow: visible !important; }
+
+/* ============================================================
+   6. 自绘滚动条 + 光标
+   ============================================================ */
+
+.pf-scrollbar {
+  position: fixed;
+  top: 50%; right: 22px;
+  z-index: 45;
+  transform: translateY(-50%);
+  transition: opacity .8s var(--pf-ease);
+}
+
+.pf-scrollbar-track {
+  position: relative;
+  width: 1px; height: 130px;
+  background: var(--pf-line-2);
+}
+
+.pf-scrollbar-thumb {
+  position: absolute;
+  top: 0; left: -1px;
+  width: 3px; height: 30px;
+  border-radius: 3px;
+  background: linear-gradient(to bottom, var(--pf-lamp-soft), var(--pf-lamp));
+  will-change: transform;
+}
+
+.pf-cursor,
+.pf-cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 70;
+  border-radius: 50%;
+  pointer-events: none;
+  transition: opacity .5s var(--pf-ease);
+}
+
+/* 外圈：跟随有延迟，形成"光晕拖尾" */
+.pf-cursor {
+  width: 34px; height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1px solid var(--pf-lamp-glow);
+  background: radial-gradient(circle, var(--pf-lamp-glow), transparent 70%);
+  transition: opacity .5s var(--pf-ease), width .36s var(--pf-ease), height .36s var(--pf-ease), margin .36s var(--pf-ease);
+  will-change: transform;
+}
+
+/* 内点：精确跟随 */
+.pf-cursor-dot {
+  width: 3px; height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  background: var(--pf-lamp);
+  will-change: transform;
+}
+
+/* 悬停可交互元素时，外圈放大 */
+.pf-cursor.is-hover {
+  width: 54px; height: 54px;
+  margin: -27px 0 0 -27px;
+  background: radial-gradient(circle, var(--pf-lamp-faint), transparent 72%);
+}
+
+/* 触屏设备隐藏光标层 */
+@media (hover: none) {
+  .pf-cursor, .pf-cursor-dot { display: none; }
+}
+
+/* ============================================================
+   7. 响应式
+   ============================================================ */
+
+@media (max-width: 860px) {
+  .pf-topbar { padding: 15px 18px; gap: 14px; }
+  .pf-brand-sub { display: none; }
+
+  .pf-nav { gap: 0; }
+  .pf-nav-item { padding: 6px 9px; font-size: 12.5px; letter-spacing: .04em; }
+  .pf-nav-item::after { left: 9px; right: 9px; }
+
+  .pf-story-body { margin-left: 0; max-width: 100%; }
+  .pf-sec { padding: 12vh 22px; }
+  .pf-feat-track { padding: 0 22px; }
+  .pf-feat-hit { flex-direction: column; align-items: flex-start; min-height: 0; padding: 26px 24px; }
+  .pf-feat-arrow { align-self: flex-end; }
+
+  .pf-scrollbar { right: 12px; }
+  .pf-scrollbar-track { height: 92px; }
+
+  .pf-contact-row { flex-wrap: wrap; gap: 6px 14px; }
+  .pf-contact-label { width: auto; }
+}
+
+@media (max-width: 560px) {
+  .pf-nav-item { padding: 6px 7px; font-size: 12px; }
+  .pf-hero-title { line-height: 1.3; }
+  .pf-pre-lines { font-size: 9px; letter-spacing: .18em; }
+}
+
+/* 尊重系统的减少动态偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .pf-rain,
+  .pf-mist,
+  .pf-scroll-cue-line i,
+  .pf-pre-dot {
+    animation: none !important;
+  }
+  .pf-reveal,
+  .pf-line-in,
+  .pf-about-card,
+  .pf-feat-arrow { transition-duration: .01ms !important; }
+}
+
+/* ============================================================
+   伦敦场景：文字可读性补偿
+   ------------------------------------------------------------
+   参考图的底是中亮度冷灰蓝（天空 br 125、桥面 br 40~80），
+   而正文是白字（--pf-text-1 #E4E8EE）。
+   ⚠️ 在云海那种亮白底上要用**深色**投影；
+      在伦敦这种中灰蓝底上，用极淡的深色投影 + 一点点白色描边，
+      两侧同时压，才能在亮部与暗部都读得清。
+   ⚠️ 别用大范围白色柔光（那是云海的做法）—— 压在灰蓝上会发脏。
+   ============================================================ */
+
+.pf .pf-hero-title,
+.pf .pf-story-title,
+.pf .pf-about-title,
+.pf .pf-feat-title,
+.pf .pf-contact-title {
+  text-shadow:
+    0 1px 2px rgba(10, 16, 24, .45),
+    0 6px 24px rgba(10, 16, 24, .30);
+}
+
+.pf .pf-hero-overline,
+.pf .pf-hero-desc,
+.pf .pf-sec-label,
+.pf .pf-story-body p,
+.pf .pf-about-sub,
+.pf .pf-feat-desc,
+.pf .pf-contact-desc,
+.pf .pf-contact-footer {
+  text-shadow: 0 1px 2px rgba(10, 16, 24, .40);
+}
+
+/* 卡片 / 列表这类浮在画面上的元素，靠一层冷色半透明底 + 描边
+   拉开层次（不用纯黑，阴天里纯黑会显脏） */
+.pf .pf-about-card {
+  background: rgba(26, 33, 43, .52);
+  border-color: rgba(168, 186, 208, .16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}

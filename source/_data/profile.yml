@@ -1,0 +1,35 @@
+# ==============================================
+# /profile/（极地 · 极光冰原）的共用配置
+#
+# ⚠️ 2026-09-29 精简：本文件原来承载「雨夜伦敦」个人主页的全部文案
+#    （brand / hero / scenes / stats / story / about / featured / contact），
+#    该页已按要求删除，只剩 music 段仍被 /profile/ 极光页使用
+#    （clouds.ejs 读 site.data.profile.music），所以这里只保留它。
+#    被删掉的文案段已随整页资产完整备份在
+#    .workbuddy/removed-profile-london-20260929/source/profile.yml ——
+#    将来若要恢复那一页，把备份里的文件覆盖回来即可。
+#
+# ⚠️ 文件名沿用 profile.yml：读它的模板是 clouds.ejs（该页 front-matter 为
+#    type: clouds），改名需同步改 clouds.ejs 里的 site.data.profile。
+# ==============================================
+
+# ---- 音乐 ----
+# 已启用真播（2026-09-28）：Mitski《My Love Mine All Mine》。
+# 音频文件放在 themes/liushen-clone/source/audio/my-love-mine-all-mine.mp3，
+# 跟着主题一起发布，构建后路径 /audio/my-love-mine-all-mine.mp3。
+# 进入页面即自动起播：由入场闸门（点「点击任意处进入」）派发 pf:enter，
+# 逻辑在 js/music.js（2026-09-29：旧版第二个全屏页已删除，只剩这一个派发点）。
+# ⚠️ 若闸门是 2.3s 自动放行（访客没点过页面），浏览器会拒绝带声播放 ——
+#    music.js 里有「首次任意手势补播」兜底，访客一动就会响起。
+# 想换回静音占位：把 src 置空即可（其余代码无需改动）。
+#
+# 曲目建议（按本页氛围）：Mitski - My Love Mine All Mine
+#   （BPM 57，钢琴 + 17 人和声）
+# ⚠️ 音量定版 0.16（2026-09-29 用户调整）—— 0.20 已偏响。
+music:
+  enabled: true
+  src: "/audio/my-love-mine-all-mine.mp3"
+  type: "audio/mpeg"
+  title: My Love Mine All Mine
+  volume: 0.16
+  loop: true

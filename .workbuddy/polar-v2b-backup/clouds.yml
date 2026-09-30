@@ -1,0 +1,55 @@
+# ==============================================
+# 极地 · 极光冰原 · /clouds/ v3「Aurora」· 内容数据
+# 北极极光冰原的纯风景场景，代码自研（three.js r112，零外部模型）。
+# 备份：v1 绘画化云海 → .workbuddy/clouds-v1-backup/
+#       v2 霓虹隧道奔跑者 → .workbuddy/clouds-v2-backup/
+#
+# ⚠️ 文案说明：尚谦的自述句（MESSAGE / 「走得很慢的人，看得最清楚。」）
+#    全站一致、故意保留原话。只把第三幕那句原本写「云」的收尾
+#    换成极地意象 —— 想改回一个字就够，改这里即可。
+# ==============================================
+
+brand: 尚谦
+brand_sub: SHANG QIAN
+
+nav:
+  - label: 首页
+    href: "/"
+  - label: 文章
+    href: /posts/
+  - label: 关于
+    href: /about/
+  - label: GitHub
+    href: "https://github.com/Shangqian-haha"
+
+# ---- 入场闸门 ----
+gate:
+  loading: 正在生成极光
+  enter: 点击任意处进入
+
+# ---- 滚动引导（左下竖排）----
+guide: 滚动查看更多
+
+# ---- 四幕滚动叙事 ----
+secs:
+  - i: 0
+    title: |
+      Welcome To
+      Shang Qian's Home
+  - i: 1
+    label: MESSAGE
+    text: 你好哇，我是尚谦，一个在夜里写字的人。
+    quote_from: 镜中
+    quote: 只要想起一生中后悔的事，梅花便落满了南山。
+  - i: 2
+    head: 走得很慢的人，看得最清楚。
+    sub: 写字、读旧书、听雨声。雨声是唯一能让我立刻平静下来的声音。
+  - i: 3
+    head: 星在头上，冰在脚下。
+    links:
+      - label: 读文章
+        href: /posts/
+        style: solid
+      - label: 关于我
+        href: /about/
+        style: ghost

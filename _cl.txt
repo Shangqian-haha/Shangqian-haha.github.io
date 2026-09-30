@@ -1,0 +1,16 @@
+51:  var isMobile = /iPad|iPhone|Android|Mobile/i.test(navigator.userAgent || '');
+92:  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
+175:    var SEG = isMobile ? 72 : 120;
+364:    var n = isMobile ? 300 : 620;
+474:  var SNOW_N = isMobile ? 320 : 620;
+510:    if (!entered) { e.preventDefault(); return; }
+520:    if (!entered || touchY === null) return;
+528:    if (!entered) return;
+603:  var loadDone = false, entered = false;
+606:  function markLoad(f) {
+611:      window.setTimeout(function () { if (!entered) enter(); }, 2300);
+615:  function enter() {
+616:    if (entered) return;
+617:    entered = true;
+631:    markLoad(k < 1 ? Math.pow(k, 0.55) * 0.985 : 1);
+716:    get gate() { return { loadDone: loadDone, entered: entered }; }

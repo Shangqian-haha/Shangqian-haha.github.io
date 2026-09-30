@@ -1,0 +1,170 @@
+# ==============================================
+# 个人主页 · 内容数据（v2 · 单屏电影感 Hero + 双场景切换）
+# ----------------------------------------------
+# 架构：
+#   首屏是一整屏 Hero（不滚动）：2 张照片缓慢交叉淡入作背景，
+#   顶部毛玻璃条（品牌 + 音乐钮）、中间标题 + 场景切换器、底部数据条。
+#   向下滚动 → 自述 / 关于 / 坐标 / 联系 四幕。
+#
+# 视觉参照：AnHeYu 那套「多图交叉淡入 + 毛玻璃 + 落雨粒子」
+# 全部文案可自由修改
+# ==============================================
+
+brand: 尚谦
+brand_sub: Shang Qian
+
+# ---- 导航 ----
+# ⚠️ 2026-09-28 按要求整体移除：顶栏不再放任何导航
+#    （首页 / 文章 / 关于 / 留言 / GitHub 五颗都没了）。
+#    DOM、CSS、JS 三处一起删干净了。
+#    站点入口改由首屏的「读文章」「关于我」两个按钮，
+#    以及下方四幕里的「← 回到首页」承担。
+
+# ---- 首屏 Hero ----
+hero:
+  # 留空 = 首页不渲染徽章（原为「记录城市与雨的呼吸」）
+  badge: ""
+  # 双行大标题：title = 第一行，title2 = 第二行（title2 留空则只渲染一行）
+  # 演变：下雨的城市 / 走得很慢的人 → Welcome / Shang Qian home → 现在这句。
+  # ⚠️ 为什么不写成一行：实测（_london_v2/run_title.py）整句需要
+  #    1920 宽屏 1188px / 内容区仅 1180px（差 8px），手机 414 需要 439px / 仅 364px
+  #    （差 75px）—— 这两档放不下。1440~768 反而放得下，但断点不可控，
+  #    所以统一按意群断成 "Welcome To" / "Shang Qian's Home"（各视口均单行不折）。
+  title: "Welcome To"
+  title2: "Shang Qian's Home"
+  sub: 从威斯敏斯特的桥，到煤气镇的蒸汽钟。两座城市的雨，两种走得很慢的时刻。
+  cta_label: 读文章
+  cta_href: /posts/
+  cta2_label: 关于我
+  cta2_href: /about/
+  enter_text: 轻触进入
+  gesture_text: TAP ANYWHERE TO BEGIN
+
+# ---- 两个场景 ----
+# ⚠️ tone 决定文字用亮色还是暗色，**按实测亮度定的，别凭感觉改**：
+#     bridge    导航区 122 / 中部 66  → light（暗底白字）
+#     steam     导航区 56  / 中部 89  → light
+#   ⚠️ 当前两个场景都是 light，且都**不下雨**了：
+#      · 原先的「雨巷」（爱丁堡）是唯一的 dark 场景，已移除；
+#        data-tone=dark 那一整套规则仍留在 profile-london.css 里备用。
+#      · wx 控制天气层，可选 steam / mist / rain / none。
+#        桥上那张照片雨点过密，已按要求改成 none（雨滴取消）。
+#        雨层实现 .ld-wx-rain 完整保留在 CSS 里 —— 改回 rain 就恢复。
+# ⚠️ pos 是 background-position：
+#     steam 的钟在画面右侧，必须右偏，否则会被 cover 裁掉。
+scenes:
+  - key: bridge
+    name: 桥上
+    en: BRIDGE
+    image: /img/london/bridge.jpg
+    pos: "50% 50%"
+    tone: light
+    wx: "none"
+    note: 威斯敏斯特桥 · 阴雨白天
+  - key: steam
+    name: 蒸汽钟
+    en: STEAM CLOCK
+    image: /img/london/steam.jpg
+    pos: "62% 50%"
+    tone: light
+    wx: steam
+    note: 煤气镇 · 整点会响的那口钟
+
+# ---- 底部数据条 ----
+# 真实数字由页面从站点数据里取，这里只放单位与修饰词
+stats:
+  since_label: 自
+  since_suffix: 年起写字
+  posts_suffix: 篇
+  categories_suffix: 个分类
+  tags_suffix: 个标签
+
+# ---- 第二幕 · 自述 ----
+story:
+  label: MESSAGE
+  title: 你好，我是尚谦
+  paragraphs:
+    - 一个在夜里写字的人。
+    - 喜欢雨声、旧书、和一杯放凉了的咖啡。
+    - |
+      不太擅长热闹的场合，但在安静里能待很久。
+      这里没有多少东西，只有一些我认真想过的话。
+    - |
+      如果你也喜欢下雨天，那我们大概是同一种人。
+
+# ---- 第三幕 · 关于 ----
+about:
+  label: ABOUT
+  title: 你不知道的，关于我的几件事
+  subtitle: 一些不成体系的碎片
+  items:
+    - icon: moon
+      title: 深夜
+      desc: 一天里最喜欢的时间。安静到能听见自己的呼吸。
+    - icon: rain
+      title: 雨天
+      desc: 雨声是唯一能让我立刻平静下来的声音。
+    - icon: coffee
+      title: 手冲
+      desc: 不追求标准，只是喜欢那个等待的过程。
+    - icon: book
+      title: 重读
+      desc: 好书不怕读第二遍。每次都会读到不一样的自己。
+
+# ---- 第四幕 · 精选（精神坐标）----
+# 每项：title / desc / tag / color(可选 #hex)
+featured:
+  title: 那些我常去的地方
+  desc: 一些让我觉得世界还不错的角落
+  items:
+    - title: 深夜的厨房
+      desc: 凌晨一点，煮一碗面。那一刻世界只有我和水汽。
+      tag: 独处
+      color: "#1C2530"
+    - title: 旧书店的第三排
+      desc: 有一本书我找了三年，最后在落灰的角落里遇到它。
+      tag: 偶然
+      color: "#232A36"
+    - title: 雨天的窗边
+      desc: 不打伞，就坐着。看雨水把玻璃变成一幅画。
+      tag: 停留
+      color: "#1A2129"
+    - title: 凌晨的最后一盏灯
+      desc: 整条街都睡了，只有那一扇窗还亮着。
+      tag: 陪伴
+      color: "#2E2A22"
+
+# ---- 第五幕 · 联系 ----
+contact:
+  title: 找我聊聊
+  desc: 如果你想说说最近的天气，或者别的什么
+  links:
+    - label: 邮箱
+      value: 357425252@qq.com
+      href: "mailto:357425252@qq.com"
+    - label: GitHub
+      value: github.com/Shangqian-haha
+      href: "https://github.com/Shangqian-haha"
+    - label: 博客
+      value: 回到文章
+      href: "/posts/"
+  footer: |
+    世界在下雨。
+    而我们有屋檐。
+
+# ---- 音乐 ----
+# ⚠️ 当前是「静音占位」：不加载音频文件，但播放/暂停、竖条动画、
+#    点击解锁手势等交互逻辑真实可用。
+# 替换方式：把 src 填成音频地址即可，其余代码无需改动。
+#
+# 曲目建议（按本页氛围）：
+#   Mitski - My Love Mine All Mine
+#   （BPM 57，钢琴 + 17 人和声，和雨声同一个频率）
+# ⚠️ 音量建议 0.18~0.22 —— 0.35 会盖过雨声
+music:
+  enabled: true
+  src: ""
+  type: "audio/mpeg"
+  title: My Love Mine All Mine
+  volume: 0.20
+  loop: true

@@ -1,0 +1,18 @@
+基线快照：个人主页(/profile) 实现前
+时间：2026-09-27 21:47:28
+
+本次要新增/修改的文件：
+【新增】
+  themes/liushen-clone/layout/_partial/profile.ejs
+  themes/liushen-clone/source/css/profile.css
+  themes/liushen-clone/source/js/profile.js
+  source/_data/profile.yml
+  source/profile/index.md
+  themes/liushen-clone/source/fonts/  (免费字体)
+【修改】
+  themes/liushen-clone/_config.yml   (菜单：关于 -> 下拉框，新增个人主页)
+  themes/liushen-clone/layout/_partial/head.ejs  (条件加载 profile.css)
+  themes/liushen-clone/layout/_partial/home-hero.ejs (开始阅读 -> 个人主页)
+  themes/liushen-clone/layout/page.ejs  (profile 路由分支)
+
+回退 = 把上述文件拷回原路径 + 删除新增文件 + 清 public 产物

@@ -1,0 +1,44 @@
+<%- partial('_partial/head', { page, config, theme }) %>
+<body>
+  <div class="scroll-progress" id="scroll-progress"></div>
+  <%- partial('_partial/header', { page, config, theme }) %>
+  <%- partial('_partial/search-dialog') %>
+
+  <!-- 首页流星主页层（试验版）：「尚谦一键还原」删掉下面这一行即可 -->
+  <%- partial('_partial/home-hero', { theme, config, page }) %>
+
+  <main class="site-body container">
+
+    <!-- 首页 Hero 主体（头像/标题/副标题/作者/社交）已上移到上方流星主页层，此处只留终端徽章 -->
+    <%- partial('_partial/hero-badge', { theme }) %>
+
+    <!-- 内容区 -->
+    <div class="layout-grid">
+      <div class="main-col">
+        <div class="post-list">
+          <% page.posts.each(function (article) { %>
+            <%- partial('_partial/post-card', { article: article }) %>
+          <% }); %>
+        </div>
+
+        <% if (page.prev || page.next) { %>
+        <nav class="pagination">
+          <% if (page.prev) { %><a class="page-link prev" href="<%= url_for(page.prev_link) %>"><i class="fa-solid fa-angle-left"></i> 上一页</a><% } %>
+          <span class="page-info"><%= page.current %> / <%= page.total %></span>
+          <% if (page.next) { %><a class="page-link next" href="<%= url_for(page.next_link) %>">下一页 <i class="fa-solid fa-angle-right"></i></a><% } %>
+        </nav>
+        <% } %>
+      </div>
+
+      <%- partial('_partial/aside', { page, config, theme }) %>
+    </div>
+  </main>
+
+  <%- partial('_partial/footer', { config, theme }) %>
+  <button class="back-top" id="back-top" aria-label="回到顶部">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4l8 8h-5v8h-6v-8H4z"/></svg>
+  </button>
+  <%- partial('_partial/body-end') %>
+  <script src="<%= url_for('/js/main.js') %>"></script>
+</body>
+</html>

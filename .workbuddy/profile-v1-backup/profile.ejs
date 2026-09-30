@@ -1,0 +1,249 @@
+<%
+  /* ------------------------------------------------------------------
+     个人主页 · /profile/
+     氛围：阴雨白天的威斯敏斯特桥（Westminster Bridge）
+           —— 灰蓝天空 / 深色哥特建筑剪影 / 大本钟 / 湿桥面反光
+              / 撑伞走过的行人 / 雨丝与涟漪
+     结构：纵向多节叙事（英雄 → 自述 → 关于 → 精选 → 联系）
+     技术：**零依赖手写 WebGL + GLSL**（不是 Three.js）
+           · 单文件 shader 画整幅场景（天空 / 建筑轮廓 / 大本钟 /
+             桥面 / 隔离桩 / 行人 / 雨丝 / 涟漪 / 表盘）
+           · 滚动驱动镜头推近（u_scroll → push/tilt）
+           · 逐行遮罩上推入场（split-line-up-effect）
+           · 原生 Web Audio 占位音控
+     文案全部来自 source/_data/profile.yml，每项都有兜底默认值。
+     ⚠️ 场景的像素级测量数据在 .workbuddy/london-scene-spec.h
+        —— 改画面之前先看那里，别凭感觉调数值。
+     ------------------------------------------------------------------ */
+  var _d = site.data.profile || {};
+  var _hero    = _d.hero    || {};
+  var _story   = _d.story   || {};
+  var _about   = _d.about   || {};
+  var _feat    = _d.featured || {};
+  var _contact = _d.contact || {};
+  var _music   = _d.music   || {};
+
+  var brand      = _d.brand      || '尚谦';
+  var brandSub   = _d.brand_sub  || 'Shang Qian';
+
+  /* ⚠️ 首屏不放文案（见下方 hero 段的说明）。
+     _hero 的 overline/title/title2/desc 仍然读取，但只用于 preloader 与文档标题，
+     不在首屏渲染 —— 需要恢复首屏文字时，把 hero 段的内容加回去即可。 */
+  var enterText    = _hero.enter_text    || '轻触进入';
+  var gestureText  = _hero.gesture_text  || 'TAP ANYWHERE TO BEGIN';
+
+  var storyLabel   = _story.label   || 'MESSAGE';
+  var storyTitle   = _story.title   || '你好';
+  var storyParas   = _story.paragraphs || [];
+
+  var aboutLabel    = _about.label    || 'ABOUT';
+  var aboutTitle    = _about.title    || '';
+  var aboutSubtitle = _about.subtitle || '';
+  var aboutItems    = _about.items    || [];
+
+  var featTitle = _feat.title || '';
+  var featDesc  = _feat.desc  || '';
+  var featItems = _feat.items || [];
+
+  var cTitle  = _contact.title  || '找我聊聊';
+  var cDesc   = _contact.desc   || '';
+  var cLinks  = _contact.links  || [];
+  var cFooter = _contact.footer || '';
+
+  /* 图标名 → 内联 SVG（避免依赖 iconfont，也保证离线可用） */
+  var _icons = {
+    moon:   'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z',
+    rain:   'M7 15a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1A4 4 0 0 1 17 15M8 18l-1 3M12 18l-1 3M16 18l-1 3',
+    coffee: 'M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9ZM16 10h2a2 2 0 0 1 0 4h-2M4 21h13',
+    book:   'M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2V5ZM8 3v18'
+  };
+%>
+<div class="pf" id="profile-root">
+
+  <!-- 关键时序：在 body 内联、尽早执行，让 CSS 的 .js-on 规则立刻生效，
+       避免"内容先按可见渲染、再跳回去隐藏"的闪烁。
+       profile.js 在页面末尾，那时已经太晚。 -->
+  <script>document.getElementById('profile-root').classList.add('js-on');</script>
+
+  <!-- ============ WebGL 伦敦雨景画布（背景层，固定） ============ -->
+  <canvas class="pf-canvas" id="pf-canvas" aria-hidden="true"></canvas>
+
+  <!-- 雨丝 / 雾 / 颗粒（纯 CSS 叠加层，WebGL 不可用时的兜底视觉） -->
+  <div class="pf-atmos" aria-hidden="true">
+    <span class="pf-rain"></span>
+    <span class="pf-mist"></span>
+    <span class="pf-vignette"></span>
+    <span class="pf-grain"></span>
+  </div>
+
+  <!-- ============ 顶部信息条 ============ -->
+  <header class="pf-topbar">
+    <div class="pf-brand">
+      <span class="pf-brand-name"><%= brand %></span>
+      <span class="pf-brand-sub"><%= brandSub %></span>
+    </div>
+    <nav class="pf-nav" aria-label="页面内导航">
+      <button class="pf-nav-item" type="button" data-goto="story">自述</button>
+      <button class="pf-nav-item" type="button" data-goto="about">关于</button>
+      <button class="pf-nav-item" type="button" data-goto="featured">坐标</button>
+      <button class="pf-nav-item" type="button" data-goto="contact">联系</button>
+    </nav>
+
+    <!-- 音乐控件：只留一个圆钮，按钮内用 canvas 画 7 根跳动的竖条。
+         无音量滑块（参考站的 #snd-btn 就是这个做法）。
+         音量在 profile.yml 里配置，不做 UI。 -->
+    <% if (_music.enabled !== false) { %>
+    <div class="pf-music" id="pf-music"
+         data-src="<%= _music.src || '' %>"
+         data-type="<%= _music.type || 'audio/mpeg' %>"
+         data-volume="<%= _music.volume != null ? _music.volume : 0.35 %>"
+         data-loop="<%= _music.loop !== false ? '1' : '0' %>"
+         data-title="<%= _music.title || 'Untitled' %>">
+      <button class="pf-snd" id="pf-music-btn" type="button"
+              aria-label="播放背景音乐" aria-pressed="false" title="播放背景音乐">
+        <canvas class="pf-snd-canvas" id="pf-snd-canvas" width="20" height="20" aria-hidden="true"></canvas>
+      </button>
+    </div>
+    <% } %>
+  </header>
+
+  <!-- ============ 入场遮罩（真实交互：点击解锁音频 + 视差拉开） ============ -->
+  <div class="pf-preloader" id="pf-preloader" data-gesture="<%= gestureText %>">
+    <div class="pf-pre-inner">
+      <div class="pf-pre-lines" id="pf-pre-lines" aria-hidden="true"></div>
+      <div class="pf-pre-gesture">
+        <span class="pf-pre-dot" aria-hidden="true"></span>
+        <span class="pf-pre-text" id="pf-pre-text"><%= gestureText %></span>
+      </div>
+      <button class="pf-pre-enter" id="pf-pre-enter" type="button"><%= enterText %></button>
+    </div>
+  </div>
+
+  <!-- ============ 主滚动容器 ============ -->
+  <main class="pf-main" id="pf-main">
+    <div class="pf-page" id="pf-page">
+
+      <!-- ---------- 第一幕 · 英雄 ----------
+           ⚠️ 首屏【不放任何文案】：参考图的主体是桥面与行人，
+              文字压在中部会把画面遮掉一半，与"1:1 复刻"的口径冲突。
+              只留一个极淡的滚动提示，其余交给 WebGL 场景本身。
+              （文案仍在 profile.yml 的 hero 段里保留，便于随时恢复。） -->
+      <section class="pf-sec pf-hero" id="sec-hero" data-sec="hero">
+        <div class="pf-scroll-cue" aria-hidden="true">
+          <span class="pf-scroll-cue-text">向下滚动</span>
+          <span class="pf-scroll-cue-line"><i></i></span>
+        </div>
+      </section>
+
+      <!-- ---------- 第二幕 · 自述 ---------- -->
+      <section class="pf-sec pf-story" id="sec-story" data-sec="story">
+        <div class="pf-sec-inner">
+          <div class="pf-sec-label pf-reveal"><%= storyLabel %></div>
+          <h2 class="pf-story-title">
+            <span class="pf-split pf-reveal"><%= storyTitle %></span>
+          </h2>
+          <div class="pf-story-body">
+            <% (storyParas || []).forEach(function (p) { %>
+              <p class="pf-split pf-reveal"><%- String(p).trim().split('\n').join('<br>') %></p>
+            <% }); %>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- 第三幕 · 关于 ---------- -->
+      <section class="pf-sec pf-about" id="sec-about" data-sec="about">
+        <div class="pf-sec-inner">
+          <div class="pf-sec-label pf-reveal"><%= aboutLabel %></div>
+          <h2 class="pf-about-title">
+            <span class="pf-split pf-reveal"><%= aboutTitle %></span>
+          </h2>
+          <% if (aboutSubtitle) { %>
+          <p class="pf-about-sub pf-split pf-reveal"><%= aboutSubtitle %></p>
+          <% } %>
+          <div class="pf-about-grid">
+            <% (aboutItems || []).forEach(function (it, i) { %>
+              <article class="pf-about-card pf-reveal" style="--i:<%= i %>">
+                <span class="pf-about-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="<%= _icons[it.icon] || _icons.moon %>"/>
+                  </svg>
+                </span>
+                <h3 class="pf-about-card-title"><%= it.title %></h3>
+                <p class="pf-about-card-desc"><%= it.desc %></p>
+              </article>
+            <% }); %>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- 第四幕 · 精选坐标 ---------- -->
+      <section class="pf-sec pf-featured" id="sec-featured" data-sec="featured">
+        <div class="pf-sec-inner">
+          <h2 class="pf-feat-title">
+            <span class="pf-split pf-reveal"><%= featTitle %></span>
+          </h2>
+          <% if (featDesc) { %>
+          <p class="pf-feat-desc pf-reveal"><%= featDesc %></p>
+          <% } %>
+        </div>
+        <div class="pf-feat-track" id="pf-feat-track">
+          <% (featItems || []).forEach(function (it, i) { %>
+            <article class="pf-feat-item" data-i="<%= i %>"
+                     style="--tone:<%= it.color || '#1E2733' %>">
+              <div class="pf-feat-hit">
+                <div class="pf-feat-shade" aria-hidden="true"></div>
+                <div class="pf-feat-text">
+                  <span class="pf-feat-tag"><%= it.tag || '' %></span>
+                  <h3 class="pf-feat-item-title"><%= it.title %></h3>
+                  <p class="pf-feat-item-desc"><%= it.desc %></p>
+                </div>
+                <span class="pf-feat-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 8 8"><polygon points="6.767 0.603 6.767 5.897 0.871 0 0 0.872 5.894 6.767 0.605 6.767 0.605 8 8 8 8 0.603 6.767 0.603"/></svg>
+                </span>
+              </div>
+            </article>
+          <% }); %>
+        </div>
+      </section>
+
+      <!-- ---------- 第五幕 · 联系 ---------- -->
+      <section class="pf-sec pf-contact" id="sec-contact" data-sec="contact">
+        <div class="pf-sec-inner">
+          <h2 class="pf-contact-title">
+            <span class="pf-split pf-reveal"><%= cTitle %></span>
+          </h2>
+          <% if (cDesc) { %>
+          <p class="pf-contact-desc pf-reveal"><%= cDesc %></p>
+          <% } %>
+          <div class="pf-contact-list">
+            <% (cLinks || []).forEach(function (l, i) { %>
+              <a class="pf-contact-row pf-reveal" href="<%= l.href %>" target="_blank" rel="noopener">
+                <span class="pf-contact-label"><%= l.label %></span>
+                <span class="pf-contact-value"><%= l.value %></span>
+                <span class="pf-contact-line" aria-hidden="true"></span>
+              </a>
+            <% }); %>
+          </div>
+          <% if (cFooter) { %>
+          <div class="pf-contact-footer pf-reveal"><%- String(cFooter).trim().split('\n').join('<br>') %></div>
+          <% } %>
+          <a class="pf-back-home pf-reveal" href="<%= url_for('/') %>">← 回到首页</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ============ 自绘滚动条（右侧） ============ -->
+  <div class="pf-scrollbar" id="pf-scrollbar" aria-hidden="true">
+    <div class="pf-scrollbar-track">
+      <div class="pf-scrollbar-thumb" id="pf-scrollbar-thumb"></div>
+    </div>
+  </div>
+
+  <!-- ============ 光标跟随 ============ -->
+  <div class="pf-cursor" id="pf-cursor" aria-hidden="true"></div>
+  <div class="pf-cursor-dot" id="pf-cursor-dot" aria-hidden="true"></div>
+
+</div>

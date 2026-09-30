@@ -1,0 +1,580 @@
+/* ============================================================
+   个人主页 v2 · 单屏电影感 Hero + 双场景切换
+   ------------------------------------------------------------
+   ⚠️ 为什么单独一份文件，而不改 profile.css：
+      profile.css 是 /profile/ 和 /clouds/ **共用**的基底
+      （clouds.css 靠它定义变量再重置成"白天"）。
+      动它会连带弄坏云海页。
+   ⚠️ 因此本文件所有类名一律用 ld- 前缀，与 .pf-* 零重叠。
+      唯一复用的是 .pf-split / .pf-line-in（逐行上推，见 profile.css）。
+
+   命名：
+     ld-stage  背景舞台（fixed）  ld-layer 照片层（当前 2 张）
+     ld-scrim  明暗遮罩（两份交叉淡入，解决"渐变不能过渡"）
+     ld-wx     天气层（蒸汽 / 雾；雨层规则保留，但当前没有场景启用它）
+     ld-top    顶部毛玻璃条（brand + 音乐钮，fixed）
+     ld-hero   首屏内容（100vh，在文档流里，会随滚动走）
+     ld-stats  底部数据条
+
+   ⚠️ 2026-09-28 已按要求取消：顶栏导航（原 ld-nav / ld-nav-cta / ld-burger）
+      与移动端全屏菜单（原 ld-menu）。DOM、CSS、JS 三处一起删干净，
+      所以下面不再有这几段。首屏只剩「品牌 + 音乐钮」+ 大标题 + 切换器 + 数据条。
+   ============================================================ */
+
+/* ---------- 1. 变量 ---------- */
+
+.ld {
+  /* 文字色由 data-tone 切换（light = 暗底白字 / dark = 亮底深字） */
+  --ld-ink:   #EAF0F7;
+  /* ⚠️ ink-2 / ink-3 的不透明度是被实测逼出来的：
+     照片中间调上，.80/.52 只能拿到 4.0/2.6 —— 不到 AA 4.5。 */
+  --ld-ink-2: rgba(234, 240, 247, .88);
+  --ld-ink-3: rgba(234, 240, 247, .74);
+  --ld-hair:  rgba(255, 255, 255, .18);
+  --ld-fill:  rgba(255, 255, 255, .92);
+  --ld-fill-ink: #141A22;
+  --ld-glass-bg: rgba(255, 255, 255, .045);
+  --ld-shadow: 0 1px 2px rgba(6, 10, 16, .45), 0 10px 34px rgba(6, 10, 16, .30);
+  /* 交叉淡入时长 —— spec 要求 1000ms，JS 里的冷却时间必须与它一致 */
+  --ld-xfade: 1000ms;
+}
+
+/* 亮底场景（tone=dark；当前两场景实测都是暗底，规则保留备用）：文字转深，玻璃转"浅色玻璃" */
+.ld[data-tone="dark"] {
+  --ld-ink:   #121820;
+  --ld-ink-2: rgba(18, 24, 32, .88);
+  --ld-ink-3: rgba(18, 24, 32, .74);
+  --ld-hair:  rgba(0, 0, 0, .16);
+  --ld-fill:  rgba(16, 22, 30, .90);
+  --ld-fill-ink: #F2F6FB;
+  --ld-glass-bg: rgba(255, 255, 255, .30);
+  --ld-shadow: 0 1px 2px rgba(255, 255, 255, .30), 0 10px 30px rgba(30, 44, 60, .18);
+}
+
+/* ---------- 2. 背景舞台 ---------- */
+
+.ld-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #10151C;   /* 图加载前的底色，避免白闪 */
+  pointer-events: none;
+}
+
+/* 照片层（当前 2 张）：只有 .is-on 可见，1000ms 交叉淡入 */
+.ld-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity var(--ld-xfade) ease-in-out;
+  transform: scale(1.035);   /* 轻微放大，避免边缘露出 + 有"呼吸"余地 */
+  will-change: opacity;
+}
+.ld-layer.is-on { opacity: 1; }
+
+/* 极缓慢的推近（Ken Burns）—— 只在激活层上跑，切场景时重置 */
+@keyframes ld-kenburns {
+  from { transform: scale(1.035) translate3d(0, 0, 0); }
+  to   { transform: scale(1.085) translate3d(0, -0.8%, 0); }
+}
+.ld-layer.is-on { animation: ld-kenburns 26s ease-out both; }
+
+/* --- 明暗遮罩 ---
+   渐变本身不能做 transition，所以用两份叠加、只过渡 opacity */
+.ld-scrim {
+  position: absolute;
+  inset: 0;
+  transition: opacity var(--ld-xfade) ease-in-out;
+}
+.ld-scrim-dark {
+  opacity: 1;
+  background:
+    /* 顶部给导航压一层，底部给数据条压一层，中间留亮 */
+    linear-gradient(to bottom,
+      rgba(8, 12, 18, .46) 0%,
+      rgba(8, 12, 18, .16) 16%,
+      rgba(8, 12, 18, .10) 42%,
+      rgba(8, 12, 18, .34) 72%,
+      rgba(8, 12, 18, .70) 100%),
+    /* 中央轻微聚光，让标题区更沉 */
+    radial-gradient(76% 58% at 50% 46%, rgba(8, 12, 18, .30), transparent 76%);
+}
+.ld-scrim-light {
+  opacity: 0;
+  background:
+    linear-gradient(to bottom,
+      rgba(232, 239, 248, .52) 0%,
+      rgba(232, 239, 248, .30) 18%,
+      rgba(232, 239, 248, .16) 44%,
+      rgba(232, 239, 248, .34) 74%,
+      rgba(226, 234, 244, .60) 100%);
+}
+.ld[data-tone="dark"] .ld-scrim-dark  { opacity: 0; }
+.ld[data-tone="dark"] .ld-scrim-light { opacity: 1; }
+
+/* --- 文字保护雾（第三对交叉淡入层）---
+   ⚠️ 为什么需要它：
+      这两张照片的中段亮度刚好落在 130~160 这个"中间调陷阱"里 ——
+      深色字的 --ld-ink-2 在那里只有 4.0 的对比度、--ld-ink-3 只有 2.6，
+      副标题和场景注脚直接糊在照片上读不出来（实测，见 _london_v2/insp2.py）。
+      解法不是给文字描边或加底板（会破坏全幅电影感），而是像自然雾气一样
+      只在"文字所在那一列"加一层柔雾，把背景推开：
+        · 亮字场景 → 压暗（.ld-veil-lit）
+        · 深字场景 → 提亮（.ld-veil-dim）
+      中心 (25%,58%) 正对标题+副标题+CTA 这一竖列的视觉重心；
+      到 100% 处完全透明，所以右侧照片主体（蒸汽钟、桥）不受影响。 */
+.ld-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity var(--ld-xfade) ease-in-out;
+}
+.ld-veil-lit {
+  opacity: 1;
+  background: radial-gradient(34% 36% at 25% 58%,
+    rgba(7, 11, 17, .60) 0%,
+    rgba(7, 11, 17, .44) 42%,
+    rgba(7, 11, 17, .17) 70%,
+    rgba(7, 11, 17, 0) 100%);
+}
+.ld-veil-dim {
+  opacity: 0;
+  background: radial-gradient(34% 36% at 25% 58%,
+    rgba(246, 249, 254, .74) 0%,
+    rgba(246, 249, 254, .56) 42%,
+    rgba(246, 249, 254, .22) 70%,
+    rgba(246, 249, 254, 0) 100%);
+}
+.ld[data-tone="dark"] .ld-veil-lit { opacity: 0; }
+.ld[data-tone="dark"] .ld-veil-dim { opacity: 1; }
+
+/* ---------- 3. 天气层 ---------- */
+
+.ld-wx {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 900ms ease-in-out;
+  pointer-events: none;
+}
+.ld[data-wx="rain"]  .ld-wx-rain  { opacity: 1; }
+.ld[data-wx="steam"] .ld-wx-steam { opacity: 1; }
+
+/* --- 【当前未启用】雨丝：两层斜向细线，速度与密度不同 → 有纵深 ---
+   ⚠️ 2026-09-28：已按要求取消雨滴（桥上那张照片上雨点过密）。
+      做法是「数据层关掉」而不是删代码 —— profile.yml 里两个场景的 wx
+      现在是 none / steam，`.ld[data-wx="rain"]` 永不匹配，本段不生效。
+      要恢复：把某个场景的 wx 改回 rain 即可，DOM 与 CSS 都还在。
+   ⚠️ 密度是专门调过的：原来近层条纹周期 14px、远层 26px，
+      在桥上看着雨点过密，已拉到 32px / 56px（同屏线条数降到约 45%）。
+      只拉间距、几乎不动透明度 —— 目标是变稀，不是变淡，雨感要留住。
+   ⚠️ 循环位移必须**正好等于背景块高度**，否则每次循环会"跳"一下。
+      斜度靠 x 分量制造（26/260 ≈ 5.7°）。 */
+.ld-wx-rain i {
+  position: absolute;
+  inset: -15%;
+  background-repeat: repeat;
+}
+.ld-wx-rain .r1 {
+  background-image: repeating-linear-gradient(
+    101deg,
+    rgba(255, 255, 255, 0)   0px,  rgba(255, 255, 255, 0)   4px,
+    rgba(228, 240, 254, .44) 4px,  rgba(228, 240, 254, .44) 5px,
+    rgba(255, 255, 255, 0)   5px,  rgba(255, 255, 255, 0)   32px
+  );
+  background-size: 210px 260px;
+  animation: ld-rain-a 1.05s linear infinite;
+  opacity: .50;
+}
+.ld-wx-rain .r2 {
+  background-image: repeating-linear-gradient(
+    101deg,
+    rgba(255, 255, 255, 0)   0px,  rgba(255, 255, 255, 0)   8px,
+    rgba(240, 248, 255, .30) 8px,  rgba(240, 248, 255, .30) 9px,
+    rgba(255, 255, 255, 0)   9px,  rgba(255, 255, 255, 0)   56px
+  );
+  background-size: 320px 380px;
+  animation: ld-rain-b 1.7s linear infinite;
+  opacity: .32;
+}
+@keyframes ld-rain-a {
+  from { background-position:   0px 0px; }
+  to   { background-position: -26px 260px; }
+}
+@keyframes ld-rain-b {
+  from { background-position:   0px 0px; }
+  to   { background-position: -38px 380px; }
+}
+
+/* --- 蒸汽：三团模糊白雾缓慢上升 + 放大 --- */
+.ld-wx-steam i {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(46px);
+  background: radial-gradient(closest-side,
+    rgba(238, 244, 252, .40), rgba(238, 244, 252, .14) 58%, rgba(238, 244, 252, 0) 78%);
+  animation: ld-steam 11s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+.ld-wx-steam .s1 { width: 34vw; height: 34vw; left: 52%; bottom: -8%;  animation-delay: 0s; }
+.ld-wx-steam .s2 { width: 26vw; height: 26vw; left: 62%; bottom: 2%;   animation-delay: -3.6s; }
+.ld-wx-steam .s3 { width: 44vw; height: 40vw; left: 40%; bottom: -14%; animation-delay: -7.2s; }
+@keyframes ld-steam {
+  0%   { transform: translate3d(0, 12%, 0) scale(.86); opacity: 0; }
+  22%  { opacity: .85; }
+  70%  { opacity: .55; }
+  100% { transform: translate3d(-4%, -34%, 0) scale(1.30); opacity: 0; }
+}
+
+/* --- 雾：一层极慢漂移的柔和提亮，所有场景都有，压得很轻 ---
+   ⚠️ 全屏提亮层每提 0.1 透明度 ≈ 给整幅画加 5~8 点亮度，别贪。 */
+.ld-wx-mist {
+  position: absolute;
+  inset: -20%;
+  opacity: .38;
+  background:
+    radial-gradient(58% 44% at 24% 34%, rgba(150, 168, 190, .10), transparent 70%),
+    radial-gradient(52% 40% at 78% 62%, rgba(126, 148, 176, .075), transparent 72%),
+    radial-gradient(70% 52% at 50% 90%, rgba(100, 122, 150, .085), transparent 74%);
+  filter: blur(42px);
+  animation: ld-mist 40s ease-in-out infinite alternate;
+}
+@keyframes ld-mist {
+  from { transform: translate3d(-2%, -1%, 0) scale(1); }
+  to   { transform: translate3d(3%, 2%, 0) scale(1.07); }
+}
+
+/* --- 颗粒：掩盖渐变色带，给胶片感 --- */
+.ld-grain {
+  position: absolute;
+  inset: 0;
+  opacity: .055;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- 4. 液态玻璃（照 spec 给的实现） ---------- */
+
+.ld-glass {
+  position: relative;
+  overflow: hidden;
+  background: var(--ld-glass-bg);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .10);
+}
+/* 靠 ::before + mask 做"只有描边发光、内部不发光"的 1.4px 渐层边框 */
+.ld-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.4px;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .45) 0%,  rgba(255, 255, 255, .15) 20%,
+    rgba(255, 255, 255, 0)  40%,  rgba(255, 255, 255, 0)  60%,
+    rgba(255, 255, 255, .15) 80%, rgba(255, 255, 255, .45) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.ld[data-tone="dark"] .ld-glass { box-shadow: inset 0 1px 1px rgba(255, 255, 255, .55); }
+.ld[data-tone="dark"] .ld-glass::before {
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, .85) 0%,  rgba(255, 255, 255, .40) 20%,
+    rgba(255, 255, 255, .10) 40%, rgba(255, 255, 255, .10) 60%,
+    rgba(255, 255, 255, .40) 80%, rgba(255, 255, 255, .85) 100%);
+}
+
+/* ---------- 5. 顶部条（品牌 + 音乐钮；导航已取消） ---------- */
+
+.ld-top {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px clamp(18px, 4vw, 54px);
+  color: var(--ld-ink);
+  transition: color var(--ld-xfade) ease-in-out, transform .45s var(--pf-ease);
+}
+/* 往下滚过首屏后整体上收，避免压住下方正文 */
+.ld-top.is-away { transform: translate3d(0, -110%, 0); }
+
+.ld-brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--pf-serif);
+  font-size: 20px;
+  letter-spacing: .02em;
+  color: inherit;
+  text-decoration: none;
+  text-shadow: var(--ld-shadow);
+  transition: opacity .3s;
+}
+.ld-brand:hover { opacity: .78; }
+.ld-brand small {
+  font-family: var(--pf-mono);
+  font-size: 9.5px;
+  letter-spacing: .30em;
+  text-transform: uppercase;
+  opacity: .62;
+}
+
+.ld-spacer { flex: 1 1 auto; }
+
+/* 音乐钮沿用 profile.css 的 .pf-music / .pf-snd，这里只管位置与色 */
+.ld-top .pf-music { margin-left: 2px; }
+.ld-top .pf-snd { color: var(--ld-ink); }
+
+/* ---------- 6. 首屏 Hero（100vh，文档流内） ---------- */
+
+.ld-hero {
+  position: relative;
+  z-index: 5;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 22vh clamp(22px, 6vw, 92px) 0;
+  color: var(--ld-ink);
+  transition: color var(--ld-xfade) ease-in-out;
+}
+
+.ld-hero-in {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* 徽章 */
+.ld-badge {
+  display: inline-block;
+  padding: 8px 17px;
+  border-radius: 999px;
+  font-family: var(--pf-mono);
+  font-size: 11px;
+  letter-spacing: .17em;
+  color: inherit;
+  margin-bottom: clamp(20px, 3.2vw, 34px);
+}
+
+/* 主标题：两行，字号跟着视口走 */
+.ld-title {
+  margin: 0;
+  font-family: var(--pf-serif);
+  font-weight: 400;
+  font-size: clamp(34px, 6.1vw, 92px);
+  line-height: 1.14;
+  letter-spacing: .01em;
+  text-shadow: var(--ld-shadow);
+}
+.ld-title > span { display: block; }
+
+/* 副标题 */
+.ld-sub {
+  max-width: 30em;
+  margin: clamp(20px, 2.6vw, 30px) 0 0;
+  font-size: clamp(13.5px, 1.15vw, 16px);
+  line-height: 1.95;
+  color: var(--ld-ink-2);
+  text-shadow: var(--ld-shadow);
+}
+
+/* CTA 行 */
+.ld-cta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: clamp(26px, 3.4vw, 40px);
+}
+.ld-btn {
+  display: inline-block;
+  padding: 13px 27px;
+  border-radius: 999px;
+  background: var(--ld-fill);
+  color: var(--ld-fill-ink);
+  font-size: 14px;
+  letter-spacing: .06em;
+  text-decoration: none;
+  transition: background-color .35s, color .35s, transform .35s;
+}
+.ld-btn:hover { transform: translateY(-2px); }
+.ld-btn2 {
+  position: relative;
+  padding: 4px 0;
+  font-size: 14px;
+  letter-spacing: .06em;
+  color: var(--ld-ink-2);
+  text-decoration: none;
+  transition: color .3s;
+}
+/* 下划线用背景做，hover 时从左展开 */
+.ld-btn2::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background: currentColor;
+  opacity: .45;
+  transform: scaleX(.35);
+  transform-origin: left;
+  transition: transform .45s var(--pf-ease), opacity .3s;
+}
+.ld-btn2:hover { color: var(--ld-ink); }
+.ld-btn2:hover::after { transform: scaleX(1); opacity: .8; }
+
+/* ---------- 7. 场景切换器 ---------- */
+
+.ld-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(18px, 3vw, 40px);
+  margin-top: clamp(34px, 4.6vw, 58px);
+}
+.ld-sw {
+  position: relative;
+  padding: 0 0 9px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--pf-sans);
+  font-size: 13.5px;
+  letter-spacing: .10em;
+  color: inherit;
+  opacity: .46;
+  transition: opacity .4s var(--pf-ease), color var(--ld-xfade) ease-in-out;
+}
+.ld-sw:hover { opacity: .82; }
+.ld-sw .ld-sw-en {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--pf-mono);
+  font-size: 9px;
+  letter-spacing: .24em;
+  opacity: .70;
+}
+/* 激活态：底部一条实线（spec 里就是这么做的） */
+.ld-sw::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .5s var(--pf-ease);
+}
+.ld-sw.is-on { opacity: 1; }
+.ld-sw.is-on::after { transform: scaleX(1); }
+
+/* ---------- 8. 底部数据条 ---------- */
+
+.ld-stats {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: clamp(22px, 3.6vh, 44px);
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(14px, 2.6vw, 34px);
+  padding: 0 clamp(18px, 4vw, 54px);
+  font-family: var(--pf-mono);
+  font-size: 11.5px;
+  letter-spacing: .13em;
+  color: var(--ld-ink-3);
+  transition: color var(--ld-xfade) ease-in-out;
+}
+.ld-stats b {
+  font-weight: 400;
+  color: var(--ld-ink);
+  opacity: .92;
+}
+.ld-stats i { font-style: normal; opacity: .30; }
+
+/* ---------- 9. 下方叙事四幕：加一层渐变把照片压暗，保证正文可读 ---------- */
+
+.ld ~ .pf-main,
+.pf-main {
+  position: relative;
+  z-index: 10;
+}
+/* ⚠️ 只在 /profile/ 才压暗正文底色。
+   用 .ld-main 这个显式类，不依赖 :has() —— 兼容性更稳，
+   也让 /clouds/（不加这个类）完全不受影响。 */
+.ld-main {
+  background: linear-gradient(to bottom,
+    rgba(10, 14, 20, 0) 0%,
+    rgba(10, 14, 20, .74) 26%,
+    rgba(10, 14, 20, .88) 55%,
+    rgba(10, 14, 20, .94) 100%);
+}
+
+/* ---------- 9b. 滚过首屏后 → 正文模式 ----------
+   ⚠️ 为什么必须有这一段：
+      下方四幕的底色是自己压暗的深色渐变。如果此刻场景是亮底
+      （data-tone=dark，深色字），就会出现"深色字压深色底"，完全读不了。
+      所以一旦进入正文，导航与遮罩强制切回亮色方案。
+      （当前两个场景实测都是暗底，所以这段现在是保险，不是常态。） */
+.ld.is-body .ld-top {
+  --ld-ink:   #EAF0F7;
+  --ld-ink-2: rgba(234, 240, 247, .80);
+  --ld-ink-3: rgba(234, 240, 247, .52);
+  --ld-hair:  rgba(255, 255, 255, .18);
+  --ld-fill:  rgba(255, 255, 255, .92);
+  --ld-fill-ink: #141A22;
+  --ld-glass-bg: rgba(255, 255, 255, .045);
+}
+.ld.is-body .ld-scrim-light { opacity: 0; }
+.ld.is-body .ld-scrim-dark  { opacity: 1; }
+/* 雾也跟着切到"亮字方案"，与上面两条遮罩保持同一套不变量 */
+.ld.is-body .ld-veil-dim  { opacity: 0; }
+.ld.is-body .ld-veil-lit  { opacity: 1; }
+
+/* ---------- 10. 响应式 ---------- */
+
+@media (max-width: 860px) {
+  .ld-hero { padding-top: 18vh; }
+  .ld-stats { gap: 12px 18px; font-size: 10.5px; letter-spacing: .10em; }
+  .ld-title { text-shadow: 0 1px 3px rgba(6, 10, 16, .55), 0 8px 26px rgba(6, 10, 16, .40); }
+}
+@media (max-width: 520px) {
+  .ld-switch { gap: 16px; }
+  .ld-sw { font-size: 12.5px; }
+  .ld-cta { gap: 12px; }
+  .ld-btn { padding: 12px 22px; font-size: 13px; }
+  .ld-wx-steam .s1, .ld-wx-steam .s3 { display: none; }
+}
+
+/* 触屏没有 hover，去掉位移反馈（避免"点一下卡住"的观感） */
+@media (hover: none) {
+  .ld-btn:hover { transform: none; }
+}
+
+/* ---------- 11. 减少动效 ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ld-layer,
+  .ld-scrim,
+  .ld-veil,
+  .ld-wx,
+  .ld-top,
+  .ld-hero,
+  .ld-stats { transition-duration: .01ms !important; }
+  .ld-layer.is-on { animation: none !important; transform: scale(1.035); }
+  .ld-wx-rain i,
+  .ld-wx-steam i,
+  .ld-wx-mist { animation: none !important; }
+  .ld-wx-steam i { opacity: .55; }
+}

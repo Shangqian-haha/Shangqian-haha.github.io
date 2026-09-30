@@ -1,0 +1,7 @@
+164:music:
+165-  enabled: true
+166-  src: ""
+167-  type: "audio/mpeg"
+168-  title: My Love Mine All Mine
+169-  volume: 0.20
+170-  loop: true

@@ -1,0 +1,259 @@
+<%
+  /* ------------------------------------------------------------------
+     云海之上 · /clouds/
+     参考图：708×1262（≈9:16 竖幅）—— 木平台望出去的无边云海
+     口径：结构 1:1 复刻，表现绘画化（不是照片写实）
+
+     结构与 /profile/ 完全同源：
+       · 5 幕纵向叙事，每幕 100vh，整体约 5 屏
+       · 文字逐行遮罩上推（.pf-split → JS 切成 .pf-line > .pf-line-in）
+       · 顶部信息条 + 圆钮 canvas 竖条音乐控件
+       · 入场遮罩（点击解锁音频）
+       · 自绘滚动条 + 跟随光标
+
+     ⚠️ 复用 .pf-* 类名是有意的：clouds.css 里只重置**变量**（浅色天空调），
+        结构规则全部继承 profile.css（两个 CSS 都会加载）。
+        这样一旦 profile 那套改好，本页也一起受益。
+     ------------------------------------------------------------------ */
+  var _d = site.data.clouds || {};
+  var _hero    = _d.hero    || {};
+  var _story   = _d.story   || {};
+  var _about   = _d.about   || {};
+  var _feat    = _d.featured || {};
+  var _contact = _d.contact || {};
+  var _music   = _d.music   || {};
+
+  var brand      = _d.brand      || '尚谦';
+  var brandSub   = _d.brand_sub  || 'Shang Qian';
+
+  var heroOverline = _hero.overline || 'SEA OF CLOUDS · 06:20';
+  var heroTitle    = _hero.title    || '云在脚下，风在耳边';
+  var heroTitle2   = _hero.title2   || '';
+  var heroDesc     = _hero.desc     || '';
+  var enterText    = _hero.enter_text    || '轻触进入';
+  var gestureText  = _hero.gesture_text  || 'TAP ANYWHERE TO BEGIN';
+
+  var storyLabel   = _story.label   || 'ABOVE THE CLOUDS';
+  var storyTitle   = _story.title   || '';
+  var storyParas   = _story.paragraphs || [];
+
+  var aboutLabel    = _about.label    || 'THREE THINGS';
+  var aboutTitle    = _about.title    || '';
+  var aboutSubtitle = _about.subtitle || '';
+  var aboutItems    = _about.items    || [];
+
+  var featTitle = _feat.title || '';
+  var featDesc  = _feat.desc  || '';
+  var featItems = _feat.items || [];
+
+  var cTitle  = _contact.title  || '也想去看看';
+  var cDesc   = _contact.desc   || '';
+  var cLinks  = _contact.links  || [];
+  var cFooter = _contact.footer || '';
+
+  /* 图标名 → 内联 SVG（与 profile 同一套，另加山/云/日） */
+  var _icons = {
+    mountain: 'M3 19h18M6 19l4.5-9L14 16l2-3 3 6M14.5 6.5a1.5 1.5 0 1 0 0-.001',
+    cloud:    'M7.5 18a3.5 3.5 0 0 1 0-7 4.5 4.5 0 0 1 8.7-1.2A3.6 3.6 0 0 1 17 18H7.5Z',
+    sun:      'M12 5v2M12 17v2M5 12h2M17 12h2M6.7 6.7l1.4 1.4M15.9 15.9l1.4 1.4M17.3 6.7l-1.4 1.4M8.1 15.9l-1.4 1.4M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z',
+    moon:     'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z',
+    book:     'M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2V5ZM8 3v18',
+    coffee:   'M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9ZM16 10h2a2 2 0 0 1 0 4h-2M4 21h13',
+    rain:     'M7 15a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1A4 4 0 0 1 17 15M8 18l-1 3M12 18l-1 3M16 18l-1 3'
+  };
+%>
+<div class="pf cl" id="clouds-root">
+
+  <!-- 关键时序：在 body 内联、尽早执行。
+       两个页面共用 .js-on 这套机制，所以这里加的仍然是 .js-on。 -->
+  <script>document.getElementById('clouds-root').classList.add('js-on');</script>
+
+  <!-- ============ WebGL 云海画布（背景层，固定） ============ -->
+  <canvas class="pf-canvas" id="cl-canvas" aria-hidden="true"></canvas>
+
+  <!-- CSS 氛围叠加层：云絮 / 光晕 / 暗角 / 颗粒（WebGL 不可用时的兜底视觉） -->
+  <div class="pf-atmos cl-atmos" aria-hidden="true">
+    <span class="cl-haze"></span>
+    <span class="cl-light"></span>
+    <span class="pf-vignette cl-vignette"></span>
+    <span class="pf-grain cl-grain"></span>
+  </div>
+
+  <!-- ============ 顶部信息条 ============ -->
+  <header class="pf-topbar cl-topbar">
+    <div class="pf-brand">
+      <span class="pf-brand-name"><%= brand %></span>
+      <span class="pf-brand-sub"><%= brandSub %></span>
+    </div>
+    <nav class="pf-nav" aria-label="页面内导航">
+      <button class="pf-nav-item" type="button" data-goto="story">自述</button>
+      <button class="pf-nav-item" type="button" data-goto="about">三件事</button>
+      <button class="pf-nav-item" type="button" data-goto="featured">坐标</button>
+      <button class="pf-nav-item" type="button" data-goto="contact">联系</button>
+    </nav>
+
+    <% if (_music.enabled !== false) { %>
+    <div class="pf-music" id="cl-music"
+         data-src="<%= _music.src || '' %>"
+         data-type="<%= _music.type || 'audio/mpeg' %>"
+         data-volume="<%= _music.volume != null ? _music.volume : 0.32 %>"
+         data-loop="<%= _music.loop !== false ? '1' : '0' %>"
+         data-title="<%= _music.title || 'Untitled' %>">
+      <button class="pf-snd" id="cl-music-btn" type="button"
+              aria-label="播放背景音乐" aria-pressed="false" title="播放背景音乐">
+        <canvas class="pf-snd-canvas" id="cl-snd-canvas" width="20" height="20" aria-hidden="true"></canvas>
+      </button>
+    </div>
+    <% } %>
+  </header>
+
+  <!-- ============ 入场遮罩 ============ -->
+  <div class="pf-preloader cl-preloader" id="cl-preloader">
+    <div class="pf-pre-inner">
+      <div class="pf-pre-lines" id="cl-pre-lines" aria-hidden="true"></div>
+      <div class="pf-pre-gesture">
+        <span class="pf-pre-dot cl-pre-dot" aria-hidden="true"></span>
+        <span class="pf-pre-text"><%= gestureText %></span>
+      </div>
+      <button class="pf-pre-enter cl-pre-enter" id="cl-pre-enter" type="button"><%= enterText %></button>
+      <div class="cl-pre-overline"><%= heroOverline %></div>
+    </div>
+  </div>
+
+  <!-- ============ 主滚动容器 ============ -->
+  <main class="pf-main" id="cl-main">
+    <div class="pf-page">
+
+      <!-- ---------- 第一幕 · 英雄（画面以云海为主） ---------- -->
+      <section class="pf-sec pf-hero cl-hero" id="cl-sec-hero" data-sec="hero">
+        <div class="pf-hero-inner cl-hero-inner">
+          <h1 class="pf-hero-title cl-hero-title">
+            <span class="pf-split pf-reveal"><%= heroTitle %></span>
+            <% if (heroTitle2) { %>
+            <span class="pf-split pf-reveal"><%= heroTitle2 %></span>
+            <% } %>
+          </h1>
+          <% if (heroDesc) { %>
+          <div class="pf-hero-desc cl-hero-desc pf-reveal"><%- String(heroDesc).trim().split('\n').join('<br>') %></div>
+          <% } %>
+        </div>
+        <div class="pf-scroll-cue cl-scroll-cue" aria-hidden="true">
+          <span class="pf-scroll-cue-text">向下滚动</span>
+          <span class="pf-scroll-cue-line"><i></i></span>
+        </div>
+      </section>
+
+      <!-- ---------- 第二幕 · 自述 ---------- -->
+      <section class="pf-sec pf-story cl-story" id="cl-sec-story" data-sec="story">
+        <div class="pf-sec-inner">
+          <div class="pf-sec-label pf-reveal"><%= storyLabel %></div>
+          <% if (storyTitle) { %>
+          <h2 class="pf-story-title">
+            <span class="pf-split pf-reveal"><%= storyTitle %></span>
+          </h2>
+          <% } %>
+          <div class="pf-story-body cl-story-body">
+            <% (storyParas || []).forEach(function (p) { %>
+              <p class="pf-split pf-reveal"><%- String(p).trim().split('\n').join('<br>') %></p>
+            <% }); %>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- 第三幕 · 三件事 ---------- -->
+      <section class="pf-sec pf-about cl-about" id="cl-sec-about" data-sec="about">
+        <div class="pf-sec-inner">
+          <div class="pf-sec-label pf-reveal"><%= aboutLabel %></div>
+          <h2 class="pf-about-title">
+            <span class="pf-split pf-reveal"><%= aboutTitle %></span>
+          </h2>
+          <% if (aboutSubtitle) { %>
+          <p class="pf-about-sub pf-split pf-reveal"><%= aboutSubtitle %></p>
+          <% } %>
+          <div class="pf-about-grid cl-about-grid">
+            <% (aboutItems || []).forEach(function (it, i) { %>
+              <article class="pf-about-card cl-about-card pf-reveal" style="--i:<%= i %>">
+                <span class="pf-about-icon cl-about-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="<%= _icons[it.icon] || _icons.cloud %>"/>
+                  </svg>
+                </span>
+                <h3 class="pf-about-card-title"><%= it.title %></h3>
+                <p class="pf-about-card-desc"><%= it.desc %></p>
+              </article>
+            <% }); %>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- 第四幕 · 坐标 ---------- -->
+      <section class="pf-sec pf-featured cl-featured" id="cl-sec-featured" data-sec="featured">
+        <div class="pf-sec-inner">
+          <h2 class="pf-feat-title">
+            <span class="pf-split pf-reveal"><%= featTitle %></span>
+          </h2>
+          <% if (featDesc) { %>
+          <p class="pf-feat-desc pf-reveal"><%= featDesc %></p>
+          <% } %>
+        </div>
+        <div class="pf-feat-track" id="cl-feat-track">
+          <% (featItems || []).forEach(function (it, i) { %>
+            <article class="pf-feat-item cl-feat-item" data-i="<%= i %>"
+                     style="--tone:<%= it.color || '#8BB0DD' %>">
+              <div class="pf-feat-hit cl-feat-hit">
+                <div class="pf-feat-shade" aria-hidden="true"></div>
+                <div class="pf-feat-text">
+                  <span class="pf-feat-tag cl-feat-tag"><%= it.tag || '' %></span>
+                  <h3 class="pf-feat-item-title"><%= it.title %></h3>
+                  <p class="pf-feat-item-desc"><%= it.desc %></p>
+                </div>
+                <span class="pf-feat-arrow cl-feat-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 8 8"><polygon points="6.767 0.603 6.767 5.897 0.871 0 0 0.872 5.894 6.767 0.605 6.767 0.605 8 8 8 8 0.603 6.767 0.603"/></svg>
+                </span>
+              </div>
+            </article>
+          <% }); %>
+        </div>
+      </section>
+
+      <!-- ---------- 第五幕 · 联系 ---------- -->
+      <section class="pf-sec pf-contact cl-contact" id="cl-sec-contact" data-sec="contact">
+        <div class="pf-sec-inner">
+          <h2 class="pf-contact-title">
+            <span class="pf-split pf-reveal"><%= cTitle %></span>
+          </h2>
+          <% if (cDesc) { %>
+          <p class="pf-contact-desc pf-reveal"><%= cDesc %></p>
+          <% } %>
+          <div class="pf-contact-list">
+            <% (cLinks || []).forEach(function (l) { %>
+              <a class="pf-contact-row cl-contact-row pf-reveal" href="<%= l.href %>" target="_blank" rel="noopener">
+                <span class="pf-contact-label"><%= l.label %></span>
+                <span class="pf-contact-value"><%= l.value %></span>
+                <span class="pf-contact-line cl-contact-line" aria-hidden="true"></span>
+              </a>
+            <% }); %>
+          </div>
+          <% if (cFooter) { %>
+          <div class="pf-contact-footer cl-contact-footer pf-reveal"><%- String(cFooter).trim().split('\n').join('<br>') %></div>
+          <% } %>
+          <a class="pf-back-home cl-back-home pf-reveal" href="<%= url_for('/') %>">← 回到首页</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ============ 自绘滚动条 ============ -->
+  <div class="pf-scrollbar cl-scrollbar" id="cl-scrollbar" aria-hidden="true">
+    <div class="pf-scrollbar-track">
+      <div class="pf-scrollbar-thumb" id="cl-scrollbar-thumb"></div>
+    </div>
+  </div>
+
+  <!-- ============ 光标跟随 ============ -->
+  <div class="pf-cursor cl-cursor" id="cl-cursor" aria-hidden="true"></div>
+  <div class="pf-cursor-dot cl-cursor-dot" id="cl-cursor-dot" aria-hidden="true"></div>
+
+</div>

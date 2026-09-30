@@ -1,0 +1,21 @@
+20:menu:
+21-  首页: /
+22-  文章汇总:
+23-    归档: /archives/
+24-    分类: /categories/
+25-    标签: /tags/
+26-  说说: /shuoshuo/
+27-  友链: /link/
+28-  关于:
+29-    关于本站: /about/
+30-    个人主页: /profile/
+31-    云海之上: /clouds/
+32-
+33-# 社交链接（Hero 区与侧栏使用）
+34-social:
+35-  github: https://github.com/Shangqian-haha
+36-  email: mailto:357425252@qq.com
+37-  qq: ""
+38-
+39-# Hero 区终端徽章文字
+40-hero_badge: "~/hello-world$"

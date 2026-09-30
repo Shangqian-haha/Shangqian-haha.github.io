@@ -1,0 +1,860 @@
+/* ============================================================
+   个人主页 · /profile/ 交互逻辑
+   零依赖，零外部库（WebGL 用原生 API 手写，不引 Three.js）
+   ------------------------------------------------------------
+   共 8 段：
+     1. 字符乱码加载    2. 入场解锁
+     3. WebGL 雨夜场景  4. 滚动进度
+     5. 入场观察器      6. 光标跟随
+     7. 音乐控件        8. 控制台彩蛋
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var root = document.getElementById('profile-root');
+  if (!root) return;
+
+  /* 告诉 CSS「脚本已经接管」。
+     ⚠️ 这一句必须**同步执行、尽早执行** —— CSS 里所有"先藏后显"的规则
+        都挂在 .js-on 下。加得越晚，内容"闪一下才归位"的概率越高。 */
+  root.classList.add('js-on');
+
+  var reduceMotion = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var lerp = function (a, b, t) { return a + (b - a) * t; };
+  var clamp = function (v, mi, ma) { return v < mi ? mi : (v > ma ? ma : v); };
+
+  /* ==========================================================
+     1. 字符乱码加载
+     逐行"解码"：每行从随机字符逐渐固化成目标字符
+     ========================================================== */
+
+  (function preloader() {
+    var box = document.getElementById('pf-pre-lines');
+    if (!box) return;
+
+    /* 四行等宽字符，用摩斯/占位符观感更像"信号在接入" */
+    var targets = [
+      '··· ——— ···',
+      'CONNECTING',
+      'NIGHT / RAIN',
+      '21:47 GMT+8'
+    ];
+    var GLYPHS = '01·—/\\|<>[]{}#*+=~ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+    var rows = targets.map(function (t) {
+      var el = document.createElement('span');
+      el.textContent = t;
+      box.appendChild(el);
+      return { el: el, target: t, done: false };
+    });
+
+    if (reduceMotion) { rows.forEach(function (r) { r.done = true; r.el.classList.add('is-done'); }); return; }
+
+    var start = performance.now();
+    var DUR = 1500;
+
+    (function tick(now) {
+      var p = clamp((now - start) / DUR, 0, 1);
+      rows.forEach(function (r, i) {
+        if (r.done) return;
+        /* 行间错开：越靠后的行越晚固化 */
+        var local = clamp((p - i * 0.13) / 0.6, 0, 1);
+        var keep = Math.floor(local * r.target.length);
+        var out = '';
+        for (var j = 0; j < r.target.length; j++) {
+          var ch = r.target.charAt(j);
+          if (j < keep || ch === ' ') out += ch;
+          else if (ch === '·' || ch === '—') out += Math.random() > 0.5 ? '·' : '—';
+          else out += GLYPHS.charAt(Math.floor(Math.random() * GLYPHS.length));
+        }
+        r.el.textContent = out;
+        if (local >= 1) { r.done = true; r.el.textContent = r.target; r.el.classList.add('is-done'); }
+      });
+      if (p < 1) requestAnimationFrame(tick);
+    })(start);
+  })();
+
+  /* ==========================================================
+     2. 入场解锁
+     点击任意处 / 点按钮 → 收遮罩；同时解锁音频（浏览器要求用户手势）
+     ========================================================== */
+
+  var preloaderEl = document.getElementById('pf-preloader');
+  var entered = false;
+
+  function enter() {
+    if (entered) return;
+    entered = true;
+    root.classList.add('pf-ready');
+    document.body.classList.add('pf-body-lock-off');
+    /* 通知音乐模块可以开始播了（由用户手势触发，合规） */
+    document.dispatchEvent(new CustomEvent('pf:enter'));
+  }
+
+  if (preloaderEl) {
+    preloaderEl.addEventListener('click', enter);
+    preloaderEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enter(); }
+    });
+    /* 若脚本跑完 4 秒用户还没点，自动进入 —— 避免"卡在门口" */
+    window.setTimeout(function () { if (!entered) enter(); }, 4200);
+  } else {
+    enter();
+  }
+
+  document.body.classList.add('pf-body-lock');
+
+  /* ==========================================================
+     3. WebGL 雨夜场景
+     手写 GLSL：多层流动噪声（FBM）当雾与云，
+     一个跟随鼠标的暖色光源当"街灯"，
+     雨丝用高频条带噪声叠加。
+     ----------------------------------------------------------
+     全部是我自己写的 shader，没有复用任何现成 example 的参数。
+     ========================================================== */
+
+  (function nightScene() {
+    var canvas = document.getElementById('pf-canvas');
+    if (!canvas) return;
+
+    var gl = canvas.getContext('webgl', {
+      alpha: false,
+      antialias: false,
+      depth: false,
+      stencil: false,
+      powerPreference: 'low-power'
+    }) || canvas.getContext('experimental-webgl');
+
+    if (!gl) {
+      /* WebGL 不可用 → 只靠 CSS 层（雨丝/雾/暗角），依然成立 */
+      root.classList.add('pf-no-webgl');
+      return;
+    }
+
+    var VERT = [
+      'attribute vec2 a_pos;',
+      'void main(){ gl_Position = vec4(a_pos, 0.0, 1.0); }'
+    ].join('\n');
+
+    /* 片段着色器 —— 核心氛围在这里 */
+    /* ⚠️ 雨丝的三个反直觉点（都踩过，见下方注释）：
+         ① 方向：GL 的 y 轴朝上，而"雨往下落"是屏幕向下 = GL 的 -y。
+            所以时间项前面必须是 **正的 +u_time**（配合 y 的负系数），
+            写成 -u_time 雨就倒着往上飞。
+         ② 走样：高频噪声层若每帧位移接近 1 个噪声网格，就会出现
+            "闪烁/抽搐"而不是"流动"。60fps 下每帧位移必须 << 1 网格。
+         ③ 周期：噪声自身无周期，但**时间乘数过大**会让图案在 1~2 秒内
+            把整个屏走完一遍，看起来就是"2 秒重复一次"。
+            总位移速率要压到「肉眼觉得在流，但一屏要走十几秒」的量级。 */
+    var FRAG = [
+      'precision mediump float;',
+      'uniform vec2  u_res;',
+      'uniform float u_time;',
+      'uniform vec2  u_mouse;',   /* 归一化鼠标，已做平滑 */
+      'uniform vec2  u_scroll;',  /* 滚动进度 (progress, velocity) */
+      '',
+      /* --- 2D 哈希与值噪声 --- */
+      'float hash(vec2 p){',
+      '  p = fract(p * vec2(123.34, 456.21));',
+      '  p += dot(p, p + 45.32);',
+      '  return fract(p.x * p.y);',
+      '}',
+      'float vnoise(vec2 p){',
+      '  vec2 i = floor(p); vec2 f = fract(p);',
+      '  vec2 u = f * f * (3.0 - 2.0 * f);',
+      '  float a = hash(i);',
+      '  float b = hash(i + vec2(1.0, 0.0));',
+      '  float c = hash(i + vec2(0.0, 1.0));',
+      '  float d = hash(i + vec2(1.0, 1.0));',
+      '  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);',
+      '}',
+      /* --- FBM：多层叠加，得到雾/云的有机感 --- */
+      'float fbm(vec2 p){',
+      '  float v = 0.0; float a = 0.5;',
+      '  for(int i = 0; i < 5; i++){',
+      '    v += a * vnoise(p);',
+      '    p *= 2.02; a *= 0.5;',
+      '  }',
+      '  return v;',
+      '}',
+      '',
+      'void main(){',
+      '  vec2 uv = gl_FragCoord.xy / u_res;',
+      '  vec2 p  = uv;',
+      '  p.x *= u_res.x / u_res.y;',
+      '',
+      /* 鼠标视差：整个场景随光标轻微平移（幅度很小，避免"整屏在晃"） */
+      '  vec2 par = (u_mouse - 0.5) * 0.045;',
+      '  p += par;',
+      '',
+      /* 滚动让雾层缓慢上移，形成"下潜"感 */
+      '  float sc = u_scroll.x;',
+      '  p.y += sc * 0.22;',
+      '',
+      /* ---------- 底色：夜空的纵向渐变 ---------- */
+      /* 上方深蓝黑，接近地平线略亮（城市光污染） */
+      '  vec3 cTop = vec3(0.026, 0.040, 0.062);',
+      '  vec3 cMid = vec3(0.055, 0.083, 0.120);',
+      '  vec3 cBot = vec3(0.085, 0.104, 0.132);',
+      '  float gy = uv.y;',
+      '  vec3 col = mix(cBot, cMid, smoothstep(0.0, 0.55, gy));',
+      '  col = mix(col, cTop, smoothstep(0.45, 1.0, gy));',
+      '',
+      /* ---------- 云层：两层不同速度的 FBM ---------- */
+      '  float t = u_time * 0.018;',
+      '  vec2 q1 = vec2(p.x * 0.9 + t,        p.y * 1.7 - t * 0.44);',
+      '  vec2 q2 = vec2(p.x * 1.7 - t * 0.62, p.y * 2.6 + t * 0.28);',
+      '  float n1 = fbm(q1);',
+      '  float n2 = fbm(q2);',
+      '  float cloud = n1 * 0.66 + n2 * 0.34;',
+      /* 把云压到上半部，下半部留干净水面 */
+      '  float cloudMask = smoothstep(0.34, 0.94, gy);',
+      '  cloud *= cloudMask;',
+      /* 云层比底色略亮、略偏冷紫（雨云的观感） */
+      '  vec3 cloudCol = vec3(0.145, 0.176, 0.222);',
+      '  col = mix(col, cloudCol, cloud * 0.72);',
+      '',
+      /* ---------- 水面：下半部横向拉长的噪声当波纹 ---------- */
+      '  float waterMask = smoothstep(0.40, 0.14, gy);',
+      '  vec2 wp = vec2(p.x * 0.7, p.y * 5.5 + t * 1.6);',
+      '  float ripple = fbm(wp) * 0.5 + fbm(wp * 3.1) * 0.22;',
+      '  /* 波纹只让水稍微亮一点点，重点是"不平" */',
+      '  col += vec3(0.022, 0.032, 0.046) * ripple * waterMask;',
+      '',
+      /* ---------- 光源：跟随鼠标的暖色灯笼 ---------- */
+      /* 关键：参考图里的光是"一盏灯笼"，不是"一个太阳"。
+         做法 —— 中心亮但**半径很小**，外面接一圈柔和的雾状扩散，
+         再叠一点横向的椭球（灯笼挂着的观感），衰减要陡。 */
+      '  vec2 lp = u_mouse; lp.x *= u_res.x / u_res.y;',
+      /* 纵向压扁一点：光晕偏横向铺开，像挂在檐下的灯被雨雾散开 */
+      '  vec2 dv = vec2((p.x - lp.x) * 1.0, (p.y - lp.y) * 1.45);',
+      '  float d2 = dot(dv, dv);',
+      /* ⚠️ 这是"一小盏灯笼"，不是"一团光"。
+         d2 的系数越大 → 半径越小。原值 155/13/2.1 导致光晕铺满半屏，
+         鼠标一动整页都亮，观感是"手电筒"而不是"街角那盏灯"。
+         现在整体收紧约 3~6 倍，只留一小圈暖光。 */
+      /* ① 灯芯：极小极亮 */
+      '  float core = 1.0 / (1.0 + d2 * 620.0);',
+      /* ② 灯罩：小半径的柔光（原 13，覆盖太广） */
+      '  float halo = 1.0 / (1.0 + d2 * 78.0);',
+      /* ③ 雾散：大范围弥漫压到极弱（原 2.1*0.040，几乎是整屏提亮） */
+      '  float mist = 1.0 / (1.0 + d2 * 5.6);',
+      '  float lampGlow = core * 0.92 + halo * 0.072 + mist * 0.013;',
+      /* 暖黄偏橙 —— 灯笼的那种色温，不是纯黄也不是纯橙 */
+      '  vec3 lampCol = vec3(0.960, 0.700, 0.395);',
+      /* 光只加在"空气里"，被雾层和雨丝稍微削一点，更像隔着一层雨看灯 */
+      '  float airDamp = 0.72 + 0.28 * (1.0 - cloud * 0.6);',
+      '  col += lampCol * lampGlow * airDamp * 0.66;',
+      '',
+      /* ---------- 雨丝 ---------- */
+      /* ⚠️ 纯线性条带会呈现"等距斜线栅栏"的规律感 —— 一眼就假。
+         做法：把雨丝坐标先做一次低频噪声扰动（让雨丝弯曲、疏密不均），
+         再用高频阈值切出细线，最后按雾的浓度调制可见度。 */
+      /* 方向与速度（关键）：
+         · rp.y 的时间系数取 **负** 且与"下落"配合 → 雨向下落。
+           这里用 +u_time * 1.02 作用在 y 的负系数上，
+           等价于图案整体向下平移。
+         · 速度取 1.02（原 1.55）→ 每帧位移 1.02/60 ≈ 0.017 网格，
+           远小于 1，不再闪烁走样。
+         · 两层速度差拉大（0.55 / 1.02）→ 产生纵深（近雨快、远雨慢）。 */
+      '  vec2 rp = vec2(p.x * 5.4 + p.y * 1.35 + u_time * 0.42, p.y * 1.15 + u_time * 1.02);',
+      /* 低频扰动：让雨的分布不再均匀（且扰动本身也要动得很慢，否则又闪） */
+      '  float rJit = vnoise(rp * 0.42 + u_time * 0.05 + 13.7);',
+      '  rp += (rJit - 0.5) * 0.50;',
+      '  float rn = vnoise(rp * 9.0);',
+      /* 二级高频：切更细的线。系数从 27 降到 15，
+         否则 rp*27 * 1.02 ≈ 27.5 网格/秒 = 每帧 0.46 网格，照样闪。 */
+      '  float rn2 = vnoise(rp * 15.0 + 5.1);',
+      /* 阈值稍微放宽（0.86→0.83）补偿降频后线条变粗 */
+      '  float rain = smoothstep(0.83, 1.0, rn * 0.72 + rn2 * 0.28);',
+      /* 雨只落在有雾/有云的区域，且离灯光越远越淡（灯下看得见雨） */
+      '  float rainVis = 0.42 + 0.58 * cloudMask;',
+      '  rainVis *= 0.55 + 0.45 * clamp(lampGlow * 2.6, 0.0, 1.0);',
+      '  col += vec3(0.62, 0.70, 0.80) * rain * 0.26 * rainVis;',
+      '',
+      /* ---------- 暗角 ---------- */
+      '  vec2 vc = uv - 0.5;',
+      '  float vig = 1.0 - dot(vc, vc) * 0.92;',
+      '  col *= clamp(vig, 0.0, 1.0);',
+      '',
+      /* ---------- 轻微胶片颗粒（掩掉渐变色带） ---------- */
+      '  float grain = hash(gl_FragCoord.xy + fract(u_time) * 91.7) - 0.5;',
+      '  col += grain * 0.020;',
+      '',
+      '  gl_FragColor = vec4(col, 1.0);',
+      '}'
+    ].join('\n');
+
+    function compile(type, src) {
+      var sh = gl.createShader(type);
+      gl.shaderSource(sh, src);
+      gl.compileShader(sh);
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+        return null;
+      }
+      return sh;
+    }
+
+    var vs = compile(gl.VERTEX_SHADER, VERT);
+    var fs = compile(gl.FRAGMENT_SHADER, FRAG);
+    if (!vs || !fs) { root.classList.add('pf-no-webgl'); return; }
+
+    var prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      root.classList.add('pf-no-webgl');
+      return;
+    }
+    gl.useProgram(prog);
+
+    var buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+      -1, -1, 1, -1, -1, 1,
+      -1, 1, 1, -1, 1, 1
+    ]), gl.STATIC_DRAW);
+
+    var aPos = gl.getAttribLocation(prog, 'a_pos');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+    var uRes    = gl.getUniformLocation(prog, 'u_res');
+    var uTime   = gl.getUniformLocation(prog, 'u_time');
+    var uMouse  = gl.getUniformLocation(prog, 'u_mouse');
+    var uScroll = gl.getUniformLocation(prog, 'u_scroll');
+
+    /* ---- 状态：都是"目标值"，渲染时用 lerp 追上去 ---- */
+    /* 开场灯位：偏左下（像远处街角那盏灯），不要压在标题正中。
+       鼠标一动就会跟过去，所以这里只决定"第一眼"的构图。 */
+    var mouseT = 0.26, mouseTY = 0.30;   /* 目标（屏幕归一化，y 朝上） */
+    var mouseC = 0.26, mouseCY = 0.30;   /* 当前 */
+    var scrollC = 0, scrollT = 0;
+    var DPR_CAP = 1.5;
+
+    function resize() {
+      var w = canvas.clientWidth || window.innerWidth;
+      var h = canvas.clientHeight || window.innerHeight;
+      var dpr = Math.min(window.devicePixelRatio || 1, DPR_CAP);
+      /* 再压一档：这个场景是全屏 FBM，像素越少越流畅，观感几乎无差 */
+      var scale = reduceMotion ? 0.5 : 0.72;
+      var W = Math.max(2, Math.floor(w * dpr * scale));
+      var H = Math.max(2, Math.floor(h * dpr * scale));
+      if (canvas.width !== W || canvas.height !== H) {
+        canvas.width = W;
+        canvas.height = H;
+        gl.viewport(0, 0, W, H);
+      }
+    }
+
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+
+    window.addEventListener('pointermove', function (e) {
+      mouseT  = e.clientX / window.innerWidth;
+      mouseTY = 1 - e.clientY / window.innerHeight;   /* GL 的 y 轴朝上 */
+    }, { passive: true });
+
+    /* 滚动进度 → 雾层上移 */
+    window.addEventListener('scroll', function () {
+      var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      scrollT = window.scrollY / max;
+    }, { passive: true });
+
+    var start = performance.now();
+    var running = true;
+
+    /* 页面不可见时暂停渲染，省电 */
+    document.addEventListener('visibilitychange', function () {
+      running = !document.hidden;
+      if (running) loop(performance.now());
+    });
+
+    function loop(now) {
+      if (!running) return;
+      resize();
+
+      var t = (now - start) / 1000;
+
+      mouseC  = lerp(mouseC,  mouseT,  0.045);
+      mouseCY = lerp(mouseCY, mouseTY, 0.045);
+      scrollC = lerp(scrollC, scrollT, 0.07);
+
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform1f(uTime, t);
+      gl.uniform2f(uMouse, mouseC, mouseCY);
+      gl.uniform2f(uScroll, scrollC, 0);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+      requestAnimationFrame(loop);
+    }
+
+    requestAnimationFrame(loop);
+  })();
+
+  /* ==========================================================
+     4. 滚动进度
+     ========================================================== */
+
+  (function scrollProgress() {
+    var thumb = document.getElementById('pf-scrollbar-thumb');
+    var track = document.querySelector('.pf-scrollbar-track');
+    var bar = document.getElementById('pf-scrollbar');
+    if (!thumb || !track) return;
+
+    var smoothing = 0, target = 0;
+
+    function measure() {
+      var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      var p = clamp(window.scrollY / max, 0, 1);
+      var th = track.clientHeight;
+      var hh = Math.max(22, thumb.offsetHeight || 30);
+      target = p * (th - hh);
+    }
+
+    measure();
+    window.addEventListener('resize', measure, { passive: true });
+    window.addEventListener('scroll', measure, { passive: true });
+
+    (function tick() {
+      smoothing = lerp(smoothing, target, 0.12);
+      /* 用 transform 而不是 top —— 走合成层，不触发重排 */
+      thumb.style.transform = 'translate3d(0,' + smoothing.toFixed(2) + 'px,0)';
+      if (bar) bar.classList.toggle('is-visible', window.scrollY > 40);
+      requestAnimationFrame(tick);
+    })();
+  })();
+
+  /* ==========================================================
+     5. 入场：逐行遮罩上推（split-line-up-effect）
+     ----------------------------------------------------------
+     参考站最标志性的动画就是这个。原理：
+       ① 把一段文字按"视觉行"切开，每行各自包一层 overflow:hidden 的壳
+       ② 壳里再放一个 .pf-line-in，初始 translateY(105%) —— 完全藏在壳下面
+       ③ 激活时把 inner 推回 0：文字像从"下一行"升上来
+       ④ 行与行之间错开延迟（easeOutQuint），形成"逐行浮现"的节奏
+     比整体淡入位移高级得多：有方向、有层次、文字是"被揭开"而不是"飘进来"。
+     ========================================================== */
+
+  (function splitLines() {
+    var targets = Array.prototype.slice.call(root.querySelectorAll('.pf-split'));
+    if (!targets.length) return;
+
+    /* 把元素里的文字按视觉行切分。
+       做法：先按 <br> 与换行拆成"逻辑段"，再在每段内部用
+       逐字测量（getBoundingClientRect().top 变化）找出真实的视觉折行位置。 */
+    function splitEl(el) {
+      /* 已经切过就不重复切 */
+      if (el.getAttribute('data-split') === '1') {
+        return Array.prototype.slice.call(el.querySelectorAll('.pf-line-in'));
+      }
+
+      var raw = el.innerHTML;
+      /* 按 <br> 或换行拆逻辑段（保留原来的换行语义） */
+      var segs = raw.split(/<br\s*\/?>/i).map(function (s) { return s.trim(); })
+                    .filter(function (s) { return s.length; });
+      if (!segs.length) segs = [''];
+
+      /* 先清空、铺入纯文本节点，便于逐字测量 */
+      el.textContent = '';
+      var nodes = [];
+      segs.forEach(function (seg, si) {
+        if (si > 0) {
+          el.appendChild(document.createElement('br'));
+          nodes.push(null);   /* 段间强制换行，标记为"必须断行" */
+        }
+        /* 逐字成 span，方便测出折行 */
+        for (var i = 0; i < seg.length; i++) {
+          var sp = document.createElement('span');
+          sp.textContent = seg.charAt(i);
+          sp.style.display = 'inline-block';
+          sp.style.whiteSpace = 'pre';
+          el.appendChild(sp);
+          nodes.push(sp);
+        }
+      });
+
+      /* 按 top 归组 → 得到视觉行 */
+      var lines = [];
+      var cur = [];
+      var lastTop = null;
+      nodes.forEach(function (n) {
+        if (!n) {                    /* 强制断行 */
+          if (cur.length) { lines.push(cur); cur = []; }
+          lastTop = null;
+          return;
+        }
+        var top = Math.round(n.getBoundingClientRect().top);
+        if (lastTop === null || top === lastTop) {
+          cur.push(n);
+        } else {
+          if (cur.length) lines.push(cur);
+          cur = [n];
+        }
+        lastTop = top;
+      });
+      if (cur.length) lines.push(cur);
+
+      /* 用行内容重建 DOM：每行一个壳 + 一个可位移的 inner */
+      el.textContent = '';
+      var inners = [];
+      lines.forEach(function (lineNodes) {
+        var text = lineNodes.map(function (n) { return n.textContent; }).join('');
+        if (!text.replace(/\s/g, '')) return;
+
+        var shell = document.createElement('span');
+        shell.className = 'pf-line';
+        var inner = document.createElement('span');
+        inner.className = 'pf-line-in';
+        inner.textContent = text;
+        shell.appendChild(inner);
+        el.appendChild(shell);
+        inners.push(inner);
+      });
+
+      el.setAttribute('data-split', '1');
+      return inners;
+    }
+
+    var allInners = [];
+    targets.forEach(function (el) {
+      var inners = splitEl(el);
+      /* 行号写进自定义属性，CSS 里用 --li 做递减延迟 */
+      inners.forEach(function (inner, i) {
+        inner.style.setProperty('--li', i);
+      });
+      allInners = allInners.concat(inners);
+    });
+
+    /* 偏好减少动效 → 直接把所有行推到位置，不做动画 */
+    if (reduceMotion) {
+      root.classList.add('pf-split-done');
+      return;
+    }
+
+    /* 观察每个 .pf-split 容器（按容器一次性唤起，行内自身错开） */
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('is-in');
+        io.unobserve(en.target);
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+
+    targets.forEach(function (el) { io.observe(el); });
+  })();
+
+  /* ==========================================================
+     5b. 入场观察器（非文字类元素）
+     同批进入的元素按 DOM 顺序递增延迟（最多 5 档，每档 90ms）
+     ========================================================== */
+
+  (function reveal() {
+    var items = Array.prototype.slice.call(root.querySelectorAll('.pf-reveal'));
+    if (!items.length) return;
+
+    /* 无 IntersectionObserver 或偏好减少动效 → 全部直接显示 */
+    if (!('IntersectionObserver' in window) || reduceMotion) {
+      items.forEach(function (el) { el.classList.add('is-in'); });
+      return;
+    }
+
+    /* 先给每个元素算好它在"同批"里的序号 —— 用一个全局游标，
+       按当前视口内出现顺序分批。简单起见：按元素在文档中的位置，
+       每 5 个为一组循环给延迟。 */
+    items.forEach(function (el, i) {
+      el.style.setProperty('--rd', (i % 5) * 90);
+    });
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          en.target.classList.add('is-in');
+          io.unobserve(en.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+
+    items.forEach(function (el) { io.observe(el); });
+  })();
+
+  /* ==========================================================
+     5c. 滚动叙事：每幕随滚动做视差 / 淡出
+     ----------------------------------------------------------
+     参考站的手感来源：滚动不是"翻页"，而是驱动场景与文字连续变化。
+     这里给每一幕挂一个进度值，做：
+       · 内容轻微纵向视差（比背景慢，形成层次）
+       · 离开视口时整体淡出 + 轻微上移
+     ========================================================== */
+
+  (function scrollNarrative() {
+    if (reduceMotion) return;
+    var secs = Array.prototype.slice.call(root.querySelectorAll('.pf-sec'));
+    if (!secs.length || !window.requestAnimationFrame) return;
+
+    /* 每幕提前算好它的文档区间；resize 时重算 */
+    var meta = secs.map(function (sec) {
+      var inner = sec.querySelector('.pf-sec-inner') || sec.querySelector('.pf-hero-inner');
+      return { sec: sec, inner: inner, top: 0, height: 1 };
+    });
+
+    function measure() {
+      var sy = window.scrollY || window.pageYOffset || 0;
+      meta.forEach(function (m) {
+        var r = m.sec.getBoundingClientRect();
+        m.top = r.top + sy;
+        m.height = Math.max(1, r.height);
+      });
+    }
+
+    measure();
+    window.addEventListener('resize', measure, { passive: true });
+    /* 字体加载完高度会变，重新量一次 */
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(measure).catch(function () {});
+    }
+
+    var cur = meta.map(function () { return 0; });
+
+    (function tick() {
+      var sy = window.scrollY || window.pageYOffset || 0;
+      var vh = window.innerHeight;
+
+      meta.forEach(function (m, i) {
+        if (!m.inner) return;
+        /* p: 0 = 幕顶刚到视口底, 1 = 幕底离开视口顶 */
+        var p = (sy + vh - m.top) / (vh + m.height);
+        p = clamp(p, 0, 1);
+        cur[i] = lerp(cur[i], p, 0.12);
+
+        /* 视差：进入时从 +18px 落到 -18px，比背景慢 → 有纵深 */
+        var local = cur[i] - 0.5;                 /* -0.5 ~ 0.5 */
+        var ty = local * -26;
+        /* 幕中心越过视口中心后逐渐淡出（首幕不淡出，避免一进来就变淡） */
+        var fade = 1;
+        if (i > 0) {
+          var off = Math.abs(local);
+          fade = 1 - clamp((off - 0.28) / 0.30, 0, 1) * 0.55;
+        }
+        m.inner.style.transform = 'translate3d(0,' + ty.toFixed(2) + 'px,0)';
+        m.inner.style.opacity = fade.toFixed(3);
+      });
+
+      requestAnimationFrame(tick);
+    })();
+  })();
+
+  /* ==========================================================
+     6. 光标跟随
+     外圈延迟跟随（光晕拖尾），内点精确跟随
+     ========================================================== */
+
+  (function cursor() {
+    var ring = document.getElementById('pf-cursor');
+    var dot = document.getElementById('pf-cursor-dot');
+    if (!ring || !dot) return;
+    if (window.matchMedia && window.matchMedia('(hover: none)').matches) return;
+
+    var tx = window.innerWidth / 2, ty = window.innerHeight / 2;
+    var rx = tx, ry = ty;
+
+    window.addEventListener('pointermove', function (e) {
+      tx = e.clientX; ty = e.clientY;
+      dot.style.transform = 'translate3d(' + tx + 'px,' + ty + 'px,0)';
+    }, { passive: true });
+
+    (function tick() {
+      rx = lerp(rx, tx, 0.14);
+      ry = lerp(ry, ty, 0.14);
+      ring.style.transform = 'translate3d(' + rx.toFixed(2) + 'px,' + ry.toFixed(2) + 'px,0)';
+      requestAnimationFrame(tick);
+    })();
+
+    /* 悬停在可交互元素上时放大外圈 */
+    var hoverSel = 'a, button, input, .pf-about-card, .pf-feat-item';
+    document.addEventListener('pointerover', function (e) {
+      if (e.target.closest && e.target.closest(hoverSel)) ring.classList.add('is-hover');
+    }, { passive: true });
+    document.addEventListener('pointerout', function (e) {
+      if (e.target.closest && e.target.closest(hoverSel)) ring.classList.remove('is-hover');
+    }, { passive: true });
+  })();
+
+  /* ==========================================================
+     7. 音乐控件
+     ----------------------------------------------------------
+     形态参考 #snd-btn：一个圆钮 + 20×20 canvas 画 7 根跳动的竖条。
+     没有音量滑块 —— 音量在 profile.yml 配置，前台只有"播放/暂停"。
+
+     ⚠️ 占位方案：data-src 为空时不加载任何音频文件，
+        但播放/暂停、竖条动画、aria 状态全部真实可用。
+        替换成真音频：把 profile.yml 的 music.src 填上即可，
+        此文件不需要任何改动。
+     ========================================================== */
+
+  (function music() {
+    var box = document.getElementById('pf-music');
+    if (!box) return;
+
+    var btn    = document.getElementById('pf-music-btn');
+    var cvs    = document.getElementById('pf-snd-canvas');
+    var src    = box.getAttribute('data-src') || '';
+    var type   = box.getAttribute('data-type') || 'audio/mpeg';
+    var loopOn = box.getAttribute('data-loop') === '1';
+    var isPlaceholder = !src;
+
+    if (isPlaceholder) box.classList.add('is-placeholder');
+
+    var audio = null;
+    var playing = false;
+    var pendingPlay = false;
+    var wantVolume = clamp(parseFloat(box.getAttribute('data-volume')) || 0.35, 0, 1);
+
+    /* ---- 有真实音源时才建 <audio> ---- */
+    if (!isPlaceholder) {
+      audio = document.createElement('audio');
+      audio.loop = loopOn;
+      audio.volume = 0;              /* 淡入用 */
+      audio.preload = 'none';
+      var s = document.createElement('source');
+      s.src = src;
+      s.type = type;
+      audio.appendChild(s);
+      audio.style.display = 'none';
+      box.appendChild(audio);
+
+      audio.addEventListener('ended', function () {
+        if (!loopOn) setPlaying(false);
+      });
+      audio.addEventListener('error', function () { setPlaying(false); });
+    }
+
+    /* ---- canvas 竖条：7 根，正弦相位错开，高度随"响度"起伏 ----
+       ⚠️ 参考实现画在 20×20 的逻辑坐标里（canvas CSS 尺寸 20px），
+          用 dpr 放大 backing store，否则 retina 上是糊的。 */
+    var D = 20;                       /* 逻辑边长（与 canvas width/height 属性一致）*/
+    var L = Math.min(window.devicePixelRatio || 1, 2);
+    var ctx = null;
+    if (cvs) {
+      cvs.width  = D * L;
+      cvs.height = D * L;
+      ctx = cvs.getContext('2d');
+    }
+
+    /* A 是"时间累加器"（秒），只在播放时推进 —— 暂停时竖条自然停住 */
+    var A = 0;
+    var lastT = performance.now();
+
+    function drawBars() {
+      if (!ctx) return;
+      var now = performance.now();
+      var dt = Math.min((now - lastT) / 1000, 0.05);
+      lastT = now;
+
+      /* 播放中才推进相位；暂停后用 lerp 把高度收平（不是硬切，更柔和） */
+      if (playing) A += dt;
+      var amp = playing ? 1 : 0;
+
+      ctx.save();
+      ctx.scale(L, L);
+      ctx.clearRect(0, 0, D, D);
+      /* 播放时暖色，暂停时压成灰蓝 —— 一眼能看出状态 */
+      ctx.fillStyle = playing
+        ? getComputedStyle(box).getPropertyValue('--pf-lamp').trim() || '#E8A85C'
+        : 'rgba(160,172,190,.55)';
+      for (var f = 0; f < 7; f++) {
+        /* 同参考实现：3px 基准 + 最多 8px 起伏，7 根共占 21px（留 1px 余量） */
+        var wave = 0.5 * Math.sin(-6 * A + 0.6 * f) + 0.5;
+        var h = 3 + 8 * wave * amp;
+        ctx.fillRect(3 * f, D - h, 1, h);
+      }
+      ctx.restore();
+    }
+
+    (function tick() {
+      drawBars();
+      /* 只在播放或还没收平时常驻重绘，静止时省电 */
+      requestAnimationFrame(tick);
+    })();
+
+    function setPlaying(on) {
+      playing = on;
+      box.classList.toggle('is-playing', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.setAttribute('aria-label', on ? '暂停背景音乐' : '播放背景音乐');
+      btn.setAttribute('title', on ? '暂停背景音乐' : '播放背景音乐');
+    }
+
+    function fadeTo(target, ms) {
+      if (!audio) return;
+      var from = audio.volume;
+      var t0 = performance.now();
+      (function step(now) {
+        var p = clamp((now - t0) / ms, 0, 1);
+        var eased = p * p * (3 - 2 * p);
+        audio.volume = clamp(lerp(from, target, eased), 0, 1);
+        if (p < 1) requestAnimationFrame(step);
+      })(t0);
+    }
+
+    function doPlay() {
+      /* 占位模式：没有音频，但状态与竖条动画照常 —— 交互逻辑完整 */
+      if (isPlaceholder) { setPlaying(true); return; }
+      var pr = audio.play();
+      if (pr && pr.then) {
+        pr.then(function () { setPlaying(true); fadeTo(wantVolume, 900); })
+          .catch(function () { setPlaying(false); });
+      } else {
+        setPlaying(true); fadeTo(wantVolume, 900);
+      }
+    }
+
+    function doPause() {
+      if (isPlaceholder) { setPlaying(false); return; }
+      fadeTo(0, 420);
+      window.setTimeout(function () { audio.pause(); setPlaying(false); }, 430);
+    }
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (playing) doPause();
+      else doPlay();
+    });
+
+    /* 入场后（已有用户手势）自动开播 —— 这是最常见的"点击进入即起音乐" */
+    document.addEventListener('pf:enter', function () {
+      if (isPlaceholder || !audio) return;
+      doPlay();
+    });
+
+    /* 页面隐藏时暂停，回来时恢复 */
+    document.addEventListener('visibilitychange', function () {
+      if (playing) lastT = performance.now();
+      if (!audio) return;
+      if (document.hidden && playing) { audio.pause(); pendingPlay = true; playing = false; box.classList.add('is-playing'); }
+      else if (!document.hidden && pendingPlay) { pendingPlay = false; doPlay(); }
+    });
+
+    /* 别忘了给 CSS 变量兜底：getComputedStyle 取不到时用暖色 */
+    if (!box.style.getPropertyValue('--pf-lamp')) {
+      box.style.setProperty('--pf-lamp-fallback', '#E8A85C');
+    }
+  })();
+
+  /* ==========================================================
+     8. 控制台彩蛋
+     ========================================================== */
+
+  (function easterEgg() {
+    if (!window.console) return;
+    var css = 'color:#E8A85C;font-family:Georgia,serif;font-size:13px;';
+    try {
+      console.log('%c雨还在下。', css);
+      console.log('%c—— 尚谦 · ' + new Date().toLocaleDateString('zh-CN'), css);
+    } catch (e) {}
+  })();
+
+})();

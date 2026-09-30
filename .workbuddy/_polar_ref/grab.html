@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>grab</title>
+<style>
+  html,body{margin:0;background:#000;height:100%;overflow:hidden}
+  video{display:block;width:720px;height:1280px;object-fit:contain}
+</style>
+</head>
+<body>
+<video id="v" src="ref.mp4" muted playsinline preload="auto"></video>
+<script>
+var v = document.getElementById('v');
+window.__err = '';
+window.__ready = false;
+window.__state = 0;
+v.addEventListener('loadedmetadata', function () { window.__ready = true; });
+v.addEventListener('error', function () {
+  window.__err = 'video error code=' + (v.error && v.error.code);
+});
+
+/* 让解码器真正就绪：play 一下再 pause */
+window.__init = function () {
+  return new Promise(function (res) {
+    var go = function () {
+      var p = v.play();
+      if (!p || !p.then) { res(1); return; }
+      p.then(function () { v.pause(); res(2); })
+       .catch(function () { res(3); });
+    };
+    if (v.readyState >= 2) go();
+    else v.addEventListener('canplay', go, { once: true });
+    setTimeout(function () { res(0); }, 6000);
+  });
+};
+
+/* seek 到 t 并等两帧绘制完成（不回传图像，交给 CDP 截图） */
+window.__seek = function (t) {
+  return new Promise(function (res) {
+    var done = function () {
+      v.removeEventListener('seeked', done);
+      v.pause();
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () { res(v.currentTime); });
+      });
+    };
+    v.addEventListener('seeked', done);
+    try { v.currentTime = t; } catch (e) {}
+    setTimeout(function () {
+      v.removeEventListener('seeked', done);
+      res(-1);
+    }, 4000);
+  });
+};
+
+window.__meta = function () {
+  return { ready: window.__ready, err: window.__err,
+           dur: v.duration, w: v.videoWidth, h: v.videoHeight };
+};
+</script>
+</body>
+</html>
