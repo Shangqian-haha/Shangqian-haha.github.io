@@ -142,17 +142,18 @@
   <%- partial('_partial/body-end') %>
   <script src="<%= url_for('/js/main.js') %>"></script>
   <% if (page.type === 'clouds') { %>
+  <% /* 音乐控件（共用模块）：逻辑在 js/music.js，样式在 profile.css（本页加载）。
+        ⚠️ 2026-09-30：从「最后加载」挪到**最前**。music.js 一执行就建立
+           <audio>，浏览器随即开始下载背景音乐（未压缩时 5.5MB，是本页最大
+           的单个资源）；而闸门现在要等音频缓冲好才放行（见 clouds.js 的
+           loadTick 与 music.js 的 window.__pfAudio），早几百毫秒开始下载
+           就直接体现为闸门少等几百毫秒。它自身不依赖任何其它脚本。 */ %>
+  <script src="<%= url_for('/js/music.js') %>?v=<%= Date.now() %>"></script>
   <% /* v5「极地 · 极光冰原」：纯自研 three r112 场景，无外部模型，
         所以不再需要 GLTFLoader（v2 的跑者 GLB 已随 v2 一起备份到
         .workbuddy/clouds-v2-backup/）。 */ %>
   <script src="<%= url_for('/js/vendor/three.r112.js') %>"></script>
   <script src="<%= url_for('/js/clouds.js') %>?v=<%= Date.now() %>"></script>
-  <% } %>
-  <% /* 音乐控件（共用模块）：逻辑在 js/music.js，样式在 profile.css（本页加载）。
-        ⚠️ 放最后加载：它只在"进入后"（pf:enter）才起播，不依赖其它脚本的
-           初始化顺序，但排后面可以保证 DOM 与样式都已就位。 */ %>
-  <% if (_isFull) { %>
-  <script src="<%= url_for('/js/music.js') %>?v=<%= Date.now() %>"></script>
   <% } %>
 </body>
 </html>

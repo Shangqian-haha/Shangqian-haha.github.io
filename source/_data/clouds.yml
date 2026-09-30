@@ -47,8 +47,20 @@ brand_sub: SHANG QIAN
 #    音乐不在这里配 —— 在 source/_data/profile.yml 的 music 段（clouds.ejs 读它）。
 
 # ---- 入场闸门 ----
+#   ⚠️ 2026-09-30 起，闸门内**不再渲染任何提示文字**（按要求取消）——
+#      下面三项留着不删，clouds.js 的 setHint() 会因找不到 hint 元素而空转。
+#      想恢复文字：在 clouds.ejs 进度条后加回
+#      <span class="cl-gate-hint" id="cl-gate-hint"></span>。
+#   三句文案原本按加载阶段自动切换（clouds.js 的 setHint()）：
+#     loading → 场景（极光 WebGL）还在生成时显示
+#     audio   → 场景就绪、但背景音乐还没缓冲完时显示
+#              ⚠️ 2026-09-30 新增：进度条现在把音乐缓冲算进去
+#              （场景权重 0.25 / 音频权重 0.75），
+#              否则会出现「点进来后歌还没出声」的落差。
+#     enter   → 进度满 100% 后显示，约 2.3s 后自动进入（也可点击进入）
 gate:
   loading: 正在生成极光
+  audio: 正在缓冲音乐
   enter: 点击任意处进入
 
 # ---- 滚动引导（左下竖排）----

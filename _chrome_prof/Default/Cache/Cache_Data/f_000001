@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="no-js">
+<head>
+<meta charset="utf-8">
+<script>
+  /* 在首次绘制前把 no-js 换成 js —— 让 CSS 能区分"脚本可用 / 不可用"。
+     必须内联且尽早，否则会出现"先按 no-js 渲染、再跳变"的闪烁。 */
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/, 'js');
+</script>
+
+
+<script>
+  (function () {
+    var ok = false;
+    try {
+      var c = document.createElement('canvas');
+      ok = !!(c.getContext('webgl') || c.getContext('experimental-webgl'));
+    } catch (e) { ok = false; }
+    if (!ok) return;
+    var h = document.documentElement;
+    h.classList.add('cl-gate-on');
+    /* ⚠️ 兜底时限 12s（2026-09-30 由 6s 放宽）：实测 200KB/s 弱网下
+       three.r112.js 下载 + 解析 + WebGL 初始化要 6~10s，6s 兜底会先把
+       闸门摘掉、让正文裸奔好几秒、闸门又盖回来 —— 比卡住更难看。
+       12s 已远超真实设备的脚本就绪时间；真正「永远卡住」的场景
+       （脚本加载失败）由 clouds.js 自己的 bootFail() 即时摘除。 */
+    window.setTimeout(function () {
+      if (!window.__clBooted) {
+        h.classList.remove('cl-gate-on');
+        if (document.body) document.body.classList.remove('cl-lock');
+      }
+    }, 12000);
+  })();
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17191f">
+<meta name="color-scheme" content="dark light">
+
+<title>个人主页 · Shang Qian</title>
+<meta name="description" content="极夜之下，极光在头顶流淌。">
+<meta name="generator" content="Hexo">
+<link rel="icon" href="/img/avatar.jpg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-sc@5.0.0/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/eb-garamond@5.0.0/index.css">
+<link rel="stylesheet" href="/css/profile.css?v=1790739047802">
+<link rel="stylesheet" href="/css/clouds.css?v=1790739047802">
+
+
+<link rel="stylesheet" href="/css/cursor-cat.css?v=1790739047802">
+<script defer src="/js/cursor-cat.js?v=1790739047802"></script>
+<script>
+  // 首次绘制前设置主题，避免闪烁
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var theme = saved || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+  })();
+</script>
+</head>
+
+
+<body class="pf-body cl-body">
+  
+  
+<div class="search-mask" id="search-mask" aria-hidden="true"></div>
+<div class="search-dialog" id="search-dialog" role="dialog" aria-label="搜索" aria-hidden="true">
+  <div class="search-card">
+    <div class="search-head">
+      <div class="search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass search-input-icon"></i>
+        <input class="search-input" id="search-input" type="search" placeholder="搜索全站文章…" autocomplete="off">
+        <span class="search-hint" id="search-hint">Ctrl/⌘ + K</span>
+      </div>
+      <button class="search-close" id="search-close" aria-label="关闭">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="search-body" id="search-body">
+      <div class="search-tip" id="search-tip">
+        <i class="fa-regular fa-lightbulb"></i>
+        <span>键入关键词以检索全站文章。提示：支持中文 / 英文 / 标签 / 分类。</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div class="search-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> 切换</span>
+      <span><kbd>Enter</kbd> 进入</span>
+      <span><kbd>Esc</kbd> 关闭</span>
+      <span class="search-count" id="search-count"></span>
+    </div>
+  </div>
+</div>
+
+
+  
+    
+
+<div class="cl" id="clouds-root">
+
+  <!-- 顶部条：品牌 + 音乐钮。
+       ⚠️ 2026-09-28 按要求取消此页右上角的四个导航（clouds.yml 的 nav 段也已
+          删除），顶栏只留「左品牌 + 右音乐钮」。
+          本站其它入口由站点 header 与各幕内的链接承担。 -->
+  <header class="cl-top">
+    <a class="cl-brand" href="/">尚谦<span>SHANG QIAN</span></a>
+
+    <span class="cl-top-spacer"></span>
+
+    
+    
+    <div class="pf-music" id="pf-music"
+         data-src="/audio/my-love-mine-all-mine.mp3"
+         data-type="audio/mpeg"
+         data-volume="0.16"
+         data-loop="1"
+         data-title="My Love Mine All Mine">
+      <button class="pf-snd" id="pf-music-btn" type="button"
+              aria-label="播放背景音乐" aria-pressed="false" title="播放背景音乐">
+        <canvas class="pf-snd-canvas" id="pf-snd-canvas" width="20" height="20" aria-hidden="true"></canvas>
+      </button>
+    </div>
+    
+  </header>
+
+  <!-- WebGL 画布（three r112：极光幕 / 星空 / 冰脊 / 冰原 / 倒影 / 雪） -->
+  <canvas class="cl-canvas" id="cl-canvas" aria-hidden="true"></canvas>
+
+  <!-- 滚动文字层：四幕，由 clouds.js 按 scroll 进度驱动 -->
+  <div class="cl-copy" id="cl-copy">
+    
+    <section class="cl-sec" data-i="0">
+      
+      <h1 class="cl-title">
+        <span>Welcome To</span><span>Shang Qian&#39;s Home</span>
+      </h1>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </section>
+    
+    <section class="cl-sec" data-i="1">
+      
+      <h3 class="cl-label">MESSAGE</h3>
+      <p class="cl-text">你好阿，我是尚谦，一个怀揣着诗与远方的 Data Analyst。</p>
+      
+      <p class="cl-quote"><b>「加缪《夏天集》」</b>在隆冬，我终于知道，我身上有一个不可战胜的夏天。</p>
+      
+      
+      
+      
+      
+      
+      
+      
+    </section>
+    
+    <section class="cl-sec" data-i="2">
+      
+      
+      
+      
+      <h3 class="cl-head">尚思少年事，谦然看星辰。</h3>
+      <p class="cl-sub">欲买桂花同载酒，终不似，少年游。</p>
+      
+      
+      
+      
+      
+    </section>
+    
+    <section class="cl-sec" data-i="3">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="cl-photo-item">
+        <figure class="cl-photo">
+          <img class="cl-photo-img" src="/img/profile/photo-guidian.jpg" alt="桂电的黄昏，橘色天光落在水面上" draggable="false">
+        </figure>
+        <div class="cl-featured">
+          <div class="cl-featured-desc split-line-mask-effect">
+            <div class="split-line">桂电的天空很美。<span class="split-line-mask" aria-hidden="true"></span></div>
+          </div>
+          <div class="cl-featured-client split-line-mask-effect">
+            <div class="split-line">那是一段短暂而小有遗憾的时光。<span class="split-line-mask" aria-hidden="true"></span></div>
+          </div>
+          <svg class="cl-featured-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" aria-hidden="true"><polygon points="6.767 0.603 6.767 5.897 0.871 0 0 0.872 5.894 6.767 0.605 6.767 0.605 8 8 8 8 0.603 6.767 0.603"></polygon></svg>
+        </div>
+      </div>
+      
+      
+    </section>
+    
+    <section class="cl-sec" data-i="4">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="cl-photo-item">
+        <figure class="cl-photo">
+          <img class="cl-photo-img" src="/img/profile/photo-jingdezhen.jpg" alt="木墙上挂着景德镇书法，一只猫仰头望" draggable="false">
+        </figure>
+        <div class="cl-featured">
+          <div class="cl-featured-desc split-line-mask-effect">
+            <div class="split-line">景德镇。<span class="split-line-mask" aria-hidden="true"></span></div>
+          </div>
+          <div class="cl-featured-client split-line-mask-effect">
+            <div class="split-line">你也为景德镇着迷吗小猫咪。<span class="split-line-mask" aria-hidden="true"></span></div>
+          </div>
+          <svg class="cl-featured-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" aria-hidden="true"><polygon points="6.767 0.603 6.767 5.897 0.871 0 0 0.872 5.894 6.767 0.605 6.767 0.605 8 8 8 8 0.603 6.767 0.603"></polygon></svg>
+        </div>
+      </div>
+      
+      
+    </section>
+    
+    <section class="cl-sec" data-i="5">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="cl-photo-item">
+        <figure class="cl-photo">
+          <img class="cl-photo-img" src="/img/profile/photo-guilin.jpg" alt="桂林山水，晚霞与山影倒映在湖面" draggable="false">
+        </figure>
+        <div class="cl-featured">
+          <div class="cl-featured-desc split-line-mask-effect">
+            <div class="split-line">桂林山水甲天下。<span class="split-line-mask" aria-hidden="true"></span></div>
+          </div>
+          <div class="cl-featured-client split-line-mask-effect">
+            <div class="split-line">玉碧罗青意可参。<span class="split-line-mask" aria-hidden="true"></span></div>
+          </div>
+          <svg class="cl-featured-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" aria-hidden="true"><polygon points="6.767 0.603 6.767 5.897 0.871 0 0 0.872 5.894 6.767 0.605 6.767 0.605 8 8 8 8 0.603 6.767 0.603"></polygon></svg>
+        </div>
+      </div>
+      
+      
+    </section>
+    
+    <section class="cl-sec" data-i="6">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="cl-photo-item">
+        <figure class="cl-photo">
+          <img class="cl-photo-img" src="/img/profile/photo-rivernight.jpg" alt="江边夜景，灯串与大桥" draggable="false">
+        </figure>
+        <div class="cl-featured">
+          <div class="cl-featured-desc split-line-mask-effect">
+            <div class="split-line">我接受不了每个人都是阶段性的存在。<span class="split-line-mask" aria-hidden="true"></span></div>
+          </div>
+          <div class="cl-featured-client split-line-mask-effect">
+            <div class="split-line">于是我活得越来越念旧。<span class="split-line-mask" aria-hidden="true"></span></div>
+          </div>
+          <svg class="cl-featured-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" aria-hidden="true"><polygon points="6.767 0.603 6.767 5.897 0.871 0 0 0.872 5.894 6.767 0.605 6.767 0.605 8 8 8 8 0.603 6.767 0.603"></polygon></svg>
+        </div>
+      </div>
+      
+      
+    </section>
+    
+    <section class="cl-sec" data-i="7">
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="cl-contact">
+        <h3 class="cl-contact-title">Say hi ☺</h3>
+        <p class="cl-contact-desc">极夜再长，也会等到光。想聊，就来找我。</p>
+        <div class="cl-contact-cols">
+          <div class="cl-contact-col">
+            <div class="cl-contact-col-title">CONTACT</div>
+            <ul class="cl-contact-list">
+              
+              <li class="cl-contact-item">
+                <a href="mailto:357425252@qq.com"><span class="cl-contact-key">邮箱</span>：357425252@qq.com</a>
+              </li>
+              
+              <li class="cl-contact-item">
+                <a href="https://shangqian-haha.github.io/" target="_blank" rel="noopener noreferrer"><span class="cl-contact-key">博客</span>：shangqian-haha.github.io</a>
+              </li>
+              
+              <li class="cl-contact-item">
+                <a href="https://github.com/Shangqian-haha" target="_blank" rel="noopener noreferrer"><span class="cl-contact-key">GitHub</span>：github.com/Shangqian-haha</a>
+              </li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      
+      
+      
+    </section>
+    
+  </div>
+
+  <!-- 滚动引导（左下竖排，进入正文后隐藏） -->
+  <div class="cl-guide" id="cl-guide">
+    <span class="cl-guide-txt">滚动查看更多</span>
+    <svg class="cl-guide-arrow" width="5" height="40" viewBox="0 0 5 40" aria-hidden="true">
+      <path d="M0,40V0H1V35H5Z" fill="currentColor"></path>
+    </svg>
+  </div>
+
+  <!-- 自定义滚动指示条（右侧） -->
+  <div class="cl-bar" aria-hidden="true"><i class="cl-bar-in" id="cl-bar"></i></div>
+
+  <!-- 入场闸门：默认 display:none；两种情形下显示 ——
+       ① html.cl-gate-on：head 里的内联探针在首帧前挂上，让闸门第一时间
+          出现（否则正文会先按文档流画出来，约 1s 后闸门才盖上来）；
+       ② .cl.js-on：clouds.js 接管后的正式开关。
+       ⚠️ 闸门内**不再显示任何提示文字**（2026-09-30 按要求取消，原来是
+          「正在生成极光 / 正在缓冲音乐 / 点击任意处进入」三句）。
+          下面的 data-enter / data-audio 两个属性仍然保留（clouds.yml 里
+          也还有对应配置项），clouds.js 的 setHint() 找不到 hint 元素会
+          自动空转；想恢复文字，在进度条后面加回
+          <span class="cl-gate-hint" id="cl-gate-hint"></span> 并补回 CSS。 -->
+  <div class="cl-gate" id="cl-gate" data-enter="点击任意处进入" data-audio="正在缓冲音乐">
+    <!-- 像素小猪加载动画（Nyan Pig）—— 2026-09-30 按用户要求替换原来的
+         bouncing-bars 跳动条。纯 SVG rect 拼块，无任何外部资源。
+         样式与换肤开关见 clouds.css 的 .cl-gate-pig 段（svg 上换类名即可
+         切 nyan / devil / alien / baguette 四套皮肤）。 -->
+    <svg class="cl-gate-pig nyan" xmlns="http://www.w3.org/2000/svg"
+         viewBox="0 0 47 20" aria-hidden="true">
+      <defs>
+        <linearGradient id="cl-pig-rainbow" x1="0.5" x2="0.5" y2="1">
+          <stop class="rainbow-color1" offset="0"></stop>
+          <stop class="rainbow-color1" offset="0.167"></stop>
+          <stop class="rainbow-color2" offset="0.167"></stop>
+          <stop class="rainbow-color2" offset="0.335"></stop>
+          <stop class="rainbow-color3" offset="0.335"></stop>
+          <stop class="rainbow-color3" offset="0.5"></stop>
+          <stop class="rainbow-color4" offset="0.5"></stop>
+          <stop class="rainbow-color4" offset="0.669"></stop>
+          <stop class="rainbow-color5" offset="0.669"></stop>
+          <stop class="rainbow-color5" offset="0.833"></stop>
+          <stop class="rainbow-color6" offset="0.833"></stop>
+          <stop class="rainbow-color6" offset="1"></stop>
+        </linearGradient>
+      </defs>
+      <g class="rainbow">
+        <rect></rect><rect></rect><rect></rect>
+        <rect></rect><rect></rect><rect></rect>
+      </g>
+      <g class="pig">
+        <g class="foot">
+          <rect width="1" height="3" transform="translate(6 13)"></rect>
+          <rect width="1" height="3" transform="translate(8 13)"></rect>
+          <rect width="1" height="3" transform="translate(14 13)"></rect>
+          <rect width="1" height="3" transform="translate(12 13)"></rect>
+        </g>
+        <g class="tail">
+          <rect width="1" height="1" transform="translate(4 10)"></rect>
+          <rect width="1" height="1" transform="translate(3 11)"></rect>
+        </g>
+        <g transform="translate(52)">
+          <rect class="body1" width="8" height="8" transform="translate(7 6)"></rect>
+          <rect class="body1" width="10" height="8" transform="translate(6 7)"></rect>
+          <rect class="body1" width="12" height="6" transform="translate(5 8)"></rect>
+          <rect class="body2" width="10" height="6" transform="translate(6 8)"></rect>
+          <rect class="body2" width="8" height="6" transform="translate(7 7)"></rect>
+          <rect class="stains" width="4" height="1" transform="translate(7 13)"></rect>
+          <rect class="stains" width="2" height="1" transform="translate(8 12)"></rect>
+          <rect class="stains" width="2" height="1" transform="translate(6 9)"></rect>
+          <rect class="stains" width="3" height="1" transform="translate(6 8)"></rect>
+          <rect class="stains" width="3" height="1" transform="translate(7 7)"></rect>
+          <rect class="stains" width="1" height="1" transform="translate(14 7)"></rect>
+        </g>
+        <g class="ears" transform="translate(52)">
+          <rect width="1" height="3" transform="translate(10 5)"></rect>
+          <rect width="1" height="3" transform="translate(15 5)"></rect>
+        </g>
+        <g class="snout">
+          <rect class="snout1" width="5" height="3" transform="translate(13 10)"></rect>
+          <rect class="snout-holes" width="1" height="3" transform="translate(17 11) rotate(90)"></rect>
+          <rect class="snout2" width="1" height="1" transform="translate(16 11) rotate(90)"></rect>
+        </g>
+        <g class="eyes">
+          <rect width="1" height="1" transform="translate(12 9)"></rect>
+          <rect width="1" height="1" transform="translate(15 9)"></rect>
+        </g>
+      </g>
+    </svg>
+
+    <!-- LOADING... 闪烁文字（原版 .loader-text），夹在小猪与进度条中间。
+         原版依赖 Google Fonts 的 Press Start 2P 像素字体，这里不引外部字体
+         （国内访问不稳 + 会阻塞首屏），改用系统等宽栈近似，见 clouds.css。 -->
+    <span class="cl-gate-loading" aria-hidden="true">Loading...</span>
+
+    <div class="cl-gate-track"><i class="cl-gate-fill" id="cl-gate-fill"></i></div>
+  </div>
+</div>
+
+
+  
+
+  
+  
+<script defer src="https://events.vercount.one/js"></script>
+  <script src="/js/main.js"></script>
+  
+  
+  <script src="/js/music.js?v=1790739047803"></script>
+  
+  <script src="/js/vendor/three.r112.js"></script>
+  <script src="/js/clouds.js?v=1790739047803"></script>
+  
+</body>
+</html>

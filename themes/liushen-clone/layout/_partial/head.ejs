@@ -7,6 +7,44 @@
      必须内联且尽早，否则会出现"先按 no-js 渲染、再跳变"的闪烁。 */
   document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/, 'js');
 </script>
+<% /* ---------- 入场闸门：抢在首帧就出现（2026-09-30 修） ----------
+     症状：进 /profile/ 先看到正文「Welcome to Shang Qian's Blog」，约 1s
+     后闸门才盖上来。
+     原因：.cl-gate 默认 display:none，只有 body 末尾的 clouds.js 跑完 WebGL
+     检测、给 .cl 挂上 .js-on 才显示；而这段脚本要等 three.r112.js（几百 KB）
+     解析完才执行，期间第一幕已按文档流绘制 —— 于是「正文先露脸」。
+     修法：把「要不要显示闸门」的判断提前到这里的**内联阻塞脚本**（首帧前
+     执行），只做一次极廉价的 WebGL 能力探针，通过就给 <html> 挂
+     .cl-gate-on；clouds.css 里该选择器与 .cl.js-on 共用同一套闸门样式。
+       · 无 JS   → 脚本不跑，不加类 → 保持「文档流兜底」的原设计
+       · 无 WebGL → 探针失败，不加类 → 同样兜底
+       · clouds.js 一旦接管会置 window.__clBooted，12s 内没接管就自动摘掉
+         该类（three.js 加载失败等），绝不把访客困在闸门里。 */ %>
+<% if (page.type === 'clouds') { %>
+<script>
+  (function () {
+    var ok = false;
+    try {
+      var c = document.createElement('canvas');
+      ok = !!(c.getContext('webgl') || c.getContext('experimental-webgl'));
+    } catch (e) { ok = false; }
+    if (!ok) return;
+    var h = document.documentElement;
+    h.classList.add('cl-gate-on');
+    /* ⚠️ 兜底时限 12s（2026-09-30 由 6s 放宽）：实测 200KB/s 弱网下
+       three.r112.js 下载 + 解析 + WebGL 初始化要 6~10s，6s 兜底会先把
+       闸门摘掉、让正文裸奔好几秒、闸门又盖回来 —— 比卡住更难看。
+       12s 已远超真实设备的脚本就绪时间；真正「永远卡住」的场景
+       （脚本加载失败）由 clouds.js 自己的 bootFail() 即时摘除。 */
+    window.setTimeout(function () {
+      if (!window.__clBooted) {
+        h.classList.remove('cl-gate-on');
+        if (document.body) document.body.classList.remove('cl-lock');
+      }
+    }, 12000);
+  })();
+</script>
+<% } %>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#17191f">
 <meta name="color-scheme" content="dark light">

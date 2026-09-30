@@ -77,6 +77,60 @@
     audio.addEventListener('error', function () { setPlaying(false); });
   }
 
+  /* ---------- 向入场闸门汇报缓冲进度（2026-09-30 加入） ----------
+     为什么要有这块：闸门的进度条原来只是一段 1.3s 的计时动画，与真实加载
+     无关；背景音乐（mp3，未压缩时 5.5MB）往往还没下完就提示「点击任意处
+     进入」，访客点进去，歌是哑的、过几秒才响。
+     现在 clouds.js 的 loadTick 会读 window.__pfAudio：只要音频没就绪，
+     闸门进度条就不过 100%，并在提示语里显示「正在缓冲音乐」。
+       · ready  —— 可顺畅通播（缓冲到接近片尾 / canplaythrough）
+       · ratio  —— 0~1 缓冲比例（duration 拿不到时保持 0，靠 ready 放行）
+       · failed —— 加载出错，闸门不再等
+       · t0     —— 起算时刻，clouds.js 用它做 20s 超时放行兜底
+     ⚠️ ratio 只增不减：网络抖动时 buffered 窗口会缩回去，进度条往回退
+        会让人以为卡死了。 */
+  var AP = window.__pfAudio = {
+    ready: isPlaceholder,
+    ratio: isPlaceholder ? 1 : 0,
+    failed: false,
+    duration: 0,
+    buffered: 0,
+    t0: Date.now()
+  };
+
+  if (audio) {
+    var probeAudio = function () {
+      if (AP.failed) return;
+      var d = audio.duration;
+      /* ⚠️ hexo server 对静态文件不发 Content-Length / Accept-Ranges
+         （实测 200 + chunked），duration 有可能拿不全；本曲带 Xing/Info
+         帧头，正常情况 metadata 一到就有 137.8s。拿不到就只靠 readyState。 */
+      if (d && isFinite(d) && d > 0) {
+        var end = 0;
+        try {
+          if (audio.buffered && audio.buffered.length) {
+            end = audio.buffered.end(audio.buffered.length - 1);
+          }
+        } catch (e) { end = 0; }
+        AP.duration = d;
+        AP.buffered = end;
+        var r = end / d;
+        if (r > AP.ratio) AP.ratio = Math.min(1, r);
+        if (end >= d - 0.4) AP.ready = true;     /* 离片尾 0.4s 内 = 整首就绪 */
+      }
+      if (audio.readyState >= 4) AP.ready = true; /* HAVE_ENOUGH_DATA */
+    };
+    ['loadedmetadata', 'loadeddata', 'durationchange', 'progress',
+     'canplay', 'canplaythrough', 'suspend', 'stalled', 'timeupdate']
+      .forEach(function (ev) { audio.addEventListener(ev, probeAudio); });
+    audio.addEventListener('error', function () {
+      AP.failed = true;                      /* 资源坏了也别把访客卡在闸门里 */
+      AP.ready = true;
+      AP.ratio = 1;
+    });
+    probeAudio();
+  }
+
   /* canvas 竖条：7 根，正弦相位错开。
      ⚠️ 画在 20×20 的逻辑坐标里，用 dpr 放大 backing store，
         否则 retina 上是糊的。 */
