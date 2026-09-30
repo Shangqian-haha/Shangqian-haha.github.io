@@ -79,6 +79,11 @@
 <link rel="stylesheet" href="<%= url_for('/css/profile.css') %>?v=<%= Date.now() %>">
 <link rel="stylesheet" href="<%= url_for('/css/clouds.css') %>?v=<%= Date.now() %>">
 <% } %>
+<% /* 404 · 雪夜：圣诞老人舔烟囱（原生 Canvas 版，绘图逻辑见 js/santa404.js）。
+       样式与脚本都只在这一页加载。 */ %>
+<% if (page.type === '404') { %>
+<link rel="stylesheet" href="<%= url_for('/css/santa404.css') %>?v=<%= Date.now() %>">
+<% } %>
 <% /* 打嗝猫鼠标指针：全站生效（含 /profile/）。
       CSS 定普通态/按住左键的两张 PNG；JS 负责按下时给 <html> 挂 cat-click。 */ %>
 <link rel="stylesheet" href="<%= url_for('/css/cursor-cat.css') %>?v=<%= Date.now() %>">

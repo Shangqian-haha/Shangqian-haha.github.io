@@ -22,8 +22,9 @@
     <%- partial('_partial/clouds', { page, config, theme, site }) %>
 
   <% } else { %>
-  <main class="site-body container">
-    <%- partial('_partial/hero-badge', { theme }) %>
+  <main class="site-body container<%= page.type === '404' ? ' s404-host' : '' %>">
+    <% /* 404 页不显示 hero-badge：徽章会显示 ~/404.html，没有意义 */ %>
+    <% if (page.type !== '404') { %><%- partial('_partial/hero-badge', { theme }) %><% } %>
 
     <% if (page.type === 'categories') { %>
       <header class="list-header card">
@@ -121,6 +122,9 @@
 
     <% } else if (page.type === 'about') { %>
       <%- partial('_partial/about', { page, config, theme, site }) %>
+
+    <% } else if (page.type === '404') { %>
+      <%- partial('_partial/santa404') %>
 
     <% } else { %>
       <article class="page-card card">

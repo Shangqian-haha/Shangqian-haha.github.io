@@ -1,0 +1,99 @@
+/* ==========================================================================
+   404 · 雪夜（圣诞老人舔烟囱）
+   ---------------------------------------------------------------------------
+   需求要点：
+     · 「人物四周的框框」取消 —— 画布本身既没有原版的 box-shadow 阴影框，
+       也没有内部底色（santa404.js 每帧 clearRect），人物、雪、烟直接浮在
+       夜色上；
+     · 夜色是**铺满视口宽度**的一条场景带（不是卡片、没有圆角边框），
+       左右顶到屏幕边缘，所以怎么看都不会有"框"；
+     · 人物下方是「回到首页」，指向线上站点（写在 _partial/santa404.ejs 里）。
+   ========================================================================== */
+
+/* 100vw 含滚动条宽度，会比可视区宽十几像素；在 body 上裁掉，别让页面横向滚动。
+   ⚠️ 两点：
+   · 不能把 clip 放在 main/容器上 —— 它会把 .s404 负 margin 拉出去的
+     左右两条夜色也一起裁掉（实测夜色带只剩容器宽度）；
+   · 用 clip 而不是 hidden —— hidden 会把元素变成滚动容器、废掉 .site-header
+     的 position: sticky，clip 不会。 */
+body:has(.s404) { overflow-x: clip; }
+
+.s404 {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);   /* 从定宽容器里"拉满"到视口宽（任意视口都精确贴边） */
+  min-height: calc(100vh - var(--header-h));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 34px 20px 58px;
+  background:
+    radial-gradient(122% 62% at 50% 3%, rgba(118, 203, 235, .14), transparent 62%),
+    radial-gradient(88% 52% at 50% 100%, rgba(122, 173, 214, .10), transparent 70%),
+    linear-gradient(180deg, #0a1322 0%, #0e1c30 46%, #142640 100%);
+  overflow: hidden;
+}
+
+/* 画布：无边框、无阴影、透明底 —— 框框就是这样消失的 */
+.s404-canvas {
+  display: block;
+  width: min(520px, 74vw, 56vh);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+}
+
+.s404-tip {
+  margin: 0;
+  color: rgba(206, 224, 244, .58);
+  font-size: .9rem;
+  letter-spacing: .06em;
+  text-align: center;
+}
+
+/* ---------- 回到首页 ---------- */
+.s404-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 8px;
+  padding: 12px 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  background: rgba(255, 255, 255, .07);
+  color: #eaf2ff;
+  font-size: .96rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-decoration: none;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transition: background-color .22s, border-color .22s, transform .22s, box-shadow .22s;
+}
+.s404-home:hover {
+  background: rgba(118, 203, 235, .18);
+  border-color: rgba(118, 203, 235, .55);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px -12px rgba(118, 203, 235, .75);
+}
+.s404-home:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.s404-home svg { flex: none; }
+
+@media (max-width: 640px) {
+  .s404 { gap: 10px; padding: 22px 16px 42px; }
+  .s404-canvas { width: min(78vw, 46vh); }
+  .s404-tip { font-size: .84rem; }
+  .s404-home { padding: 11px 22px; font-size: .92rem; }
+}
+
+/* 减弱动态偏好：画面静止（雪不飘、舌头不拉），但仍是一张完整的雪夜 */
+@media (prefers-reduced-motion: reduce) {
+  .s404-home { transition: none; }
+  .s404-home:hover { transform: none; }
+}

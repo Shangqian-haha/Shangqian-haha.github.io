@@ -1,0 +1,27 @@
+<% /* ==========================================================================
+     404 · 雪夜（圣诞老人舔烟囱）
+     ---------------------------------------------------------------------------
+     效果来源：前端嘛《圣诞老人舔"铁"》
+       https://www.fecoder.cn/code-fun/santa-tongue-stuck-pipe
+     绘图逻辑 1:1 移植到原生 Canvas 2D（不引 Processing.js），
+     实现细节与 Processing 语义坑见 source/js/santa404.js 顶部注释。
+
+     ⚠️ 三条与"原版"的差异，都是需求：
+       · 人物四周没有框：画布无阴影/无边框、背景透明（JS 每帧 clearRect），
+         人物与雪直接浮在夜色上（夜色见 css/santa404.css）；
+       · 夜色带左右拉满视口宽度，不是卡片；
+       · 「回到首页」按用户指定指向线上站点 https://shangqian-haha.github.io/ ，
+         所以本地预览时点它也会跳到线上（这是有意为之，不是本地链接失效）。
+     ========================================================================== */ %>
+<section class="s404">
+  <canvas class="s404-canvas" id="s404-canvas" width="600" height="600"
+          role="img" aria-label="雪夜中，圣诞老人抱着烟囱舔铁管的动画"></canvas>
+  <p class="s404-tip">404 · 这个页面走丢了</p>
+  <a class="s404-home" href="https://shangqian-haha.github.io/">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+      <path fill="currentColor" d="M12 3.1 2.6 10.9h2.8V21h5.1v-5.7h3v5.7h5.1V10.9h2.8L12 3.1z"/>
+    </svg>
+    回到首页
+  </a>
+</section>
+<script src="<%= url_for('/js/santa404.js') %>?v=<%= Date.now() %>"></script>
